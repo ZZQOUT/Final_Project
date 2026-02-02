@@ -1,0 +1,7 @@
+streamlit
+pydantic
+python-dotenv
+pyyaml
+chromadb
+httpx
+openai

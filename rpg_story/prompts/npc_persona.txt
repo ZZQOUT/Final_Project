@@ -1,0 +1,6 @@
+NPC Persona Template:
+Name: {{name}}
+Role: {{role}}
+Persona: {{persona}}
+Speech style: {{style}}
+Goals: {{goals}}

@@ -1,0 +1,17 @@
+model:
+  name: gpt-5
+  base_url: https://api.example.com
+  api_key: ${LLM_API_KEY}
+  embedding_model: text-embedding-3-large
+  temperature: 0.7
+  max_tokens: 800
+retrieval:
+  top_k: 5
+  chunk_size: 350
+  chunk_overlap: 50
+safety:
+  block_topics: ["real_person", "politics", "sexual", "harmful"]
+logging:
+  session_dir: data/sessions
+ui:
+  default_mode: streamlit
