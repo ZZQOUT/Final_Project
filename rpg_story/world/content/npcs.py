@@ -1,0 +1,1 @@
+"""Stub: NPC content definitions."""

@@ -1,0 +1,1 @@
+"""Stub: location content definitions."""
