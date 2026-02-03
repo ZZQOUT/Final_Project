@@ -1,17 +1,56 @@
-model:
-  name: gpt-5
-  base_url: https://api.example.com
-  api_key: ${LLM_API_KEY}
-  embedding_model: text-embedding-3-large
+# Global configuration for the RPG thesis prototype.
+# Values here are defaults and can be overridden by environment variables.
+
+app:
+  # Application name (used in logs/UI)
+  name: "rpg-thesis"
+  # Environment mode: dev or prod
+  env: "dev"
+  # Base data directory
+  data_dir: "data"
+  # Per-play session data (state + logs)
+  sessions_dir: "data/sessions"
+  # Reusable generated world assets
+  worlds_dir: "data/worlds"
+  # Vector store directory for RAG
+  vectorstore_dir: "data/vectorstore"
+
+llm:
+  # LLM provider type (OpenAI-compatible HTTP API)
+  provider: "openai_compatible"
+  # Base URL for the LLM API (override with LLM_BASE_URL)
+  base_url: ""
+  # Model name (override with LLM_MODEL)
+  model: ""
+  # Environment variable name for the API key
+  api_key_env: "LLM_API_KEY"
+  # Request timeout in seconds
+  timeout_seconds: 30
+  # Max retry attempts for failed requests
+  max_retries: 2
+  # Sampling temperature
   temperature: 0.7
-  max_tokens: 800
-retrieval:
+  # Top-p nucleus sampling
+  top_p: 0.95
+
+rag:
+  # Enable/disable RAG pipeline
+  enabled: true
+  # Top-k retrieved memories
   top_k: 5
-  chunk_size: 350
-  chunk_overlap: 50
-safety:
-  block_topics: ["real_person", "politics", "sexual", "harmful"]
+  # Number of recent summaries always included
+  summary_window: 3
+
+worldgen:
+  # Max retries for invalid world JSON
+  max_retries: 2
+  # Enforce strict consistency rules during generation
+  strict_consistency: true
+  # Optional: require bidirectional edges in location graph (A<->B)
+  enforce_bidirectional_edges: false
+
 logging:
-  session_dir: data/sessions
-ui:
-  default_mode: streamlit
+  # Logging level: DEBUG, INFO, WARNING, ERROR
+  level: "INFO"
+  # Emit JSONL logs per session
+  log_jsonl: true
