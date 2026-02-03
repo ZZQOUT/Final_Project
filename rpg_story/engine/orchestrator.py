@@ -7,7 +7,7 @@ import uuid
 
 from rpg_story.config import Config
 from rpg_story.engine.state import GameState
-from rpg_story.engine.turn import TurnResult
+from rpg_story.models.turn import TurnResult
 from rpg_story.engine.validators import validate_npc_move
 from rpg_story.engine.agency import evaluate_move_acceptance
 from rpg_story.llm.client import LLMClient
