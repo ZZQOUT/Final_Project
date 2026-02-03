@@ -1,7 +1,4 @@
-streamlit
-pydantic
+openai
 python-dotenv
 pyyaml
-chromadb
-httpx
-openai
+pytest

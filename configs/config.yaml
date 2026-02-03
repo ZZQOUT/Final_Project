@@ -16,14 +16,14 @@ app:
   vectorstore_dir: "data/vectorstore"
 
 llm:
-  # LLM provider type (OpenAI-compatible HTTP API)
-  provider: "openai_compatible"
+  # LLM provider type (OpenAI-compatible DashScope)
+  provider: "dashscope_openai_compatible"
   # Base URL for the LLM API (override with LLM_BASE_URL)
-  base_url: ""
+  base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
   # Model name (override with LLM_MODEL)
-  model: ""
+  model: "qwen3-max"
   # Environment variable name for the API key
-  api_key_env: "LLM_API_KEY"
+  api_key_env: "DASHSCOPE_API_KEY"
   # Request timeout in seconds
   timeout_seconds: 30
   # Max retry attempts for failed requests
@@ -31,7 +31,7 @@ llm:
   # Sampling temperature
   temperature: 0.7
   # Top-p nucleus sampling
-  top_p: 0.95
+  top_p: 0.9
 
 rag:
   # Enable/disable RAG pipeline

@@ -107,15 +107,16 @@ def load_config(config_path: str = "configs/config.yaml") -> AppConfig:
     worldgen_cfg = _require_section(data, "worldgen")
     logging_cfg = _require_section(data, "logging")
 
-    # Environment overrides
-    env_api_key = os.getenv("LLM_API_KEY", "")
+    # Environment overrides (base URL / model)
     env_base_url = os.getenv("LLM_BASE_URL", "")
     env_model = os.getenv("LLM_MODEL", "")
 
     llm_base_url = env_base_url or str(llm_cfg.get("base_url", ""))
     llm_model = env_model or str(llm_cfg.get("model", ""))
-    api_key_env = str(llm_cfg.get("api_key_env", "LLM_API_KEY"))
-    api_key = env_api_key or os.getenv(api_key_env, "")
+    api_key_env = str(llm_cfg.get("api_key_env", "DASHSCOPE_API_KEY"))
+    api_key = os.getenv(api_key_env, "")
+    if not api_key and api_key_env != "DASHSCOPE_API_KEY":
+        api_key = os.getenv("DASHSCOPE_API_KEY", "")
 
     app = AppSection(
         name=str(app_cfg.get("name", "app")),
