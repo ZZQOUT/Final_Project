@@ -43,6 +43,13 @@ class WorldGenSection:
     max_retries: int
     strict_consistency: bool
     enforce_bidirectional_edges: bool
+    banned_keywords: list[str]
+    strict_bidirectional_edges: bool
+    max_rewrite_attempts: int
+    locations_min: int
+    locations_max: int
+    npcs_min: int
+    npcs_max: int
 
 
 @dataclass(frozen=True)
@@ -78,6 +85,8 @@ class AppConfig:
 
 def _load_env() -> None:
     """Load .env if python-dotenv is available. No-op if missing."""
+    if os.getenv("DISABLE_DOTENV") == "1":
+        return
     try:
         from dotenv import load_dotenv  # type: ignore
     except Exception:
@@ -149,6 +158,13 @@ def load_config(config_path: str = "configs/config.yaml") -> AppConfig:
         max_retries=int(worldgen_cfg.get("max_retries", 2)),
         strict_consistency=bool(worldgen_cfg.get("strict_consistency", True)),
         enforce_bidirectional_edges=bool(worldgen_cfg.get("enforce_bidirectional_edges", False)),
+        banned_keywords=list(worldgen_cfg.get("banned_keywords", [])),
+        strict_bidirectional_edges=bool(worldgen_cfg.get("strict_bidirectional_edges", False)),
+        max_rewrite_attempts=int(worldgen_cfg.get("max_rewrite_attempts", 1)),
+        locations_min=int(worldgen_cfg.get("locations_min", 3)),
+        locations_max=int(worldgen_cfg.get("locations_max", 8)),
+        npcs_min=int(worldgen_cfg.get("npcs_min", 2)),
+        npcs_max=int(worldgen_cfg.get("npcs_max", 8)),
     )
 
     logging = LoggingSection(

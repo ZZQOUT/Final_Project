@@ -93,6 +93,10 @@ def test_orchestrator_single_turn(tmp_path: Path):
     pipeline = TurnPipeline(cfg=cfg, llm_client=llm, sessions_root=sessions_root)
 
     updated_state, output, _log = pipeline.run_turn(state, "Meet me at the bridge", "npc_1")
+    assert llm.last_response_format is not None
+    assert llm.last_response_format.get("type") == "json_schema"
+    assert llm.last_response_format.get("strict") is True
+    assert llm.last_response_format.get("json_schema", {}).get("name") == "TurnOutput"
 
     # state.json exists and loads
     loaded = load_state("sess_test", sessions_root)

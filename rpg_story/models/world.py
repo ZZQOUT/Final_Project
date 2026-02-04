@@ -1,7 +1,7 @@
 """Canonical data contracts for world and game state."""
 from __future__ import annotations
 
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Optional, Set, Literal
 from pydantic import BaseModel, Field, ConfigDict, model_validator
 
 
@@ -23,9 +23,10 @@ class WorldBibleRules(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    tech_level: str
+    tech_level: Literal["medieval", "modern", "sci-fi"] = "medieval"
     magic_rules: str
     tone: str
+    anachronism_policy: Optional[str] = None
     taboos: List[str] = Field(default_factory=list)
     do_not_mention: List[str] = Field(default_factory=list)
     anachronism_blocklist: List[str] = Field(default_factory=list)

@@ -5,14 +5,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Any, Optional, Tuple
 from datetime import datetime, timezone
+import json
 
 from rpg_story.config import AppConfig
-from rpg_story.llm.client import BaseLLMClient
+from rpg_story.llm.client import BaseLLMClient, make_json_schema_response_format
 from rpg_story.llm.schemas import validate_turn_output
 from rpg_story.models.world import GameState
 from rpg_story.models.turn import TurnOutput
 from rpg_story.engine.state import apply_turn_output
 from rpg_story.persistence.store import append_turn_log, save_state, default_sessions_root
+from rpg_story.world.term_guard import DEFAULT_ANACHRONISM_TERMS, detect_first_mention
 
 
 @dataclass
@@ -65,8 +67,14 @@ class TurnPipeline:
 
     def run_turn(self, state: GameState, player_text: str, npc_id: str) -> Tuple[GameState, TurnOutput, Dict[str, Any]]:
         system_prompt, user_prompt = self._build_prompts(state, player_text, npc_id)
-        data = self.llm_client.generate_json(system_prompt, user_prompt)
+        response_format = make_json_schema_response_format(
+            name="TurnOutput",
+            schema=TurnOutput.model_json_schema(),
+            description="Narration and world updates for a single RPG turn.",
+        )
+        data = self.llm_client.generate_json(system_prompt, user_prompt, response_format=response_format)
         output = validate_turn_output(data)
+        output = self._enforce_no_first_mention(state, player_text, output, response_format)
         updated_state = apply_turn_output(state, output, npc_id)
 
         turn_index = updated_state.last_turn_id
@@ -87,3 +95,37 @@ class TurnPipeline:
         save_state(updated_state.session_id, updated_state, sessions_root)
 
         return updated_state, output, log_record
+
+    def _enforce_no_first_mention(
+        self,
+        state: GameState,
+        player_text: str,
+        output: TurnOutput,
+        response_format: dict,
+    ) -> TurnOutput:
+        tech_level = getattr(state.world.world_bible, "tech_level", "medieval") or "medieval"
+        if tech_level != "medieval":
+            return output
+        npc_texts = [output.narration] + [line.text for line in output.npc_dialogue]
+        new_terms = detect_first_mention(player_text, npc_texts, DEFAULT_ANACHRONISM_TERMS)
+        if not new_terms:
+            return output
+
+        rewrite_system = (
+            "You are a JSON repair tool. Return ONLY valid JSON. "
+            "Remove out-of-setting terms unless the player said them first."
+        )
+        rewrite_user = (
+            "Remove these terms from NPC output unless the player already said them:\n"
+            f"{sorted(new_terms)}\n\n"
+            f"Player text: {player_text}\n\n"
+            "Do not introduce these terms. Keep the rest of the content consistent.\n\n"
+            f"Original JSON: {json.dumps(output.model_dump(), ensure_ascii=False)}"
+        )
+        fixed = self.llm_client.generate_json(rewrite_system, rewrite_user, response_format=response_format)
+        fixed_output = validate_turn_output(fixed)
+        npc_texts = [fixed_output.narration] + [line.text for line in fixed_output.npc_dialogue]
+        still_new = detect_first_mention(player_text, npc_texts, DEFAULT_ANACHRONISM_TERMS)
+        if still_new:
+            raise ValueError(f"first-mention anachronisms remain: {sorted(still_new)}")
+        return fixed_output

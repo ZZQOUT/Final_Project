@@ -48,6 +48,17 @@ worldgen:
   strict_consistency: true
   # Optional: require bidirectional edges in location graph (A<->B)
   enforce_bidirectional_edges: false
+  # Legacy static list (unused); anachronisms come from world_bible.do_not_mention + tech_level
+  banned_keywords: []
+  # Enforce bidirectional edges (preferred new flag)
+  strict_bidirectional_edges: false
+  # Max rewrite attempts for invalid or inconsistent worlds
+  max_rewrite_attempts: 1
+  # Soft bounds for world size
+  locations_min: 3
+  locations_max: 8
+  npcs_min: 2
+  npcs_max: 8
 
 logging:
   # Logging level: DEBUG, INFO, WARNING, ERROR

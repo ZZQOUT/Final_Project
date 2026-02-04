@@ -39,6 +39,7 @@ def test_generate_json_repair_fails():
 def test_qwen_client_missing_api_key(monkeypatch):
     if OpenAI is None:
         pytest.skip("openai package not available")
+    monkeypatch.setenv("DISABLE_DOTENV", "1")
     monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
     # In case a custom env var is set
     monkeypatch.delenv("LLM_API_KEY", raising=False)

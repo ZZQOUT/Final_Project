@@ -69,8 +69,21 @@ class BaseLLMClient(ABC):
         user_prompt: str,
         *,
         schema_hint: str | None = None,
+        response_format: dict | None = None,
     ) -> Dict[str, Any]:
         raise NotImplementedError
+
+
+def make_json_schema_response_format(
+    name: str,
+    schema: dict,
+    description: str | None = None,
+    strict: bool = True,
+) -> dict:
+    rf = {"type": "json_schema", "json_schema": {"name": name, "schema": schema}, "strict": strict}
+    if description:
+        rf["json_schema"]["description"] = description
+    return rf
 
 
 class QwenOpenAICompatibleClient(BaseLLMClient):
@@ -116,20 +129,29 @@ class QwenOpenAICompatibleClient(BaseLLMClient):
                 return True
         return False
 
-    def _request_chat(self, messages: List[Dict[str, str]], temperature: float, top_p: float) -> str:
+    def _request_chat(
+        self,
+        messages: List[Dict[str, str]],
+        temperature: float,
+        top_p: float,
+        response_format: dict | None = None,
+    ) -> str:
         self._require_api_key()
         max_retries = max(1, int(self.config.llm.max_retries))
         base_delay = 0.5
         cap_delay = 3.0
         for attempt in range(max_retries + 1):
             try:
-                completion = self._client.chat.completions.create(
-                    model=self.model,
-                    messages=messages,
-                    temperature=temperature,
-                    top_p=top_p,
-                    stream=False,
-                )
+                request_kwargs: Dict[str, Any] = {
+                    "model": self.model,
+                    "messages": messages,
+                    "temperature": temperature,
+                    "top_p": top_p,
+                    "stream": False,
+                }
+                if response_format is not None:
+                    request_kwargs["response_format"] = response_format
+                completion = self._client.chat.completions.create(**request_kwargs)
                 return completion.choices[0].message.content or ""
             except Exception as exc:  # pragma: no cover - external errors
                 if attempt >= max_retries or not self._should_retry(exc):
@@ -155,12 +177,15 @@ class QwenOpenAICompatibleClient(BaseLLMClient):
         user_prompt: str,
         *,
         schema_hint: str | None = None,
+        response_format: dict | None = None,
     ) -> Dict[str, Any]:
         messages = [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
         ]
-        text = self.generate_text(messages)
+        temp = self.config.llm.temperature
+        top = self.config.llm.top_p
+        text = self._request_chat(messages, temp, top, response_format=response_format)
         parsed = _parse_json(text)
         if parsed is not None:
             return parsed
@@ -174,7 +199,12 @@ class QwenOpenAICompatibleClient(BaseLLMClient):
             {"role": "system", "content": repair_system},
             {"role": "user", "content": repair_user},
         ]
-        repaired_text = self.generate_text(repair_messages, temperature=0.0, top_p=1.0)
+        repaired_text = self._request_chat(
+            repair_messages,
+            0.0,
+            1.0,
+            response_format=response_format,
+        )
         repaired = _parse_json(repaired_text)
         if repaired is not None:
             return repaired
@@ -189,6 +219,8 @@ class MockLLMClient(BaseLLMClient):
     def __init__(self, outputs: List[str]) -> None:
         self.outputs = list(outputs)
         self.calls = 0
+        self.last_schema_hint: str | None = None
+        self.last_response_format: dict | None = None
 
     def generate_text(
         self,
@@ -208,7 +240,10 @@ class MockLLMClient(BaseLLMClient):
         user_prompt: str,
         *,
         schema_hint: str | None = None,
+        response_format: dict | None = None,
     ) -> Dict[str, Any]:
+        self.last_schema_hint = schema_hint
+        self.last_response_format = response_format
         text = self.generate_text([
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
