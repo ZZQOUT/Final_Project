@@ -1,6 +1,5 @@
-NPC Persona Template:
-Name: {{name}}
-Role: {{role}}
-Persona: {{persona}}
-Speech style: {{style}}
-Goals: {{goals}}
+NPC Persona:
+Name: {npc_name}
+Profession: {profession}
+Traits: {traits}
+Current Location: {location_id}

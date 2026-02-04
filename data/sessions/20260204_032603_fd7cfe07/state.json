@@ -1,0 +1,71 @@
+{
+  "session_id": "20260204_032603_fd7cfe07",
+  "created_at": "2026-02-04T03:26:03.601468+00:00",
+  "world": {
+    "world_id": "world_demo",
+    "title": "Demo World",
+    "world_bible": {
+      "tech_level": "medieval",
+      "magic_rules": "low",
+      "tone": "grounded",
+      "taboos": [],
+      "do_not_mention": [],
+      "anachronism_blocklist": []
+    },
+    "locations": [
+      {
+        "location_id": "shop",
+        "name": "Shop",
+        "kind": "shop",
+        "description": "A small shop with wooden shelves.",
+        "connected_to": [
+          "bridge"
+        ],
+        "tags": []
+      },
+      {
+        "location_id": "bridge",
+        "name": "Broken Bridge",
+        "kind": "bridge",
+        "description": "A broken bridge over a misty river.",
+        "connected_to": [
+          "shop"
+        ],
+        "tags": []
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_1",
+        "name": "Mara",
+        "profession": "Merchant",
+        "traits": [
+          "practical"
+        ],
+        "goals": [
+          "protect her goods"
+        ],
+        "starting_location": "shop",
+        "obedience_level": 0.5,
+        "stubbornness": 0.5,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": 0,
+        "refusal_style": "firm but polite"
+      }
+    ],
+    "starting_location": "shop",
+    "starting_hook": "A rumor spreads in the market.",
+    "initial_quest": "Deliver a message across the river."
+  },
+  "player_location": "shop",
+  "npc_locations": {
+    "npc_1": "shop"
+  },
+  "flags": {},
+  "quests": {},
+  "inventory": {},
+  "recent_summaries": [
+    "Player entered Mara's shop and greeted her."
+  ],
+  "last_turn_id": 1
+}

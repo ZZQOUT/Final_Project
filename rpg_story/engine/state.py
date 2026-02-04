@@ -1,71 +1,54 @@
-"""Game state data model with world generation support."""
+"""Minimal state update helpers (Milestone 3)."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from pathlib import Path
-from typing import Dict, List
-import json
+from typing import Dict, Any
+from copy import deepcopy
 
-from rpg_story.world.schemas import WorldSpec, NPCProfile, LocationSpec
+from rpg_story.models.world import GameState
+from rpg_story.models.turn import TurnOutput
 
 
-@dataclass
-class GameState:
-    world: WorldSpec
-    player_location: str
-    npc_locations: Dict[str, str]
-    world_facts: List[str] = field(default_factory=list)
-    timeline: List[str] = field(default_factory=list)
-    quests: List[str] = field(default_factory=list)
-    flags: Dict[str, bool] = field(default_factory=dict)
-    inventory: List[str] = field(default_factory=list)
-    session_id: str = ""
+def apply_turn_output(state: GameState, output: TurnOutput, npc_id: str) -> GameState:
+    """Apply a TurnOutput to GameState and return a new validated state."""
+    data: Dict[str, Any] = state.model_dump()
 
-    @classmethod
-    def from_world(cls, world: WorldSpec, session_id: str) -> "GameState":
-        npc_locations = {npc.npc_id: npc.starting_location for npc in world.npcs}
-        return cls(
-            world=world,
-            player_location=world.starting_location,
-            npc_locations=npc_locations,
-            session_id=session_id,
-        )
+    # Update last_turn_id
+    data["last_turn_id"] = int(data.get("last_turn_id", 0)) + 1
 
-    def get_npcs_at_location(self, location_id: str) -> List[NPCProfile]:
-        return [npc for npc in self.world.npcs if self.npc_locations.get(npc.npc_id) == location_id]
+    # Summary handling (append to recent_summaries)
+    summary = output.memory_summary
+    if summary:
+        summaries = data.get("recent_summaries", [])
+        if not isinstance(summaries, list):
+            summaries = []
+        summaries.append(summary)
+        data["recent_summaries"] = summaries
 
-    def get_location(self, location_id: str) -> LocationSpec:
-        return next(loc for loc in self.world.locations if loc.location_id == location_id)
+    # Flags merge
+    if output.world_updates.flags_delta:
+        flags = data.get("flags", {})
+        flags.update(output.world_updates.flags_delta)
+        data["flags"] = flags
 
-    def has_location(self, location_id: str) -> bool:
-        return any(loc.location_id == location_id for loc in self.world.locations)
+    # Quest updates
+    if output.world_updates.quest_updates:
+        quests = data.get("quests", {})
+        quests.update(output.world_updates.quest_updates)
+        data["quests"] = quests
 
-    def save(self, path: str | Path) -> None:
-        data = {
-            "world": self.world.model_dump(),
-            "player_location": self.player_location,
-            "npc_locations": self.npc_locations,
-            "world_facts": self.world_facts,
-            "timeline": self.timeline,
-            "quests": self.quests,
-            "flags": self.flags,
-            "inventory": self.inventory,
-            "session_id": self.session_id,
-        }
-        Path(path).write_text(json.dumps(data, indent=2), encoding="utf-8")
+    # NPC movement
+    npc_locations = data.get("npc_locations", {})
+    location_ids = {loc["location_id"] for loc in data["world"]["locations"]}
+    for move in output.world_updates.npc_moves:
+        if move.to_location not in location_ids:
+            raise ValueError(f"Invalid move to unknown location: {move.to_location}")
+        npc_locations[move.npc_id] = move.to_location
+    data["npc_locations"] = npc_locations
 
-    @staticmethod
-    def load(path: str | Path) -> "GameState":
-        raw = json.loads(Path(path).read_text(encoding="utf-8"))
-        world = WorldSpec.model_validate(raw["world"])
-        return GameState(
-            world=world,
-            player_location=raw["player_location"],
-            npc_locations=raw["npc_locations"],
-            world_facts=raw.get("world_facts", []),
-            timeline=raw.get("timeline", []),
-            quests=raw.get("quests", []),
-            flags=raw.get("flags", {}),
-            inventory=raw.get("inventory", []),
-            session_id=raw.get("session_id", ""),
-        )
+    # Player movement
+    if output.world_updates.player_location:
+        if output.world_updates.player_location not in location_ids:
+            raise ValueError(f"Invalid player_location: {output.world_updates.player_location}")
+        data["player_location"] = output.world_updates.player_location
+
+    return GameState.model_validate(data)

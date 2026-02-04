@@ -1,1 +1,2 @@
-Narration style: vivid, concise, second person. Keep continuity with world state.
+Style: concise, second-person, grounded fantasy tone.
+Avoid modern references.
