@@ -15,6 +15,10 @@ from rpg_story.models.turn import TurnOutput
 from rpg_story.engine.state import apply_turn_output
 from rpg_story.engine.validators import validate_npc_move
 from rpg_story.engine.agency import apply_agency_gate
+from rpg_story.rag.index import RAGIndex
+from rpg_story.rag.retriever import RAGRetriever
+from rpg_story.rag.stores.memory import InMemoryStore
+from rpg_story.rag.types import Document
 from rpg_story.persistence.store import append_turn_log, save_state, default_sessions_root
 from rpg_story.world.term_guard import DEFAULT_ANACHRONISM_TERMS, detect_first_mention
 
@@ -32,7 +36,13 @@ class TurnPipeline:
         path = self._prompts_dir() / filename
         return path.read_text(encoding="utf-8")
 
-    def _build_prompts(self, state: GameState, player_text: str, npc_id: str) -> tuple[str, str]:
+    def _build_prompts(
+        self,
+        state: GameState,
+        player_text: str,
+        npc_id: str,
+        rag_text: str | None = None,
+    ) -> tuple[str, str]:
         base = self._load_prompt("system_base.txt")
         narrator = self._load_prompt("narrator.txt")
         persona_template = self._load_prompt("npc_persona.txt")
@@ -50,6 +60,8 @@ class TurnPipeline:
         )
 
         system_prompt = base + "\n" + narrator + "\n" + persona
+        if rag_text:
+            system_prompt += "\n\n" + rag_text
         world_constraints = "World constraints: medieval setting, no modern tech, maintain consistency."
         schema_hint = (
             "Return JSON with keys: narration, npc_dialogue, world_updates, memory_summary, safety. "
@@ -68,7 +80,8 @@ class TurnPipeline:
         return system_prompt, user_prompt
 
     def run_turn(self, state: GameState, player_text: str, npc_id: str) -> Tuple[GameState, TurnOutput, Dict[str, Any]]:
-        system_prompt, user_prompt = self._build_prompts(state, player_text, npc_id)
+        rag_text, rag_debug = self._build_rag_context(state, npc_id, player_text)
+        system_prompt, user_prompt = self._build_prompts(state, player_text, npc_id, rag_text)
         response_format = make_json_schema_response_format(
             name="TurnOutput",
             schema=TurnOutput.model_json_schema(),
@@ -126,6 +139,7 @@ class TurnPipeline:
             "move_applied_count": applied_count,
             "move_rejected_count": rejected_count,
             "move_refused_count": refused_count,
+            "rag": rag_debug,
         }
 
         sessions_root = self.sessions_root or default_sessions_root(self.cfg)
@@ -133,6 +147,56 @@ class TurnPipeline:
         save_state(updated_state.session_id, updated_state, sessions_root)
 
         return updated_state, output, log_record
+
+    def _build_rag_context(
+        self,
+        state: GameState,
+        npc_id: str,
+        player_text: str,
+    ) -> tuple[str, dict]:
+        if not self.cfg.rag.enabled:
+            return "", {"enabled": False}
+        sessions_root = self.sessions_root or default_sessions_root(self.cfg)
+        store = InMemoryStore()
+        index = RAGIndex(store)
+        index.build_default(state.session_id, state.world)
+        retriever = RAGRetriever(index)
+        query_text = f"{player_text}\nlocation:{state.player_location}\nnpc:{npc_id}"
+        rag_pack = retriever.get_forced_context_pack(
+            session_id=state.session_id,
+            world=state.world,
+            state=state,
+            npc_id=npc_id,
+            sessions_root=sessions_root,
+            last_n_summaries=self.cfg.rag.summary_window,
+            top_k=self.cfg.rag.top_k,
+            query_text=query_text,
+        )
+        rag_text = self._render_rag_pack(rag_pack)
+        debug = {
+            "enabled": True,
+            "always_include_ids": [doc.id for doc in rag_pack["always_include"]],
+            "retrieved_ids": [doc.id for doc in rag_pack["retrieved"]],
+            **rag_pack["debug"],
+        }
+        return rag_text, debug
+
+    def _render_rag_pack(self, rag_pack: dict) -> str:
+        always = rag_pack.get("always_include", [])
+        retrieved = rag_pack.get("retrieved", [])
+        sections = []
+        sections.append(self._render_section("WORLD BIBLE", _filter_docs(always, "world_bible")))
+        sections.append(self._render_section("LOCATION", _filter_docs(always, "location")))
+        sections.append(self._render_section("NPC PROFILE", _filter_docs(always, "npc_profile")))
+        sections.append(self._render_section("RECENT SUMMARIES", _filter_docs(always, "summary")))
+        sections.append(self._render_section("RETRIEVED MEMORIES", retrieved))
+        return "\n\n".join([section for section in sections if section])
+
+    def _render_section(self, title: str, docs: list[Document]) -> str:
+        if not docs:
+            return ""
+        body = "\n".join([doc.text for doc in docs if doc.text])
+        return f"=== {title} ===\n{body}"
 
     def _append_refusals(self, output: TurnOutput, refusals: list[dict], world: WorldSpec) -> TurnOutput:
         if not refusals:
@@ -189,3 +253,7 @@ class TurnPipeline:
         if still_new:
             raise ValueError(f"first-mention anachronisms remain: {sorted(still_new)}")
         return fixed_output
+
+
+def _filter_docs(docs: list[Document], doc_type: str) -> list[Document]:
+    return [doc for doc in docs if doc.metadata.get("doc_type") == doc_type]

@@ -1,1 +1,1 @@
-"""RAG store adapters (stubs only)."""
+"""RAG stores."""

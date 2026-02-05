@@ -1,1 +1,1 @@
-"""RAG source pipelines (stubs only)."""
+"""RAG document sources."""

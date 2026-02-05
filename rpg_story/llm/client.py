@@ -221,6 +221,8 @@ class MockLLMClient(BaseLLMClient):
         self.calls = 0
         self.last_schema_hint: str | None = None
         self.last_response_format: dict | None = None
+        self.last_system_prompt: str | None = None
+        self.last_user_prompt: str | None = None
 
     def generate_text(
         self,
@@ -244,6 +246,8 @@ class MockLLMClient(BaseLLMClient):
     ) -> Dict[str, Any]:
         self.last_schema_hint = schema_hint
         self.last_response_format = response_format
+        self.last_system_prompt = system_prompt
+        self.last_user_prompt = user_prompt
         text = self.generate_text([
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},
