@@ -36,16 +36,8 @@ def apply_turn_output(state: GameState, output: TurnOutput, npc_id: str) -> Game
         quests.update(output.world_updates.quest_updates)
         data["quests"] = quests
 
-    # NPC movement
-    npc_locations = data.get("npc_locations", {})
-    location_ids = {loc["location_id"] for loc in data["world"]["locations"]}
-    for move in output.world_updates.npc_moves:
-        if move.to_location not in location_ids:
-            raise ValueError(f"Invalid move to unknown location: {move.to_location}")
-        npc_locations[move.npc_id] = move.to_location
-    data["npc_locations"] = npc_locations
-
     # Player movement
+    location_ids = {loc["location_id"] for loc in data["world"]["locations"]}
     if output.world_updates.player_location:
         if output.world_updates.player_location not in location_ids:
             raise ValueError(f"Invalid player_location: {output.world_updates.player_location}")

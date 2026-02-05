@@ -1,46 +1,93 @@
-"""Validation helpers for movement and location legality."""
+"""Movement validators for NPC moves."""
 from __future__ import annotations
 
-from typing import Tuple
+from collections import deque
+from typing import Dict, Set, Tuple, List
 
-from rpg_story.engine.state import GameState
-
-
-def is_location_valid(state: GameState, location_id: str) -> bool:
-    return any(loc.location_id == location_id for loc in state.world.locations)
+from rpg_story.models.world import WorldSpec, GameState
+from rpg_story.models.turn import NPCMove
 
 
-def is_reachable(state: GameState, from_loc: str, to_loc: str) -> bool:
-    if from_loc == to_loc:
-        return True
-    adjacency = {loc.location_id: set(loc.connected_to) for loc in state.world.locations}
-    visited = set()
-    queue = [from_loc]
+def build_graph(world: WorldSpec) -> Dict[str, Set[str]]:
+    graph: Dict[str, Set[str]] = {}
+    loc_ids = {loc.location_id for loc in world.locations}
+    for loc in world.locations:
+        neighbors = {target for target in loc.connected_to if target in loc_ids}
+        graph[loc.location_id] = neighbors
+    return graph
+
+
+def is_reachable(graph: Dict[str, Set[str]], start: str, goal: str) -> bool:
+    if start == goal:
+        return start in graph
+    if start not in graph or goal not in graph:
+        return False
+    visited = {start}
+    queue = deque([start])
     while queue:
-        current = queue.pop(0)
-        if current == to_loc:
-            return True
-        if current in visited:
-            continue
-        visited.add(current)
-        for nxt in adjacency.get(current, set()):
-            if nxt not in visited:
-                queue.append(nxt)
+        node = queue.popleft()
+        for neighbor in graph.get(node, set()):
+            if neighbor == goal:
+                return True
+            if neighbor not in visited:
+                visited.add(neighbor)
+                queue.append(neighbor)
     return False
 
 
-def validate_npc_move(
+def validate_npc_move(move: NPCMove, state: GameState, world: WorldSpec) -> Tuple[bool, str]:
+    graph = build_graph(world)
+    return _validate_npc_move_with_graph(move, state, world, graph)
+
+
+def _validate_npc_move_with_graph(
+    move: NPCMove,
     state: GameState,
-    npc_id: str,
-    from_location: str,
-    to_location: str,
+    world: WorldSpec,
+    graph: Dict[str, Set[str]],
 ) -> Tuple[bool, str]:
-    if npc_id not in state.npc_locations:
-        return False, "npc_id_not_found"
-    if state.npc_locations.get(npc_id) != from_location:
-        return False, "from_location_mismatch"
-    if not is_location_valid(state, to_location):
-        return False, "to_location_invalid"
-    if not state.world.bible.allow_special_travel and not is_reachable(state, from_location, to_location):
-        return False, "not_reachable"
+    npc_ids = {npc.npc_id for npc in world.npcs}
+    if move.npc_id not in npc_ids:
+        return False, "npc_id not found"
+    if move.npc_id not in state.npc_locations:
+        return False, "npc_id missing in npc_locations"
+
+    current_loc = state.npc_locations[move.npc_id]
+    if move.from_location != current_loc:
+        return False, f"from_location mismatch (expected {current_loc})"
+
+    loc_ids = world.location_ids()
+    if move.to_location not in loc_ids:
+        return False, "to_location unknown"
+
+    if not is_reachable(graph, move.from_location, move.to_location):
+        return False, "to_location unreachable"
+
     return True, "ok"
+
+
+def apply_validated_moves(
+    moves: List[NPCMove],
+    state: GameState,
+    world: WorldSpec,
+) -> Tuple[GameState, List[dict]]:
+    working_state = state.model_copy(deep=True)
+    events: List[dict] = []
+    graph = build_graph(world)
+
+    for move in moves:
+        ok, reason = _validate_npc_move_with_graph(move, working_state, world, graph)
+        if ok:
+            working_state.npc_locations[move.npc_id] = move.to_location
+            continue
+        events.append(
+            {
+                "type": "move_rejected",
+                "npc_id": move.npc_id,
+                "from_location": move.from_location,
+                "to_location": move.to_location,
+                "reason": reason,
+            }
+        )
+
+    return GameState.model_validate(working_state.model_dump()), events

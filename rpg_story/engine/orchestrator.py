@@ -13,6 +13,7 @@ from rpg_story.llm.schemas import validate_turn_output
 from rpg_story.models.world import GameState
 from rpg_story.models.turn import TurnOutput
 from rpg_story.engine.state import apply_turn_output
+from rpg_story.engine.validators import apply_validated_moves
 from rpg_story.persistence.store import append_turn_log, save_state, default_sessions_root
 from rpg_story.world.term_guard import DEFAULT_ANACHRONISM_TERMS, detect_first_mention
 
@@ -75,7 +76,13 @@ class TurnPipeline:
         data = self.llm_client.generate_json(system_prompt, user_prompt, response_format=response_format)
         output = validate_turn_output(data)
         output = self._enforce_no_first_mention(state, player_text, output, response_format)
-        updated_state = apply_turn_output(state, output, npc_id)
+        state_non_move = apply_turn_output(state, output, npc_id)
+        updated_state, move_rejections = apply_validated_moves(
+            output.world_updates.npc_moves, state_non_move, state_non_move.world
+        )
+        total_moves = len(output.world_updates.npc_moves)
+        rejected_count = len(move_rejections)
+        applied_count = max(0, total_moves - rejected_count)
 
         turn_index = updated_state.last_turn_id
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -88,6 +95,9 @@ class TurnPipeline:
             "location_id": updated_state.player_location,
             "model_used": self.cfg.llm.model,
             "output": output.model_dump(),
+            "move_rejections": move_rejections,
+            "move_applied_count": applied_count,
+            "move_rejected_count": rejected_count,
         }
 
         sessions_root = self.sessions_root or default_sessions_root(self.cfg)
