@@ -10,10 +10,11 @@ import json
 from rpg_story.config import AppConfig
 from rpg_story.llm.client import BaseLLMClient, make_json_schema_response_format
 from rpg_story.llm.schemas import validate_turn_output
-from rpg_story.models.world import GameState
+from rpg_story.models.world import GameState, WorldSpec
 from rpg_story.models.turn import TurnOutput
 from rpg_story.engine.state import apply_turn_output
-from rpg_story.engine.validators import apply_validated_moves
+from rpg_story.engine.validators import validate_npc_move
+from rpg_story.engine.agency import apply_agency_gate
 from rpg_story.persistence.store import append_turn_log, save_state, default_sessions_root
 from rpg_story.world.term_guard import DEFAULT_ANACHRONISM_TERMS, detect_first_mention
 
@@ -77,12 +78,37 @@ class TurnPipeline:
         output = validate_turn_output(data)
         output = self._enforce_no_first_mention(state, player_text, output, response_format)
         state_non_move = apply_turn_output(state, output, npc_id)
-        updated_state, move_rejections = apply_validated_moves(
-            output.world_updates.npc_moves, state_non_move, state_non_move.world
+
+        move_rejections = []
+        legal_moves = []
+        for move in output.world_updates.npc_moves:
+            ok, reason = validate_npc_move(move, state_non_move, state_non_move.world)
+            if ok:
+                legal_moves.append(move)
+                continue
+            move_rejections.append(
+                {
+                    "type": "move_rejected",
+                    "npc_id": move.npc_id,
+                    "from_location": move.from_location,
+                    "to_location": move.to_location,
+                    "reason": reason,
+                }
+            )
+
+        allowed_moves, move_refusals = apply_agency_gate(
+            legal_moves, state_non_move, state_non_move.world, player_text
         )
+        updated_state = state_non_move.model_copy(deep=True)
+        for move in allowed_moves:
+            updated_state.npc_locations[move.npc_id] = move.to_location
+        updated_state = GameState.model_validate(updated_state.model_dump())
+
         total_moves = len(output.world_updates.npc_moves)
         rejected_count = len(move_rejections)
-        applied_count = max(0, total_moves - rejected_count)
+        refused_count = len(move_refusals)
+        applied_count = max(0, total_moves - rejected_count - refused_count)
+        output = self._append_refusals(output, move_refusals, state.world)
 
         turn_index = updated_state.last_turn_id
         timestamp = datetime.now(timezone.utc).isoformat()
@@ -96,8 +122,10 @@ class TurnPipeline:
             "model_used": self.cfg.llm.model,
             "output": output.model_dump(),
             "move_rejections": move_rejections,
+            "move_refusals": move_refusals,
             "move_applied_count": applied_count,
             "move_rejected_count": rejected_count,
+            "move_refused_count": refused_count,
         }
 
         sessions_root = self.sessions_root or default_sessions_root(self.cfg)
@@ -105,6 +133,28 @@ class TurnPipeline:
         save_state(updated_state.session_id, updated_state, sessions_root)
 
         return updated_state, output, log_record
+
+    def _append_refusals(self, output: TurnOutput, refusals: list[dict], world: WorldSpec) -> TurnOutput:
+        if not refusals:
+            return output
+        updated = output.model_copy(deep=True)
+        lines = []
+        for refusal in refusals:
+            npc_id = refusal.get("npc_id", "npc")
+            npc_name = self._npc_name(world, npc_id)
+            reason = refusal.get("reason", "refused")
+            lines.append(f"{npc_name} refuses to move: {reason}.")
+        if updated.narration:
+            updated.narration = updated.narration.rstrip() + " " + " ".join(lines)
+        else:
+            updated.narration = " ".join(lines)
+        return updated
+
+    def _npc_name(self, world: WorldSpec, npc_id: str) -> str:
+        for npc in world.npcs:
+            if npc.npc_id == npc_id:
+                return npc.name
+        return npc_id
 
     def _enforce_no_first_mention(
         self,

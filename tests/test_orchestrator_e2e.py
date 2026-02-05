@@ -30,14 +30,14 @@ def make_world() -> WorldSpec:
     npc = NPCProfile(
         npc_id="npc_1",
         name="Mara",
-        profession="Merchant",
-        traits=["practical"],
-        goals=["protect her goods"],
+        profession="Courier",
+        traits=["brave"],
+        goals=["deliver messages"],
         starting_location="shop",
-        obedience_level=0.5,
-        stubbornness=0.5,
-        risk_tolerance=0.5,
-        disposition_to_player=0,
+        obedience_level=0.8,
+        stubbornness=0.2,
+        risk_tolerance=0.7,
+        disposition_to_player=1,
         refusal_style="polite",
     )
     bible = WorldBibleRules(tech_level="medieval", magic_rules="low", tone="grounded")

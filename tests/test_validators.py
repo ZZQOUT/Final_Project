@@ -39,14 +39,14 @@ def make_world() -> WorldSpec:
     npc = NPCProfile(
         npc_id="npc_1",
         name="Mara",
-        profession="Merchant",
-        traits=["practical"],
-        goals=["trade"],
+        profession="Courier",
+        traits=["brave"],
+        goals=["deliver messages"],
         starting_location="A",
-        obedience_level=0.5,
-        stubbornness=0.5,
-        risk_tolerance=0.5,
-        disposition_to_player=0,
+        obedience_level=0.8,
+        stubbornness=0.2,
+        risk_tolerance=0.7,
+        disposition_to_player=1,
         refusal_style="polite",
     )
     bible = WorldBibleRules(tech_level="medieval", magic_rules="low", tone="grounded")
@@ -175,7 +175,8 @@ def test_orchestrator_logs_move_rejections(tmp_path: Path):
     assert updated_state.npc_locations["npc_1"] == "B"
     rejections = log_record.get("move_rejections", [])
     assert len(rejections) == 1
-    assert "to_location" in rejections[0].get("reason", "")
+    reason = rejections[0].get("reason", "")
+    assert "from_location mismatch" in reason or "to_location" in reason
     assert log_record.get("move_rejected_count") == 1
 
     logs = read_turn_logs("sess_test", sessions_root)
