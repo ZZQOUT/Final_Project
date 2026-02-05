@@ -1,0 +1,202 @@
+{
+  "session_id": "20260205_075652_29474d53",
+  "created_at": "2026-02-05T07:57:19.308474+00:00",
+  "world": {
+    "world_id": "w_dq001",
+    "title": "勇者斗恶龙",
+    "world_bible": {
+      "tech_level": "medieval",
+      "magic_rules": "Magic is rare and tied to ancient relics or divine blessings. Only a few can wield it, and misuse leads to curses.",
+      "tone": "Heroic fantasy with clear good vs evil themes, perilous quests, and noble sacrifices.",
+      "anachronism_policy": null,
+      "taboos": [
+        "betraying your kingdom",
+        "desecrating holy relics",
+        "making pacts with demons"
+      ],
+      "do_not_mention": [
+        "smartphone",
+        "internet",
+        "credit card",
+        "car",
+        "airplane",
+        "computer",
+        "gunpowder",
+        "electricity"
+      ],
+      "anachronism_blocklist": [
+        "smartphone",
+        "internet",
+        "credit card",
+        "car",
+        "airplane",
+        "computer",
+        "gunpowder",
+        "electricity"
+      ]
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "晨光村",
+        "kind": "town",
+        "description": "宁静的小村庄，四周被麦田和森林环绕。村民淳朴，是勇者的故乡。",
+        "connected_to": [
+          "loc_002",
+          "loc_003"
+        ],
+        "tags": [
+          "peaceful",
+          "starting_area",
+          "farmland"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "迷雾森林",
+        "kind": "forest",
+        "description": "浓雾笼罩的古老森林，传闻有魔兽出没，也是通往龙之谷的必经之路。",
+        "connected_to": [
+          "loc_001",
+          "loc_004"
+        ],
+        "tags": [
+          "dangerous",
+          "mystical",
+          "traps"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "圣光教堂",
+        "kind": "castle",
+        "description": "供奉光明神的小型修道院，藏有神圣武器的秘密。",
+        "connected_to": [
+          "loc_001"
+        ],
+        "tags": [
+          "holy",
+          "safe_zone",
+          "quest_giver"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "龙之谷",
+        "kind": "dungeon",
+        "description": "恶龙盘踞的山谷，布满骸骨与熔岩裂缝，是最终决战之地。",
+        "connected_to": [
+          "loc_002"
+        ],
+        "tags": [
+          "boss_lair",
+          "deadly",
+          "treasure"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_001",
+        "name": "艾琳",
+        "profession": "村长女儿",
+        "traits": [
+          "kind",
+          "worried",
+          "loyal"
+        ],
+        "goals": [
+          "protect the village",
+          "support the勇者"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.8,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.2,
+        "disposition_to_player": 4,
+        "refusal_style": "politely declines with concern"
+      },
+      {
+        "npc_id": "npc_002",
+        "name": "老战士巴隆",
+        "profession": "退役骑士",
+        "traits": [
+          "gruff",
+          "wise",
+          "honorable"
+        ],
+        "goals": [
+          "train the next generation",
+          "defeat the dragon"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.6,
+        "stubbornness": 0.7,
+        "risk_tolerance": 0.9,
+        "disposition_to_player": 3,
+        "refusal_style": "grumbles but eventually agrees"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "修女玛尔塔",
+        "profession": "神职人员",
+        "traits": [
+          "devout",
+          "calm",
+          "secretive"
+        ],
+        "goals": [
+          "guard the sacred relic",
+          "guide the chosen one"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.9,
+        "stubbornness": 0.5,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 5,
+        "refusal_style": "declines with serene firmness"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "商人雷诺",
+        "profession": "旅行商人",
+        "traits": [
+          "shrewd",
+          "opportunistic",
+          "nervous"
+        ],
+        "goals": [
+          "make profit",
+          "avoid danger"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.4,
+        "stubbornness": 0.6,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": 1,
+        "refusal_style": "makes excuses about inventory or safety"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "恶龙袭击了邻近的王国，国王发布诏令：谁能击败恶龙，谁就能成为新任勇者并迎娶公主。你，作为晨光村的年轻战士，决定踏上征程。",
+    "initial_quest": "前往圣光教堂，从修女玛尔塔处取得神圣护符，以抵御龙之谷的诅咒气息。"
+  },
+  "player_location": "loc_001",
+  "npc_locations": {
+    "npc_001": "loc_001",
+    "npc_002": "loc_001",
+    "npc_003": "loc_003",
+    "npc_004": "loc_001"
+  },
+  "flags": {},
+  "quests": {},
+  "inventory": {},
+  "recent_summaries": [
+    "玩家询问艾琳的名字，她回答并表达了对勇者征程的担忧。",
+    "玩家询问老战士巴隆的身份，艾琳说明他是退役战士，现居村中并教导剑术。",
+    "玩家确认了艾琳的身份，她表达了对勇者征程的关切。",
+    "玩家误将商人雷诺认作艾琳，雷诺澄清身份并指出艾琳的住处。",
+    "玩家误将老战士巴隆认作艾琳，巴隆纠正了身份并表明自己是退役骑士。"
+  ],
+  "last_turn_id": 5
+}

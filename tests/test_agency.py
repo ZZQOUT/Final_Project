@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from rpg_story.config import load_config
-from rpg_story.engine.agency import decide_npc_move
+from rpg_story.engine.agency import decide_npc_move, apply_agency_gate
 from rpg_story.engine.orchestrator import TurnPipeline
 from rpg_story.llm.client import MockLLMClient
 from rpg_story.models.turn import NPCMove
@@ -184,3 +184,26 @@ def test_orchestrator_applies_agency_gate(tmp_path: Path):
     refusals = log_record.get("move_refusals", [])
     assert refusals
     assert refusals[0]["npc_id"] == "npc_stubborn"
+
+
+def test_agency_accepts_explicit_npc_yes():
+    world = make_world()
+    state = make_state(world)
+    move = NPCMove(
+        npc_id="npc_stubborn",
+        from_location="shop",
+        to_location="bridge",
+        trigger="player_instruction",
+        reason="request",
+        permanence="temporary",
+        confidence=0.9,
+    )
+    allowed, refusals = apply_agency_gate(
+        [move],
+        state,
+        world,
+        "请和我去断桥。",
+        {"npc_stubborn": ["好，我跟你去断桥。"]},
+    )
+    assert allowed
+    assert not refusals

@@ -189,6 +189,62 @@ def test_forced_pack_includes_last_summaries(tmp_path: Path):
     assert [doc.text for doc in summary_docs] == ["summary 1", "summary 2"]
 
 
+def test_forced_pack_includes_npc_memory(tmp_path: Path):
+    sessions_root = tmp_path / "sessions"
+    session_id = "sess_npc_mem"
+    records = [
+        {
+            "session_id": session_id,
+            "turn_index": 0,
+            "timestamp": "t0",
+            "npc_id": "npc_1",
+            "player_text": "Hi",
+            "output": {"npc_dialogue": [{"npc_id": "npc_1", "text": "Hello."}]},
+        },
+        {
+            "session_id": session_id,
+            "turn_index": 1,
+            "timestamp": "t1",
+            "npc_id": "npc_2",
+            "player_text": "Hi",
+            "output": {"npc_dialogue": [{"npc_id": "npc_2", "text": "Greetings."}]},
+        },
+        {
+            "session_id": session_id,
+            "turn_index": 2,
+            "timestamp": "t2",
+            "npc_id": "npc_1",
+            "player_text": "Back again",
+            "output": {"npc_dialogue": [{"npc_id": "npc_1", "text": "Welcome back."}]},
+        },
+    ]
+    for record in records:
+        append_turn_log(session_id, record, sessions_root)
+
+    world = make_world()
+    state = make_state(world)
+    store = InMemoryStore()
+    index = RAGIndex(store)
+    index.build_default(session_id, world)
+    retriever = RAGRetriever(index)
+
+    pack = retriever.get_forced_context_pack(
+        session_id=session_id,
+        world=world,
+        state=state,
+        npc_id="npc_1",
+        sessions_root=sessions_root,
+        last_n_summaries=2,
+        top_k=1,
+        query_text="hello",
+    )
+    npc_memory = [
+        doc for doc in pack["always_include"]
+        if doc.metadata.get("doc_type") == "memory" and doc.metadata.get("npc_id") == "npc_1"
+    ]
+    assert len(npc_memory) == 2
+
+
 def test_orchestrator_injects_rag(tmp_path: Path):
     cfg = load_config("configs/config.yaml")
     sessions_root = tmp_path / "sessions"

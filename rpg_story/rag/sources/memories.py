@@ -7,6 +7,35 @@ from rpg_story.persistence.store import read_turn_logs
 from rpg_story.rag.types import Document, make_doc_id, normalize_metadata
 
 
+def _memory_text_from_record(record: dict) -> str:
+    player_text = record.get("player_text", "")
+    output = record.get("output", {})
+    narration = output.get("narration", "")
+    summary = output.get("memory_summary", "")
+    move_rejections = record.get("move_rejections", [])
+    move_refusals = record.get("move_refusals", [])
+    npc_dialogue = output.get("npc_dialogue", [])
+
+    parts = []
+    if player_text:
+        parts.append(f"Player: {player_text}")
+    for line in npc_dialogue:
+        npc_id = line.get("npc_id", "")
+        text = line.get("text", "")
+        if text:
+            prefix = f"NPC[{npc_id}]" if npc_id else "NPC"
+            parts.append(f"{prefix}: {text}")
+    if narration:
+        parts.append(f"Narration: {narration}")
+    if summary:
+        parts.append(f"Summary: {summary}")
+    if move_rejections:
+        parts.append(f"Move rejections: {len(move_rejections)}")
+    if move_refusals:
+        parts.append(f"Move refusals: {len(move_refusals)}")
+    return "\n".join([p for p in parts if p])
+
+
 def build_memory_docs_from_turn_logs(
     session_id: str,
     sessions_root,
@@ -20,29 +49,11 @@ def build_memory_docs_from_turn_logs(
     tail = logs[-limit:]
     docs: List[Document] = []
     for record in tail:
-        player_text = record.get("player_text", "")
-        output = record.get("output", {})
-        narration = output.get("narration", "")
-        summary = output.get("memory_summary", "")
-        move_rejections = record.get("move_rejections", [])
-        move_refusals = record.get("move_refusals", [])
-
         turn_id = record.get("turn_index")
         timestamp = record.get("timestamp")
         if turn_id is None or not timestamp:
             continue
-        parts = []
-        if player_text:
-            parts.append(f"Player: {player_text}")
-        if narration:
-            parts.append(f"Narration: {narration}")
-        if summary:
-            parts.append(f"Summary: {summary}")
-        if move_rejections:
-            parts.append(f"Move rejections: {len(move_rejections)}")
-        if move_refusals:
-            parts.append(f"Move refusals: {len(move_refusals)}")
-        text = "\n".join([p for p in parts if p])
+        text = _memory_text_from_record(record)
         if not text:
             continue
 

@@ -1,0 +1,210 @@
+{
+  "world_id": "w_dq01",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "magic_rules": "Magic is rare and potent, drawn from ancient runes and divine blessings. Only trained mages or blessed individuals can wield it safely.",
+    "tone": "Heroic fantasy with clear good vs. evil themes, inspired by classic JRPGs.",
+    "anachronism_policy": null,
+    "taboos": [
+      "betraying the kingdom",
+      "desecrating holy relics",
+      "allying with demons"
+    ],
+    "do_not_mention": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "car",
+      "gun",
+      "computer",
+      "electricity",
+      "airplane"
+    ],
+    "anachronism_blocklist": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "car",
+      "gun",
+      "computer",
+      "electricity",
+      "airplane"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "格林村",
+      "kind": "town",
+      "description": "宁静的乡村，勇者的故乡。村中有老橡树、小教堂和铁匠铺。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "peaceful",
+        "starting_village",
+        "safe"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "迷雾森林",
+      "kind": "forest",
+      "description": "被浓雾笼罩的森林，常有哥布林出没，通往北方的必经之路。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "dangerous",
+        "monsters",
+        "path"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "断桥废墟",
+      "kind": "bridge",
+      "description": "一座坍塌的石桥，下方是湍急的河流。传说桥下藏有宝藏。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "ruins",
+        "treasure",
+        "hazard"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "白石城",
+      "kind": "town",
+      "description": "王国的边陲重镇，城墙高耸，驻扎着皇家骑士团。",
+      "connected_to": [
+        "loc_002",
+        "loc_006"
+      ],
+      "tags": [
+        "fortified",
+        "quest_hub",
+        "safe"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "幽暗洞穴",
+      "kind": "dungeon",
+      "description": "潮湿阴冷的洞穴，居住着蝙蝠和食人魔，深处有古代祭坛。",
+      "connected_to": [
+        "loc_003"
+      ],
+      "tags": [
+        "dungeon",
+        "monsters",
+        "puzzle"
+      ]
+    },
+    {
+      "location_id": "loc_006",
+      "name": "龙之峰",
+      "kind": "castle",
+      "description": "恶龙盘踞的山顶堡垒，终年雷云密布，是最终决战之地。",
+      "connected_to": [
+        "loc_004"
+      ],
+      "tags": [
+        "boss",
+        "dangerous",
+        "final"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "艾拉",
+      "profession": "村巫女",
+      "traits": [
+        "善良",
+        "虔诚",
+        "略显胆小"
+      ],
+      "goals": [
+        "保护村庄",
+        "指引勇者"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.8,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 4,
+      "refusal_style": "温柔劝阻"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "巴洛克",
+      "profession": "流浪战士",
+      "traits": [
+        "粗鲁",
+        "忠诚",
+        "嗜酒"
+      ],
+      "goals": [
+        "寻找失踪的妹妹",
+        "击败恶龙"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.5,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": 2,
+      "refusal_style": "大声抱怨但最终服从"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "梅林达",
+      "profession": "宫廷法师",
+      "traits": [
+        "智慧",
+        "神秘",
+        "冷漠"
+      ],
+      "goals": [
+        "封印远古魔法",
+        "阻止恶魔复苏"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.4,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 1,
+      "refusal_style": "用谜语回避"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "托比",
+      "profession": "铁匠学徒",
+      "traits": [
+        "热情",
+        "笨拙",
+        "乐观"
+      ],
+      "goals": [
+        "打造传奇武器",
+        "证明自己"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 5,
+      "refusal_style": "慌张道歉并立刻改正"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "你从小在格林村长大，昨晚梦见了燃烧的龙之峰和哭泣的国王。今晨，村长紧急召集所有年轻人，说恶龙已苏醒，王国危在旦夕。",
+  "initial_quest": "前往白石城向皇家骑士团报告恶龙苏醒的征兆，并寻求支援。"
+}

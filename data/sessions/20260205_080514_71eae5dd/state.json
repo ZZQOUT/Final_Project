@@ -1,0 +1,254 @@
+{
+  "session_id": "20260205_080514_71eae5dd",
+  "created_at": "2026-02-05T08:05:50.461899+00:00",
+  "world": {
+    "world_id": "w_dq001",
+    "title": "勇者斗恶龙",
+    "world_bible": {
+      "tech_level": "medieval",
+      "magic_rules": "Magic is rare and potent, drawn from ancient runes and divine blessings. Only trained mages or blessed clerics can wield it safely.",
+      "tone": "Heroic fantasy with clear moral lines between good and evil.",
+      "anachronism_policy": null,
+      "taboos": [
+        "betraying the king",
+        "desecrating holy shrines",
+        "allying with demons"
+      ],
+      "do_not_mention": [
+        "smartphone",
+        "internet",
+        "credit card",
+        "car",
+        "gun",
+        "computer",
+        "electricity",
+        "plastic"
+      ],
+      "anachronism_blocklist": [
+        "smartphone",
+        "internet",
+        "credit card",
+        "car",
+        "gun",
+        "computer",
+        "electricity",
+        "plastic"
+      ]
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "晨光村",
+        "kind": "town",
+        "description": "一个宁静的村庄，被青山环绕，是勇者的故乡。村民们淳朴善良，村中央有一座古老神庙。",
+        "connected_to": [
+          "loc_002",
+          "loc_003"
+        ],
+        "tags": [
+          "peaceful",
+          "starting_area",
+          "holy"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "迷雾森林",
+        "kind": "forest",
+        "description": "常年被浓雾笼罩的森林，传说中藏有通往古代遗迹的小径，也有野兽和哥布林出没。",
+        "connected_to": [
+          "loc_001",
+          "loc_004"
+        ],
+        "tags": [
+          "dangerous",
+          "mysterious",
+          "wildlife"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "石桥隘口",
+        "kind": "bridge",
+        "description": "横跨深渊的古老石桥，是通往王都的必经之路，最近被强盗占据。",
+        "connected_to": [
+          "loc_001",
+          "loc_005"
+        ],
+        "tags": [
+          "strategic",
+          "contested",
+          "ruined"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "古精灵遗迹",
+        "kind": "dungeon",
+        "description": "隐藏在迷雾森林深处的精灵遗迹，布满机关和魔法陷阱，据说藏有上古神器。",
+        "connected_to": [
+          "loc_002"
+        ],
+        "tags": [
+          "ancient",
+          "magical",
+          "treasure"
+        ]
+      },
+      {
+        "location_id": "loc_005",
+        "name": "王都阿尔托利亚",
+        "kind": "town",
+        "description": "王国的首都，高墙环绕，市场繁荣，王宫坐落于城市中心，国王正为恶龙肆虐而忧心忡忡。",
+        "connected_to": [
+          "loc_003",
+          "loc_006"
+        ],
+        "tags": [
+          "political",
+          "populated",
+          "safe"
+        ]
+      },
+      {
+        "location_id": "loc_006",
+        "name": "黑焰山",
+        "kind": "castle",
+        "description": "恶龙盘踞的火山要塞，岩浆流淌，空气中弥漫着硫磺味，是最终决战之地。",
+        "connected_to": [
+          "loc_005"
+        ],
+        "tags": [
+          "evil",
+          "dangerous",
+          "final_boss"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_001",
+        "name": "艾拉",
+        "profession": "村巫女",
+        "traits": [
+          "虔诚",
+          "温柔",
+          "有预知梦"
+        ],
+        "goals": [
+          "保护村庄",
+          "指引勇者"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.8,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.2,
+        "disposition_to_player": 4,
+        "refusal_style": "婉言劝阻，强调神谕"
+      },
+      {
+        "npc_id": "npc_002",
+        "name": "巴隆",
+        "profession": "退役骑士",
+        "traits": [
+          "酗酒",
+          "经验丰富",
+          "愤世嫉俗"
+        ],
+        "goals": [
+          "赎罪",
+          "训练新勇者"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.5,
+        "stubbornness": 0.7,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 2,
+        "refusal_style": "冷笑并转身离开"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "莉娜",
+        "profession": "盗贼",
+        "traits": [
+          "机灵",
+          "贪财",
+          "讲义气"
+        ],
+        "goals": [
+          "偷取恶龙宝藏",
+          "逃离过去"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.4,
+        "stubbornness": 0.6,
+        "risk_tolerance": 0.9,
+        "disposition_to_player": 1,
+        "refusal_style": "提出交换条件或金钱"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "国王奥德里克",
+        "profession": "君主",
+        "traits": [
+          "仁慈",
+          "焦虑",
+          "果断"
+        ],
+        "goals": [
+          "消灭恶龙",
+          "保护子民"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.9,
+        "stubbornness": 0.5,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 5,
+        "refusal_style": "以国家大义劝说"
+      },
+      {
+        "npc_id": "npc_005",
+        "name": "格鲁姆",
+        "profession": "哥布林斥候",
+        "traits": [
+          "胆小",
+          "狡猾",
+          "贪吃"
+        ],
+        "goals": [
+          "活命",
+          "偷食物"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.2,
+        "stubbornness": 0.4,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": -2,
+        "refusal_style": "尖叫逃跑或求饶"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "你从一场预知梦中惊醒，梦见村庄被火海吞噬。村巫女艾拉告诉你，这是恶龙苏醒的征兆，而你，正是预言中的勇者。",
+    "initial_quest": "前往王都阿尔托利亚，接受国王的委托，寻找击败恶龙的方法。"
+  },
+  "player_location": "loc_001",
+  "npc_locations": {
+    "npc_001": "loc_001",
+    "npc_002": "loc_001",
+    "npc_003": "loc_003",
+    "npc_004": "loc_005",
+    "npc_005": "loc_002"
+  },
+  "flags": {},
+  "quests": {},
+  "inventory": {},
+  "recent_summaries": [
+    "玩家在晨光村与退役骑士巴隆初次对话，巴隆自报姓名并反问玩家身份。",
+    "玩家向巴隆询问前往王都的路线，巴隆以嘲讽语气指明方向并暗示旅途危险。",
+    "玩家向巴隆询问村巫女艾拉的性别，巴隆确认艾拉是女性并嘲讽玩家。",
+    "玩家向村巫女艾拉打招呼，艾拉重申预知梦的警告并催促玩家前往王都。",
+    "玩家向村巫女艾拉询问是否认识巴隆，艾拉表示认识但强调其与当前使命无关。",
+    "玩家询问艾拉是否认识巴隆，艾拉确认认识但强调其与当前使命无关。"
+  ],
+  "last_turn_id": 6
+}

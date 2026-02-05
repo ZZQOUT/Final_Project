@@ -1,0 +1,263 @@
+{
+  "world_id": "w_dq001",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "magic_rules": "Magic is rare and potent, drawn from ancient runes or divine blessings. Only trained mages or blessed clerics can wield it safely.",
+    "tone": "Heroic fantasy with clear moral lines between good and evil.",
+    "anachronism_policy": null,
+    "taboos": [
+      "betrayal of the crown",
+      "desecration of holy relics",
+      "summoning demons without royal sanction"
+    ],
+    "do_not_mention": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "automobile",
+      "computer",
+      "gunpowder",
+      "airplane"
+    ],
+    "anachronism_blocklist": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "automobile",
+      "computer",
+      "gunpowder",
+      "airplane"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "晨光村",
+      "kind": "town",
+      "description": "一个宁静的村庄，被青山环绕，是勇者的故乡。村民们淳朴善良，村中央有一座古老神庙。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "peaceful",
+        "starting_village",
+        "holy_site"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "迷雾森林",
+      "kind": "forest",
+      "description": "浓雾终年不散的森林，传说中藏有古代精灵遗迹，也潜伏着哥布林和野兽。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "dangerous",
+        "mystical",
+        "monster_lair"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "断桥",
+      "kind": "bridge",
+      "description": "一座年久失修的石桥，横跨深渊，通往王国主城。桥中央断裂，需跳跃或修复才能通过。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "obstacle",
+        "strategic",
+        "scenic"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "哥布林洞穴",
+      "kind": "dungeon",
+      "description": "隐藏在迷雾森林深处的洞穴，哥布林在此囤积掠夺来的财宝，并崇拜一只邪恶图腾。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "hostile",
+        "treasure",
+        "trap_filled"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "王都艾尔加德",
+      "kind": "town",
+      "description": "王国的首都，高墙环绕，集市繁华，王宫巍峨。国王正为恶龙肆虐而忧心忡忡。",
+      "connected_to": [
+        "loc_003",
+        "loc_006"
+      ],
+      "tags": [
+        "political",
+        "safe_zone",
+        "quest_hub"
+      ]
+    },
+    {
+      "location_id": "loc_006",
+      "name": "龙脊山脉",
+      "kind": "mountain",
+      "description": "险峻的山脉，山顶终年积雪，恶龙盘踞在最高峰的火山口巢穴中。",
+      "connected_to": [
+        "loc_005",
+        "loc_007"
+      ],
+      "tags": [
+        "extreme_danger",
+        "dragon_lair",
+        "treacherous"
+      ]
+    },
+    {
+      "location_id": "loc_007",
+      "name": "龙巢",
+      "kind": "dungeon",
+      "description": "恶龙的巢穴，堆满金银财宝，空气中弥漫着硫磺味。恶龙在此守护着被掳走的公主。",
+      "connected_to": [
+        "loc_006"
+      ],
+      "tags": [
+        "final_boss",
+        "treasure_hoard",
+        "rescue"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "老村长阿尔文",
+      "profession": "村长",
+      "traits": [
+        "慈祥",
+        "睿智",
+        "行动不便"
+      ],
+      "goals": [
+        "保护村民安全",
+        "指引勇者踏上征途"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.8,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.1,
+      "disposition_to_player": 4,
+      "refusal_style": "叹息并劝说玩家三思"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "莉娜",
+      "profession": "见习法师",
+      "traits": [
+        "好奇",
+        "勇敢",
+        "有点冒失"
+      ],
+      "goals": [
+        "寻找古代魔法书",
+        "证明自己配得上法师塔"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.5,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.7,
+      "disposition_to_player": 2,
+      "refusal_style": "撅嘴并说‘你根本不懂魔法！’"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "铁匠巴隆",
+      "profession": "铁匠",
+      "traits": [
+        "豪爽",
+        "固执",
+        "手艺精湛"
+      ],
+      "goals": [
+        "打造一把屠龙剑",
+        "找回被哥布林偷走的祖传铁锤"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.4,
+      "stubbornness": 0.9,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 3,
+      "refusal_style": "大吼‘没材料别来烦我！’"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "国王奥德里克",
+      "profession": "君主",
+      "traits": [
+        "威严",
+        "焦虑",
+        "公正"
+      ],
+      "goals": [
+        "拯救被掳走的公主",
+        "消灭恶龙以保王国平安"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.9,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 5,
+      "refusal_style": "严肃地命令卫兵将玩家请出宫殿"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "盗贼影子",
+      "profession": "盗贼",
+      "traits": [
+        "狡猾",
+        "机会主义",
+        "讲信用"
+      ],
+      "goals": [
+        "偷取龙巢中的红宝石",
+        "避开王都守卫的追捕"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.2,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": 0,
+      "refusal_style": "消失在阴影中，只留下一句‘下次再谈’"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "哥布林酋长格鲁姆",
+      "profession": "哥布林首领",
+      "traits": [
+        "残暴",
+        "贪婪",
+        "迷信"
+      ],
+      "goals": [
+        "献祭俘虏给图腾",
+        "扩大洞穴领地"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.1,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": -5,
+      "refusal_style": "咆哮着召唤手下攻击"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "你从小在晨光村长大，今晨醒来发现村中神庙的圣物——勇者之剑——在你床边发光，村长阿尔文告诉你：预言中的勇者就是你，必须启程讨伐恶龙，拯救王国。",
+  "initial_quest": "前往王都艾尔加德，面见国王奥德里克，接受正式的屠龙任务。途中可探索迷雾森林或修复断桥。"
+}

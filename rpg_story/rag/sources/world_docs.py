@@ -23,6 +23,17 @@ def build_world_bible_doc(world: WorldSpec, session_id: str) -> Document:
         parts.append("Anachronism blocklist: " + ", ".join(bible.anachronism_blocklist))
     parts.append(f"Starting hook: {world.starting_hook}")
     parts.append(f"Initial quest: {world.initial_quest}")
+    if world.npcs:
+        roster = []
+        for npc in world.npcs:
+            roster.append(f"{npc.npc_id}: {npc.name} ({npc.profession}) @ {npc.starting_location}")
+        parts.append("NPC roster: " + "; ".join(roster))
+        professions = sorted({npc.profession for npc in world.npcs if npc.profession})
+        if professions:
+            parts.append("Known professions: " + ", ".join(professions))
+    if world.locations:
+        locs = [f"{loc.location_id}: {loc.name}" for loc in world.locations]
+        parts.append("Location roster: " + "; ".join(locs))
 
     text = "\n".join([p for p in parts if p])
     metadata = normalize_metadata(

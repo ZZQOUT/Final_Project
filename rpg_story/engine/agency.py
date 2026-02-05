@@ -1,7 +1,7 @@
 """NPC agency gate for move compliance decisions."""
 from __future__ import annotations
 
-from typing import List, TypedDict
+from typing import Dict, List, TypedDict
 
 from rpg_story.models.turn import NPCMove
 from rpg_story.models.world import GameState, WorldSpec, NPCProfile
@@ -60,10 +60,17 @@ def apply_agency_gate(
     state: GameState,
     world: WorldSpec,
     player_text: str,
+    npc_dialogue_by_id: Dict[str, List[str]] | None = None,
 ) -> tuple[List[NPCMove], List[dict]]:
     allowed: List[NPCMove] = []
     events: List[dict] = []
     for move in moves:
+        npc_texts = []
+        if npc_dialogue_by_id:
+            npc_texts = npc_dialogue_by_id.get(move.npc_id, [])
+        if _npc_accepts_move(move, state, world, player_text, npc_texts):
+            allowed.append(move)
+            continue
         decision = decide_npc_move(move, state, world, player_text)
         if decision["allowed"]:
             allowed.append(move)
@@ -155,3 +162,90 @@ def _refusal_reason(npc: NPCProfile, risk_tags: List[str], role_tags: List[str])
     if npc.stubbornness >= 0.7:
         return "Refused: too stubborn"
     return "Refused: unwilling to comply"
+
+
+def _npc_accepts_move(
+    move: NPCMove,
+    state: GameState,
+    world: WorldSpec,
+    player_text: str,
+    npc_texts: List[str],
+) -> bool:
+    if not npc_texts:
+        return False
+    combined = " ".join([t for t in npc_texts if t]).strip()
+    if not combined:
+        return False
+    if _npc_refuses_in_text(combined):
+        return False
+    loc = world.get_location(move.to_location)
+    dest_names = {move.to_location}
+    if loc and loc.name:
+        dest_names.add(loc.name)
+    dest_in_text = any(name and name in combined for name in dest_names)
+    dest_in_player = any(name and name in player_text for name in dest_names) if player_text else False
+    if not (dest_in_text or dest_in_player):
+        return False
+    return _npc_accepts_in_text(combined)
+
+
+def _npc_accepts_in_text(text: str) -> bool:
+    lower = text.lower()
+    cues = [
+        "我愿意",
+        "我跟你去",
+        "我会去",
+        "我去",
+        "我马上去",
+        "我现在就去",
+        "跟你走",
+        "一起去",
+        "好的",
+        "可以",
+        "没问题",
+        "行",
+        "当然",
+        "let's go",
+        "i will go",
+        "i'll go",
+        "i can go",
+        "sure",
+        "okay",
+        "alright",
+    ]
+    for cue in cues:
+        if cue.isascii():
+            if cue in lower:
+                return True
+            continue
+        if cue in text:
+            return True
+    return False
+
+
+def _npc_refuses_in_text(text: str) -> bool:
+    lower = text.lower()
+    cues = [
+        "不去",
+        "不能",
+        "不行",
+        "不愿意",
+        "没空",
+        "拒绝",
+        "做不到",
+        "改天",
+        "not going",
+        "can't",
+        "cannot",
+        "won't",
+        "refuse",
+        "decline",
+    ]
+    for cue in cues:
+        if cue.isascii():
+            if cue in lower:
+                return True
+            continue
+        if cue in text:
+            return True
+    return False

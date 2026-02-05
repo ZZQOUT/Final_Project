@@ -12,6 +12,7 @@ def build_npc_profile_doc(world: WorldSpec, npc_id: str, session_id: str) -> Doc
     else:
         parts = [
             f"NPC: {npc.name} ({npc.profession})",
+            f"Identity: You are {npc.name}. Never claim to be someone else.",
             f"Traits: {', '.join(npc.traits)}",
             f"Goals: {', '.join(npc.goals)}",
             f"Starting location: {npc.starting_location}",

@@ -3,7 +3,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, Any, Optional, Tuple
+from typing import Dict, Any, Optional, Tuple, List, Set
+import re
 from datetime import datetime, timezone
 import json
 
@@ -11,7 +12,7 @@ from rpg_story.config import AppConfig
 from rpg_story.llm.client import BaseLLMClient, make_json_schema_response_format
 from rpg_story.llm.schemas import validate_turn_output
 from rpg_story.models.world import GameState, WorldSpec
-from rpg_story.models.turn import TurnOutput
+from rpg_story.models.turn import TurnOutput, NPCDialogueLine
 from rpg_story.engine.state import apply_turn_output
 from rpg_story.engine.validators import validate_npc_move
 from rpg_story.engine.agency import apply_agency_gate
@@ -62,7 +63,10 @@ class TurnPipeline:
         system_prompt = base + "\n" + narrator + "\n" + persona
         if rag_text:
             system_prompt += "\n\n" + rag_text
-        world_constraints = "World constraints: medieval setting, no modern tech, maintain consistency."
+        tech_level = getattr(state.world.world_bible, "tech_level", "medieval") or "medieval"
+        world_constraints = (
+            f"World constraints: tech_level={tech_level}, maintain lore consistency."
+        )
         schema_hint = (
             "Return JSON with keys: narration, npc_dialogue, world_updates, memory_summary, safety. "
             "npc_dialogue is a list of {npc_id, text}. world_updates may include player_location, npc_moves, flags_delta, quest_updates. "
@@ -73,8 +77,14 @@ class TurnPipeline:
         user_prompt = (
             f"location_id: {state.player_location}\n"
             f"npc_id: {npc_id}\n"
+            f"npc_name: {npc_name}\n"
             f"player_text: {player_text}\n"
             f"{world_constraints}\n"
+            "NPC reply MUST be placed in npc_dialogue using the same npc_id. "
+            "NPC identity must stay consistent with npc_name; correct the player if they use a wrong name. "
+            "If asked about other NPCs or roles, only use names/professions from the NPC roster in WORLD BIBLE; "
+            "if a role does not exist, say there is no such person in town. "
+            "Keep narration brief and optional.\n"
             f"schema_hint: {schema_hint}"
         )
         return system_prompt, user_prompt
@@ -90,6 +100,8 @@ class TurnPipeline:
         data = self.llm_client.generate_json(system_prompt, user_prompt, response_format=response_format)
         output = validate_turn_output(data)
         output = self._enforce_no_first_mention(state, player_text, output, response_format)
+        output = self._ensure_npc_dialogue(output, npc_id)
+        output = self._enforce_world_roster(state, output, npc_id, response_format)
         state_non_move = apply_turn_output(state, output, npc_id)
 
         move_rejections = []
@@ -109,8 +121,17 @@ class TurnPipeline:
                 }
             )
 
+        dialogue_by_id = {}
+        for line in output.npc_dialogue:
+            if not line.text:
+                continue
+            dialogue_by_id.setdefault(line.npc_id, []).append(line.text)
         allowed_moves, move_refusals = apply_agency_gate(
-            legal_moves, state_non_move, state_non_move.world, player_text
+            legal_moves,
+            state_non_move,
+            state_non_move.world,
+            player_text,
+            dialogue_by_id,
         )
         updated_state = state_non_move.model_copy(deep=True)
         for move in allowed_moves:
@@ -188,6 +209,7 @@ class TurnPipeline:
         sections.append(self._render_section("WORLD BIBLE", _filter_docs(always, "world_bible")))
         sections.append(self._render_section("LOCATION", _filter_docs(always, "location")))
         sections.append(self._render_section("NPC PROFILE", _filter_docs(always, "npc_profile")))
+        sections.append(self._render_section("NPC MEMORY", _filter_docs(always, "memory")))
         sections.append(self._render_section("RECENT SUMMARIES", _filter_docs(always, "summary")))
         sections.append(self._render_section("RETRIEVED MEMORIES", retrieved))
         return "\n\n".join([section for section in sections if section])
@@ -219,6 +241,66 @@ class TurnPipeline:
             if npc.npc_id == npc_id:
                 return npc.name
         return npc_id
+
+    def _ensure_npc_dialogue(self, output: TurnOutput, npc_id: str) -> TurnOutput:
+        if output.npc_dialogue:
+            has_text = any(line.text.strip() for line in output.npc_dialogue)
+            if has_text:
+                return output
+        if not output.narration.strip():
+            return output
+        updated = output.model_copy(deep=True)
+        updated.npc_dialogue = [
+            NPCDialogueLine(npc_id=npc_id, text=updated.narration.strip())
+        ]
+        updated.narration = ""
+        return updated
+
+    def _enforce_world_roster(
+        self,
+        state: GameState,
+        output: TurnOutput,
+        npc_id: str,
+        response_format: dict,
+    ) -> TurnOutput:
+        roster_names = [npc.name for npc in state.world.npcs if npc.name]
+        roster_professions = [npc.profession for npc in state.world.npcs if npc.profession]
+        if not roster_names and not roster_professions:
+            return output
+        texts = []
+        if output.narration:
+            texts.append(output.narration)
+        for line in output.npc_dialogue:
+            if line.text:
+                texts.append(line.text)
+        offending = _detect_unknown_references(texts, roster_names, roster_professions)
+        if not offending:
+            return output
+        rewrite_system = (
+            "You are a JSON repair tool. Return ONLY valid JSON. "
+            "Keep NPC/world consistency with the roster."
+        )
+        rewrite_user = (
+            "The NPC must only reference known NPCs and professions from the roster.\n"
+            f"Known NPC names: {roster_names}\n"
+            f"Known professions: {roster_professions}\n"
+            f"Offending terms: {sorted(offending)}\n\n"
+            "Remove or replace offending terms. If a role does not exist, state that no such person exists.\n\n"
+            f"Original JSON: {json.dumps(output.model_dump(), ensure_ascii=False)}"
+        )
+        fixed = self.llm_client.generate_json(rewrite_system, rewrite_user, response_format=response_format)
+        fixed_output = validate_turn_output(fixed)
+        fixed_output = self._ensure_npc_dialogue(fixed_output, npc_id)
+        texts = []
+        if fixed_output.narration:
+            texts.append(fixed_output.narration)
+        for line in fixed_output.npc_dialogue:
+            if line.text:
+                texts.append(line.text)
+        still_offending = _detect_unknown_references(texts, roster_names, roster_professions)
+        if still_offending:
+            raise ValueError(f"unknown NPC/role references remain: {sorted(still_offending)}")
+        return fixed_output
 
     def _enforce_no_first_mention(
         self,
@@ -257,3 +339,53 @@ class TurnPipeline:
 
 def _filter_docs(docs: list[Document], doc_type: str) -> list[Document]:
     return [doc for doc in docs if doc.metadata.get("doc_type") == doc_type]
+
+
+COMMON_ROLE_TERMS: Set[str] = {
+    "铁匠",
+    "药师",
+    "医生",
+    "牧师",
+    "守卫",
+    "队长",
+    "猎人",
+    "渔夫",
+    "农夫",
+    "工匠",
+    "裁缝",
+    "学者",
+    "法师",
+    "旅馆老板",
+    "店主",
+    "商人",
+    "blacksmith",
+    "healer",
+    "doctor",
+    "guard",
+    "merchant",
+}
+
+
+def _detect_unknown_references(
+    texts: List[str],
+    roster_names: List[str],
+    roster_professions: List[str],
+) -> Set[str]:
+    offending: Set[str] = set()
+    name_set = {name.strip() for name in roster_names if name.strip()}
+    prof_set = {prof.strip() for prof in roster_professions if prof.strip()}
+    for text in texts:
+        lower_text = text.lower()
+        for match in re.findall(r"(?:名叫|名为|叫做|叫)([\\u4e00-\\u9fff]{2,4})", text):
+            if match not in name_set:
+                offending.add(match)
+        for role in COMMON_ROLE_TERMS:
+            if role.isascii():
+                if role in lower_text:
+                    if not any(role in prof.lower() for prof in prof_set):
+                        offending.add(role)
+                continue
+            if role in text:
+                if not any(role in prof for prof in prof_set):
+                    offending.add(role)
+    return offending

@@ -11,6 +11,7 @@ from rpg_story.rag.sources.location_docs import build_location_doc
 from rpg_story.rag.sources.npc_docs import build_npc_profile_doc
 from rpg_story.rag.sources.summaries import build_summary_docs_from_turn_logs
 from rpg_story.rag.sources.memories import build_memory_docs_from_turn_logs
+from rpg_story.rag.sources.npc_memories import build_npc_memory_docs_from_turn_logs
 from rpg_story.rag.types import dedupe_docs
 
 
@@ -39,6 +40,13 @@ class RAGRetriever:
         if npc_id:
             npc_doc = build_npc_profile_doc(world, npc_id, session_id)
             always_include.append(npc_doc)
+            npc_memory_docs = build_npc_memory_docs_from_turn_logs(
+                session_id,
+                sessions_root,
+                npc_id,
+                limit=min(last_n_summaries, 3),
+            )
+            always_include.extend(npc_memory_docs)
 
         summary_docs = build_summary_docs_from_turn_logs(session_id, sessions_root, last_n_summaries)
         always_include.extend(summary_docs)

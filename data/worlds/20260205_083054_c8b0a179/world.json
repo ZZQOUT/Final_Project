@@ -1,0 +1,175 @@
+{
+  "world_id": "w_dq001",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "magic_rules": "魔法源自古代龙语，只有少数法师能掌握。神圣魔法由神殿授予，用于治疗与驱邪。",
+    "tone": "史诗奇幻，善恶分明，充满冒险与牺牲精神。",
+    "anachronism_policy": null,
+    "taboos": [
+      "亵渎龙神",
+      "背叛王国",
+      "伤害无辜村民"
+    ],
+    "do_not_mention": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "car",
+      "computer",
+      "gun",
+      "airplane",
+      "electricity"
+    ],
+    "anachronism_blocklist": [
+      "modern weapon",
+      "digital device",
+      "plastic"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "王城阿尔托利亚",
+      "kind": "town",
+      "description": "王国的首都，高耸的城墙和金色的王宫象征着荣耀与秩序。市民们正为恶龙的威胁而惶恐不安。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "kingdom",
+        "safe",
+        "quest_giver"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "迷雾森林",
+      "kind": "forest",
+      "description": "一片被古老魔法笼罩的森林，常有怪物出没，但也是通往龙穴的必经之路。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "dangerous",
+        "magical",
+        "wildlife"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "圣光神殿",
+      "kind": "castle",
+      "description": "供奉光明女神的神殿，拥有治愈之力和对抗黑暗的圣物。",
+      "connected_to": [
+        "loc_001"
+      ],
+      "tags": [
+        "holy",
+        "safe",
+        "healing"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "黑龙之巢",
+      "kind": "dungeon",
+      "description": "位于火山口中的恶龙巢穴，充满熔岩、财宝与死亡陷阱。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "boss",
+        "deadly",
+        "treasure"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "国王雷奥纳德",
+      "profession": "国王",
+      "traits": [
+        "威严",
+        "忧虑",
+        "公正"
+      ],
+      "goals": [
+        "保护子民",
+        "消灭恶龙"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.8,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 3,
+      "refusal_style": "以国家大义劝说，不会直接命令"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "艾莉娅",
+      "profession": "见习法师",
+      "traits": [
+        "聪慧",
+        "胆小",
+        "忠诚"
+      ],
+      "goals": [
+        "掌握龙语魔法",
+        "协助勇者"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.7,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 2,
+      "refusal_style": "会犹豫但最终顺从"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "大祭司玛尔塔",
+      "profession": "神殿祭司",
+      "traits": [
+        "慈祥",
+        "坚定",
+        "神秘"
+      ],
+      "goals": [
+        "守护圣物",
+        "引导勇者获得神佑"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.5,
+      "stubbornness": 0.9,
+      "risk_tolerance": 0.1,
+      "disposition_to_player": 4,
+      "refusal_style": "以神谕为由拒绝不合理请求"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "盗贼罗恩",
+      "profession": "盗贼",
+      "traits": [
+        "狡猾",
+        "实用主义",
+        "讲义气"
+      ],
+      "goals": [
+        "偷取龙巢宝藏",
+        "活命"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.3,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 0,
+      "refusal_style": "讨价还价或找借口溜走"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "王国边境村庄遭恶龙袭击，国王急召勇者拯救苍生。",
+  "initial_quest": "前往圣光神殿获取祝福，然后穿越迷雾森林，最终击败黑龙。"
+}
