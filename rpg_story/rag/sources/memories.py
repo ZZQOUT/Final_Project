@@ -30,9 +30,16 @@ def _memory_text_from_record(record: dict) -> str:
     if summary:
         parts.append(f"Summary: {summary}")
     if move_rejections:
-        parts.append(f"Move rejections: {len(move_rejections)}")
+        for event in move_rejections:
+            npc_id = event.get("npc_id", "")
+            reason = event.get("reason", "rejected")
+            to_loc = event.get("to_location", "")
+            parts.append(f"Move rejected: npc={npc_id} to={to_loc} reason={reason}")
     if move_refusals:
-        parts.append(f"Move refusals: {len(move_refusals)}")
+        for event in move_refusals:
+            npc_id = event.get("npc_id", "")
+            reason = event.get("reason", "refused")
+            parts.append(f"Move refused: npc={npc_id} reason={reason}")
     return "\n".join([p for p in parts if p])
 
 

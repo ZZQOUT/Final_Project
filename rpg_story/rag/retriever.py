@@ -44,7 +44,7 @@ class RAGRetriever:
                 session_id,
                 sessions_root,
                 npc_id,
-                limit=min(last_n_summaries, 3),
+                limit=max(4, min(10, last_n_summaries * 2)),
             )
             always_include.extend(npc_memory_docs)
 

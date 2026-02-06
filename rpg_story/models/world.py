@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from typing import Dict, List, Optional, Set, Literal
-from pydantic import BaseModel, Field, ConfigDict, model_validator
+from pydantic import BaseModel, Field, ConfigDict, model_validator, field_validator
 
 
 class LocationSpec(BaseModel):
@@ -24,6 +24,7 @@ class WorldBibleRules(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     tech_level: Literal["medieval", "modern", "sci-fi"] = "medieval"
+    narrative_language: Optional[Literal["zh", "en"]] = None
     magic_rules: str
     tone: str
     anachronism_policy: Optional[str] = None
@@ -50,6 +51,101 @@ class NPCProfile(BaseModel):
     refusal_style: str
 
 
+class QuestSpec(BaseModel):
+    """Quest specification generated as part of WorldSpec."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    quest_id: str
+    title: str
+    category: Literal["main", "side"] = "side"
+    description: str
+    objective: str
+    giver_npc_id: Optional[str] = None
+    suggested_location: Optional[str] = None
+    required_items: Dict[str, int] = Field(default_factory=dict)
+    reward_items: Dict[str, int] = Field(default_factory=dict)
+    reward_hint: Optional[str] = None
+
+    @field_validator("required_items", "reward_items", mode="before")
+    @classmethod
+    def _normalize_required_items(cls, value):
+        if value is None:
+            return {}
+        if isinstance(value, list):
+            result: Dict[str, int] = {}
+            for item in value:
+                if not isinstance(item, dict):
+                    continue
+                key = item.get("item") or item.get("name")
+                count = item.get("count") or item.get("qty") or item.get("quantity") or 1
+                if not key:
+                    continue
+                try:
+                    amount = int(float(count))
+                except Exception:
+                    amount = 1
+                if amount > 0:
+                    result[str(key)] = amount
+            return result
+        if isinstance(value, dict):
+            result: Dict[str, int] = {}
+            for key, raw in value.items():
+                try:
+                    amount = int(float(raw))
+                except Exception:
+                    continue
+                if amount > 0:
+                    result[str(key)] = amount
+            return result
+        return {}
+
+
+class MapPosition(BaseModel):
+    """Relative map coordinate for one location."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    location_id: str
+    x: float = Field(..., ge=0.0, le=100.0)
+    y: float = Field(..., ge=0.0, le=100.0)
+
+
+class QuestProgress(BaseModel):
+    """Runtime quest progress tracked in GameState."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    quest_id: str
+    title: str
+    category: Literal["main", "side"] = "side"
+    status: Literal["available", "active", "completed", "failed"] = "available"
+    objective: str = ""
+    guidance: str = ""
+    giver_npc_id: Optional[str] = None
+    required_items: Dict[str, int] = Field(default_factory=dict)
+    collected_items: Dict[str, int] = Field(default_factory=dict)
+    reward_items: Dict[str, int] = Field(default_factory=dict)
+    reward_hint: Optional[str] = None
+
+    @field_validator("required_items", "collected_items", "reward_items", mode="before")
+    @classmethod
+    def _normalize_item_map(cls, value):
+        if value is None:
+            return {}
+        if not isinstance(value, dict):
+            return {}
+        result: Dict[str, int] = {}
+        for key, raw in value.items():
+            try:
+                amount = int(float(raw))
+            except Exception:
+                continue
+            if amount >= 0:
+                result[str(key)] = amount
+        return result
+
+
 class WorldSpec(BaseModel):
     """World spec produced by WorldGen."""
 
@@ -63,6 +159,9 @@ class WorldSpec(BaseModel):
     starting_location: str
     starting_hook: str
     initial_quest: str
+    main_quest: Optional[QuestSpec] = None
+    side_quests: List[QuestSpec] = Field(default_factory=list)
+    map_layout: List[MapPosition] = Field(default_factory=list)
 
     def location_ids(self) -> Set[str]:
         return {loc.location_id for loc in self.locations}
@@ -104,6 +203,33 @@ class WorldSpec(BaseModel):
             bad = [target for target in loc.connected_to if target not in loc_ids]
             if bad:
                 raise ValueError(f"connected_to invalid for {loc.location_id}: {bad}")
+        npc_ids_set = set(npc_ids)
+        quest_ids: Set[str] = set()
+        if self.main_quest:
+            if self.main_quest.category != "main":
+                raise ValueError("main_quest.category must be 'main'")
+            quest_ids.add(self.main_quest.quest_id)
+            if self.main_quest.giver_npc_id and self.main_quest.giver_npc_id not in npc_ids_set:
+                raise ValueError("main_quest.giver_npc_id must exist in npcs")
+            if self.main_quest.suggested_location and self.main_quest.suggested_location not in loc_ids:
+                raise ValueError("main_quest.suggested_location must exist in locations")
+        for quest in self.side_quests:
+            if quest.category != "side":
+                raise ValueError(f"side_quests category must be 'side': {quest.quest_id}")
+            if quest.quest_id in quest_ids:
+                raise ValueError("quest_id must be unique across main_quest/side_quests")
+            quest_ids.add(quest.quest_id)
+            if quest.giver_npc_id and quest.giver_npc_id not in npc_ids_set:
+                raise ValueError(f"Quest giver_npc_id invalid: {quest.quest_id}")
+            if quest.suggested_location and quest.suggested_location not in loc_ids:
+                raise ValueError(f"Quest suggested_location invalid: {quest.quest_id}")
+        layout_ids = set()
+        for node in self.map_layout:
+            if node.location_id not in loc_ids:
+                raise ValueError(f"map_layout contains unknown location_id: {node.location_id}")
+            if node.location_id in layout_ids:
+                raise ValueError(f"map_layout duplicates location_id: {node.location_id}")
+            layout_ids.add(node.location_id)
         return self
 
     def to_dict(self) -> Dict:
@@ -126,7 +252,10 @@ class GameState(BaseModel):
     npc_locations: Dict[str, str]
     flags: Dict[str, bool] = Field(default_factory=dict)
     quests: Dict[str, str] = Field(default_factory=dict)
+    quest_journal: Dict[str, QuestProgress] = Field(default_factory=dict)
+    main_quest_id: Optional[str] = None
     inventory: Dict[str, int] = Field(default_factory=dict)
+    location_resource_stock: Dict[str, Dict[str, int]] = Field(default_factory=dict)
     recent_summaries: List[str] = Field(default_factory=list)
     last_turn_id: int = 0
 
@@ -154,6 +283,18 @@ class GameState(BaseModel):
         loc_ids = self.world.location_ids()
         if self.player_location not in loc_ids:
             raise ValueError("player_location must exist in locations")
+        if self.main_quest_id and self.main_quest_id not in self.quest_journal:
+            raise ValueError("main_quest_id must exist in quest_journal")
+        for loc_id, stock in self.location_resource_stock.items():
+            if loc_id not in loc_ids:
+                raise ValueError(f"location_resource_stock contains invalid location_id: {loc_id}")
+            if not isinstance(stock, dict):
+                raise ValueError("location_resource_stock values must be dictionaries")
+            for item_name, item_count in stock.items():
+                if int(item_count) < 0:
+                    raise ValueError(
+                        f"location_resource_stock count must be >= 0: {loc_id}.{item_name}"
+                    )
         self.validate_references()
         return self
 

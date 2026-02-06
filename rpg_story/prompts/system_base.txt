@@ -6,5 +6,7 @@ Output ONLY valid JSON with no markdown.
 Follow the provided schema hint strictly.
 The 'safety' field MUST be an object: {refuse: boolean, reason: string|null}.
 quest_updates MUST be an object/dictionary. If no updates, use {} (not []).
+quest_progress_updates MUST be a list. If no updates, use [].
+inventory_delta MUST be an object/dictionary of item->signed int. If no updates, use {}.
 npc_moves MUST be a list. If no moves, use [] (not {}).
 Stay consistent with the medieval world constraints.

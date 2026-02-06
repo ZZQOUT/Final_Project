@@ -13,10 +13,14 @@ WORLD_FIELDS = {
     "starting_location",
     "starting_hook",
     "initial_quest",
+    "main_quest",
+    "side_quests",
+    "map_layout",
 }
 
 WORLD_BIBLE_FIELDS = {
     "tech_level",
+    "narrative_language",
     "magic_rules",
     "tone",
     "anachronism_policy",
@@ -46,6 +50,25 @@ NPC_FIELDS = {
     "risk_tolerance",
     "disposition_to_player",
     "refusal_style",
+}
+
+QUEST_FIELDS = {
+    "quest_id",
+    "title",
+    "category",
+    "description",
+    "objective",
+    "giver_npc_id",
+    "suggested_location",
+    "required_items",
+    "reward_items",
+    "reward_hint",
+}
+
+MAP_LAYOUT_FIELDS = {
+    "location_id",
+    "x",
+    "y",
 }
 
 LEVEL_MAP = {
@@ -87,6 +110,7 @@ SCRUB_LOCATION_TEXT_FIELDS = {"name", "kind", "description"}
 SCRUB_LOCATION_LIST_FIELDS = {"tags"}
 SCRUB_NPC_TEXT_FIELDS = {"name", "profession", "refusal_style"}
 SCRUB_NPC_LIST_FIELDS = {"traits", "goals"}
+SCRUB_QUEST_TEXT_FIELDS = {"title", "description", "objective", "reward_hint"}
 
 
 def summarize_changes(changes: List[str], limit: int = 12) -> str:
@@ -117,6 +141,8 @@ def sanitize_world_payload(data: Any) -> Tuple[Any, List[str]]:
             if key in WORLD_BIBLE_FIELDS:
                 if key in {"taboos", "do_not_mention", "anachronism_blocklist"}:
                     cleaned_bible[key] = _coerce_str_list(value)
+                elif key == "narrative_language":
+                    cleaned_bible[key] = _normalize_narrative_language(value, changes, f"world_bible.{key}")
                 else:
                     cleaned_bible[key] = value
             else:
@@ -164,6 +190,39 @@ def sanitize_world_payload(data: Any) -> Tuple[Any, List[str]]:
                     changes.append(f"drop_npc[{idx}]:{key}")
             cleaned_npcs.append(npc_clean)
         cleaned["npcs"] = cleaned_npcs
+
+    main_quest = cleaned.get("main_quest")
+    if isinstance(main_quest, dict):
+        cleaned["main_quest"] = _sanitize_quest(main_quest, changes, "main_quest")
+
+    side_quests = cleaned.get("side_quests")
+    if isinstance(side_quests, list):
+        cleaned_side_quests: List[Any] = []
+        for idx, quest in enumerate(side_quests):
+            if not isinstance(quest, dict):
+                cleaned_side_quests.append(quest)
+                continue
+            cleaned_side_quests.append(_sanitize_quest(quest, changes, f"side_quests[{idx}]"))
+        cleaned["side_quests"] = cleaned_side_quests
+
+    map_layout = cleaned.get("map_layout")
+    if isinstance(map_layout, list):
+        cleaned_layout: List[Any] = []
+        for idx, node in enumerate(map_layout):
+            if not isinstance(node, dict):
+                cleaned_layout.append(node)
+                continue
+            node_clean: Dict[str, Any] = {}
+            for key, value in node.items():
+                if key in MAP_LAYOUT_FIELDS:
+                    if key in {"x", "y"}:
+                        node_clean[key] = _to_float(value)
+                    else:
+                        node_clean[key] = value
+                else:
+                    changes.append(f"drop_map_layout[{idx}]:{key}")
+            cleaned_layout.append(node_clean)
+        cleaned["map_layout"] = cleaned_layout
 
     return cleaned, changes
 
@@ -234,6 +293,30 @@ def scrub_banned_terms(data: Any, banned: List[str]) -> Tuple[Any, List[str]]:
             new_npcs.append(npc_clean)
         cleaned["npcs"] = new_npcs
 
+    main_quest = cleaned.get("main_quest")
+    if isinstance(main_quest, dict):
+        q_clean = dict(main_quest)
+        for field in SCRUB_QUEST_TEXT_FIELDS:
+            if isinstance(q_clean.get(field), str):
+                q_clean[field] = _scrub_text(q_clean[field], f"main_quest.{field}", patterns, changes)
+        cleaned["main_quest"] = q_clean
+
+    side_quests = cleaned.get("side_quests")
+    if isinstance(side_quests, list):
+        new_quests: List[Any] = []
+        for idx, quest in enumerate(side_quests):
+            if not isinstance(quest, dict):
+                new_quests.append(quest)
+                continue
+            q_clean = dict(quest)
+            for field in SCRUB_QUEST_TEXT_FIELDS:
+                if isinstance(q_clean.get(field), str):
+                    q_clean[field] = _scrub_text(
+                        q_clean[field], f"side_quests[{idx}].{field}", patterns, changes
+                    )
+            new_quests.append(q_clean)
+        cleaned["side_quests"] = new_quests
+
     return cleaned, changes
 
 
@@ -278,6 +361,13 @@ def _parse_number(value: Any) -> float | None:
     return None
 
 
+def _to_float(value: Any) -> Any:
+    parsed = _parse_number(value)
+    if parsed is None:
+        return value
+    return round(parsed, 3)
+
+
 def _build_banned_patterns(banned: List[str]) -> List[Tuple[str, re.Pattern]]:
     patterns: List[Tuple[str, re.Pattern]] = []
     for term in banned:
@@ -289,6 +379,50 @@ def _build_banned_patterns(banned: List[str]) -> List[Tuple[str, re.Pattern]]:
             body = re.escape(lowered)
         patterns.append((term, re.compile(rf"\b{body}\b")))
     return patterns
+
+
+def _sanitize_quest(quest: Dict[str, Any], changes: List[str], prefix: str) -> Dict[str, Any]:
+    quest_clean: Dict[str, Any] = {}
+    for key, value in quest.items():
+        if key in QUEST_FIELDS:
+            if key in {"required_items", "reward_items"}:
+                quest_clean[key] = _coerce_item_map(value)
+            else:
+                quest_clean[key] = value
+        else:
+            changes.append(f"drop_{prefix}:{key}")
+    return quest_clean
+
+
+def _coerce_item_map(value: Any) -> Dict[str, int]:
+    if value is None:
+        return {}
+    if isinstance(value, dict):
+        result: Dict[str, int] = {}
+        for key, raw in value.items():
+            parsed = _parse_number(raw)
+            if parsed is None:
+                continue
+            amount = int(round(parsed))
+            if amount > 0:
+                result[str(key)] = amount
+        return result
+    if isinstance(value, list):
+        result: Dict[str, int] = {}
+        for item in value:
+            if not isinstance(item, dict):
+                continue
+            key = item.get("item") or item.get("name")
+            if not key:
+                continue
+            parsed = _parse_number(item.get("count") or item.get("qty") or item.get("quantity") or 1)
+            if parsed is None:
+                continue
+            amount = int(round(parsed))
+            if amount > 0:
+                result[str(key)] = amount
+        return result
+    return {}
 
 
 def _scrub_text(text: str, path: str, patterns: List[Tuple[str, re.Pattern]], changes: List[str]) -> str:
@@ -365,4 +499,28 @@ def _normalize_disposition(value: Any, changes: List[str], path: str) -> Any:
 
     if normalized != original:
         changes.append(f"{path}:{original}->{normalized}")
+    return normalized
+
+
+def _normalize_narrative_language(value: Any, changes: List[str], path: str) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip().lower()
+    mapping = {
+        "zh": "zh",
+        "zh-cn": "zh",
+        "zh_hans": "zh",
+        "chinese": "zh",
+        "中文": "zh",
+        "cn": "zh",
+        "en": "en",
+        "en-us": "en",
+        "english": "en",
+        "英文": "en",
+    }
+    normalized = mapping.get(text)
+    if normalized is None:
+        return None
+    if normalized != value:
+        changes.append(f"{path}:{value}->{normalized}")
     return normalized

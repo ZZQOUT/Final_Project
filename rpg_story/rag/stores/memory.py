@@ -41,7 +41,14 @@ class InMemoryStore(BaseStore):
 def _tokenize(text: str) -> set[str]:
     if not text:
         return set()
-    return set(re.findall(r"[a-z0-9]+", text.lower()))
+    lowered = text.lower()
+    ascii_tokens = set(re.findall(r"[a-z0-9]+", lowered))
+    cjk_chars = re.findall(r"[\u4e00-\u9fff]", text)
+    cjk_tokens = set(cjk_chars)
+    if len(cjk_chars) >= 2:
+        for idx in range(len(cjk_chars) - 1):
+            cjk_tokens.add(cjk_chars[idx] + cjk_chars[idx + 1])
+    return ascii_tokens | cjk_tokens
 
 
 def _score_doc(query_tokens: set[str], text: str) -> int:

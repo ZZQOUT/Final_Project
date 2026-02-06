@@ -65,6 +65,9 @@ def apply_agency_gate(
     allowed: List[NPCMove] = []
     events: List[dict] = []
     for move in moves:
+        if _is_forced_move(move, player_text, npc_texts=npc_dialogue_by_id.get(move.npc_id, []) if npc_dialogue_by_id else []):
+            allowed.append(move)
+            continue
         npc_texts = []
         if npc_dialogue_by_id:
             npc_texts = npc_dialogue_by_id.get(move.npc_id, [])
@@ -184,9 +187,43 @@ def _npc_accepts_move(
         dest_names.add(loc.name)
     dest_in_text = any(name and name in combined for name in dest_names)
     dest_in_player = any(name and name in player_text for name in dest_names) if player_text else False
-    if not (dest_in_text or dest_in_player):
+    accepted = _npc_accepts_in_text(combined)
+    if not accepted:
         return False
-    return _npc_accepts_in_text(combined)
+    if dest_in_text or dest_in_player:
+        return True
+    # Fallback: natural language destination may not match ids/English names.
+    text = player_text or ""
+    if any(token in text for token in ["去", "跟", "一起", "follow", "go", "meet"]):
+        return True
+    return False
+
+
+def _is_forced_move(move: NPCMove, player_text: str, npc_texts: List[str]) -> bool:
+    text = (player_text or "").lower()
+    coercive_cues = [
+        "绑架",
+        "强迫",
+        "威胁",
+        "要么",
+        "不然",
+        "杀了你",
+        "drag you",
+        "kidnap",
+        "abduct",
+        "or i kill",
+        "force you",
+        "at knife point",
+    ]
+    if not any(cue in text for cue in coercive_cues):
+        return False
+    if move.trigger not in {"player_instruction", "system"}:
+        return False
+    combined_npc = " ".join(npc_texts or [])
+    if _npc_accepts_in_text(combined_npc):
+        return True
+    # In coercive contexts, destination mention in player text is enough to force movement.
+    return bool(player_text and any(token in player_text for token in ["去", "带你", "跟我", "to ", "into "]))
 
 
 def _npc_accepts_in_text(text: str) -> bool:

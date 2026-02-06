@@ -207,3 +207,26 @@ def test_agency_accepts_explicit_npc_yes():
     )
     assert allowed
     assert not refusals
+
+
+def test_agency_forced_move_on_coercion():
+    world = make_world()
+    state = make_state(world)
+    move = NPCMove(
+        npc_id="npc_stubborn",
+        from_location="shop",
+        to_location="bridge",
+        trigger="player_instruction",
+        reason="forced",
+        permanence="temporary",
+        confidence=0.9,
+    )
+    allowed, refusals = apply_agency_gate(
+        [move],
+        state,
+        world,
+        "要么跟我去桥边，要么我杀了你。",
+        {"npc_stubborn": ["不要...我害怕。"]},
+    )
+    assert allowed
+    assert not refusals

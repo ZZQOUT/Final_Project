@@ -1,0 +1,448 @@
+{
+  "world_id": "w_dq001",
+  "title": "The Kingdom of Eldoria",
+  "world_bible": {
+    "tech_level": "medieval",
+    "magic_rules": "Magic is rare and tied to ancient runes; only a few mages can wield it, often at great personal cost. Artifacts amplify magical abilities but are scarce.",
+    "tone": "Heroic fantasy with moments of peril and wonder.",
+    "anachronism_policy": null,
+    "taboos": [
+      "Using magic for personal gain",
+      "Desecrating dragon shrines"
+    ],
+    "do_not_mention": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "automobile",
+      "electricity",
+      "gunpowder"
+    ],
+    "anachronism_blocklist": [
+      "computer",
+      "airplane",
+      "plastic"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "Eldoria Village",
+      "kind": "town",
+      "description": "A peaceful farming village nestled in green hills, known as the birthplace of many heroes.",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "safe",
+        "starting",
+        "market"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "Whispering Woods",
+      "kind": "forest",
+      "description": "An enchanted forest filled with talking trees and hidden paths. Beware of illusions.",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "enchanted",
+        "dangerous"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "Ironridge Bridge",
+      "kind": "bridge",
+      "description": "A sturdy stone bridge crossing the River Mourn, guarded by a retired knight.",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "crossing",
+        "guarded"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "Crystal Caverns",
+      "kind": "dungeon",
+      "description": "Glowing caves filled with crystals that resonate with magic. Home to earth elementals.",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "magical",
+        "treasure"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "Stormspire Castle",
+      "kind": "castle",
+      "description": "The ancestral fortress of the royal family, now besieged by dark forces.",
+      "connected_to": [
+        "loc_003",
+        "loc_006"
+      ],
+      "tags": [
+        "fortified",
+        "siege"
+      ]
+    },
+    {
+      "location_id": "loc_006",
+      "name": "Dragon's Maw Peak",
+      "kind": "mountain",
+      "description": "A volcanic peak where the ancient dragon Malagar sleeps atop a hoard of cursed gold.",
+      "connected_to": [
+        "loc_005"
+      ],
+      "tags": [
+        "volcanic",
+        "boss"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "Elara",
+      "profession": "Herbalist",
+      "traits": [
+        "kind",
+        "wise",
+        "cautious"
+      ],
+      "goals": [
+        "Protect the village from blight",
+        "Teach healing arts"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 3,
+      "refusal_style": "Politely declines with alternative suggestions."
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "Borin Stonefist",
+      "profession": "Blacksmith",
+      "traits": [
+        "gruff",
+        "loyal",
+        "stubborn"
+      ],
+      "goals": [
+        "Forge the perfect blade",
+        "Train an apprentice"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.4,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 1,
+      "refusal_style": "Grumbles but may relent if convinced."
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "Lyra",
+      "profession": "Ranger",
+      "traits": [
+        "observant",
+        "independent",
+        "cooperative"
+      ],
+      "goals": [
+        "Map the Whispering Woods",
+        "Protect forest spirits"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.7,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 2,
+      "refusal_style": "Offers conditional help based on mutual benefit."
+    },
+    {
+      "npc_id": "npc_auto_001",
+      "name": "Lina",
+      "profession": "Guide",
+      "traits": [
+        "brave",
+        "impulsive"
+      ],
+      "goals": [
+        "hunt threats"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.7,
+      "stubbornness": 0.35,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 0,
+      "refusal_style": "impatient and blunt"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "Sir Gareth",
+      "profession": "Retired Knight",
+      "traits": [
+        "honorable",
+        "weary",
+        "helpful"
+      ],
+      "goals": [
+        "Ensure safe passage across the bridge",
+        "Mentor young warriors"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.85,
+      "stubbornness": 0.4,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 4,
+      "refusal_style": "Declines only if honor is compromised."
+    },
+    {
+      "npc_id": "npc_auto_002",
+      "name": "Kael",
+      "profession": "Blacksmith",
+      "traits": [
+        "warm",
+        "decisive"
+      ],
+      "goals": [
+        "assist travelers"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.85,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 3,
+      "refusal_style": "friendly and direct"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "Zinnia",
+      "profession": "Geomancer",
+      "traits": [
+        "eccentric",
+        "knowledgeable",
+        "reclusive"
+      ],
+      "goals": [
+        "Study crystal resonance",
+        "Prevent elemental imbalance"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.5,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 0,
+      "refusal_style": "Dismisses requests unless aligned with research."
+    },
+    {
+      "npc_id": "npc_auto_003",
+      "name": "Evan",
+      "profession": "Herbalist",
+      "traits": [
+        "cautious",
+        "suspicious"
+      ],
+      "goals": [
+        "protect the village"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.35,
+      "stubbornness": 0.75,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": -1,
+      "refusal_style": "cold and guarded"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "Captain Riven",
+      "profession": "Royal Guard",
+      "traits": [
+        "disciplined",
+        "desperate",
+        "dutiful"
+      ],
+      "goals": [
+        "Defend Stormspire Castle",
+        "Find reinforcements"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.6,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": 2,
+      "refusal_style": "Refuses only if mission jeopardizes defense."
+    },
+    {
+      "npc_id": "npc_auto_004",
+      "name": "Tasha",
+      "profession": "Hunter",
+      "traits": [
+        "calm",
+        "rational"
+      ],
+      "goals": [
+        "gather intel"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.55,
+      "stubbornness": 0.45,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 1,
+      "refusal_style": "concise and restrained"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "Malagar",
+      "profession": "Ancient Dragon",
+      "traits": [
+        "proud",
+        "vengeful",
+        "ancient"
+      ],
+      "goals": [
+        "Guard cursed hoard",
+        "Punish intruders"
+      ],
+      "starting_location": "loc_006",
+      "obedience_level": 0.0,
+      "stubbornness": 1.0,
+      "risk_tolerance": 1.0,
+      "disposition_to_player": -5,
+      "refusal_style": "Attacks without warning."
+    },
+    {
+      "npc_id": "npc_auto_005",
+      "name": "Rowan",
+      "profession": "Merchant",
+      "traits": [
+        "brave",
+        "impulsive"
+      ],
+      "goals": [
+        "hunt threats"
+      ],
+      "starting_location": "loc_006",
+      "obedience_level": 0.7,
+      "stubbornness": 0.35,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 0,
+      "refusal_style": "impatient and blunt"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "You awaken in Eldoria Village after a prophetic dream of a dragon consuming the kingdom in flame. The village elder urges you to seek allies before it’s too late.",
+  "initial_quest": "Speak with Elara the Herbalist to learn more about the prophecy.",
+  "main_quest": {
+    "quest_id": "quest_main_001",
+    "title": "Slay the Dragon Malagar",
+    "category": "main",
+    "description": "Main progression requires completing side quests and obtaining their reward items.",
+    "objective": "Finish side quests and collect key rewards: Dragonbane Blade x1, Elemental Ward Amulet x1, Knight's Favor x1, Silver Chain x1",
+    "giver_npc_id": "npc_006",
+    "suggested_location": "loc_006",
+    "required_items": {
+      "Dragonbane Blade": 1,
+      "Elemental Ward Amulet": 1,
+      "Knight's Favor": 1,
+      "Silver Chain": 1
+    },
+    "reward_items": {},
+    "reward_hint": "Peace will return to Eldoria, and you shall be hailed as its savior."
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_001",
+      "title": "Forge the Dragonbane Blade",
+      "category": "side",
+      "description": "Borin needs rare Crystal Shards to forge a blade capable of piercing dragon scales.",
+      "objective": "Retrieve 3 Crystal Shards from Crystal Caverns.",
+      "giver_npc_id": "npc_002",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "moon_herb": 3
+      },
+      "reward_items": {
+        "Dragonbane Blade": 1
+      },
+      "reward_hint": "A legendary weapon forged for this very purpose."
+    },
+    {
+      "quest_id": "quest_side_002",
+      "title": "Restore the Elemental Ward",
+      "category": "side",
+      "description": "Zinnia believes an amulet attuned to the crystals can shield against Malagar’s fire.",
+      "objective": "Bring her 2 Resonant Crystals and a Silver Chain.",
+      "giver_npc_id": "npc_005",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "Resonant Crystal": 2,
+        "Silver Chain": 1
+      },
+      "reward_items": {
+        "Elemental Ward Amulet": 1
+      },
+      "reward_hint": "Protection against the dragon’s breath."
+    },
+    {
+      "quest_id": "quest_side_003",
+      "title": "Secure the Bridge",
+      "category": "side",
+      "description": "Bandits harass travelers near Ironridge Bridge. Sir Gareth seeks aid to clear them out.",
+      "objective": "Defeat the bandit leader near the bridge.",
+      "giver_npc_id": "npc_004",
+      "suggested_location": "loc_003",
+      "required_items": {
+        "ancient_ore": 2
+      },
+      "reward_items": {
+        "Knight's Favor": 1,
+        "Silver Chain": 1
+      },
+      "reward_hint": "Gratitude from the old knight—and a useful trinket."
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 20.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 40.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 40.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 60.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 60.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_006",
+      "x": 85.0,
+      "y": 60.0
+    }
+  ]
+}

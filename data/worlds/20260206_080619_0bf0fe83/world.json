@@ -1,0 +1,217 @@
+{
+  "world_id": "w_dq001",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "magic_rules": "Magic is rare and powerful, accessible only to trained mages or through ancient artifacts. Casting requires incantations and gestures.",
+    "tone": "Heroic fantasy with clear good vs evil themes, inspired by classic JRPGs.",
+    "anachronism_policy": null,
+    "taboos": [
+      "betraying the kingdom",
+      "desecrating sacred relics"
+    ],
+    "do_not_mention": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "airplane",
+      "computer",
+      "gunpowder",
+      "automobile"
+    ],
+    "anachronism_blocklist": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "airplane",
+      "computer",
+      "gunpowder",
+      "automobile"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "王国城",
+      "kind": "town",
+      "description": "和平繁荣的王国首都，高墙环绕，市场热闹，是勇者的出发之地。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "safe",
+        "market",
+        "quest_giver"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "迷雾森林",
+      "kind": "forest",
+      "description": "浓雾笼罩的古老森林，充满野兽与陷阱，通往龙之谷的必经之路。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "dangerous",
+        "wildlife",
+        "maze"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "贤者之塔",
+      "kind": "castle",
+      "description": "隐居在山丘上的高塔，住着王国最睿智的魔法师艾尔文。",
+      "connected_to": [
+        "loc_001"
+      ],
+      "tags": [
+        "magic",
+        "safe",
+        "knowledge"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "龙之谷",
+      "kind": "dungeon",
+      "description": "恶龙‘黑焰’盘踞的火山山谷，熔岩流淌，危机四伏。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "boss",
+        "lava",
+        "treasure"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "国王雷奥",
+      "profession": "统治者",
+      "traits": [
+        "wise",
+        "concerned",
+        "authoritative"
+      ],
+      "goals": [
+        "protect the kingdom",
+        "defeat the dragon"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 3,
+      "refusal_style": "politely declines with royal decorum"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "艾尔文",
+      "profession": "大法师",
+      "traits": [
+        "eccentric",
+        "helpful",
+        "forgetful"
+      ],
+      "goals": [
+        "preserve ancient knowledge",
+        "aid the chosen hero"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.6,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 4,
+      "refusal_style": "rambles about unrelated magical theories"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "莉娜",
+      "profession": "草药师",
+      "traits": [
+        "kind",
+        "nervous",
+        "resourceful"
+      ],
+      "goals": [
+        "gather rare herbs",
+        "help wounded travelers"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.8,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 2,
+      "refusal_style": "apologizes profusely while shaking her head"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "王国边境传来恶龙袭击村庄的消息，国王紧急召集勇者。",
+  "initial_quest": "前往王国城觐见国王雷奥。",
+  "main_quest": {
+    "quest_id": "quest_main_001",
+    "title": "屠龙救国",
+    "category": "main",
+    "description": "恶龙‘黑焰’威胁王国存亡，唯有真正的勇者能将其击败。",
+    "objective": "进入龙之谷，击败恶龙‘黑焰’。",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_004",
+    "required_items": {
+      "神圣护符": 1,
+      "龙鳞盾": 1
+    },
+    "reward_hint": "王国的宝藏与永恒的荣耀"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_001",
+      "title": "寻找月光草",
+      "category": "side",
+      "description": "草药师莉娜需要迷雾森林深处的月光草来制作治疗药剂。",
+      "objective": "在迷雾森林中采集3株月光草并交给莉娜。",
+      "giver_npc_id": "npc_003",
+      "suggested_location": "loc_002",
+      "required_items": {},
+      "reward_hint": "强力治疗药水配方"
+    },
+    {
+      "quest_id": "quest_side_002",
+      "title": "贤者的魔法书",
+      "category": "side",
+      "description": "艾尔文的魔法书被风吹到了迷雾森林，他请求你帮忙找回。",
+      "objective": "在迷雾森林找到《古代咒文集》并归还给艾尔文。",
+      "giver_npc_id": "npc_002",
+      "suggested_location": "loc_002",
+      "required_items": {},
+      "reward_hint": "解锁基础火球术"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 20.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 50.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 20.0,
+      "y": 80.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 80.0,
+      "y": 20.0
+    }
+  ]
+}

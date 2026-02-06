@@ -1,0 +1,287 @@
+{
+  "world_id": "w_dq001",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "magic_rules": "Magic is rare and tied to ancient relics or divine blessings. Only a few individuals—such as royal mages or temple priests—can wield it reliably.",
+    "tone": "Heroic fantasy with clear good vs. evil themes, inspired by classic JRPGs.",
+    "anachronism_policy": null,
+    "taboos": [
+      "Using modern slang in dialogue",
+      "Introducing firearms or gunpowder weapons"
+    ],
+    "do_not_mention": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "car",
+      "airplane",
+      "computer",
+      "electricity"
+    ],
+    "anachronism_blocklist": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "car",
+      "airplane",
+      "computer",
+      "electricity"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "晨露村",
+      "kind": "town",
+      "description": "一个宁静的小村庄，被群山环绕。村民以耕作为生，最近因恶龙袭击而人心惶惶。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "peaceful",
+        "starting_area",
+        "village"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "迷雾森林",
+      "kind": "forest",
+      "description": "浓雾常年不散的古老森林，传说中有守护兽出没。路径错综复杂，容易迷路。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "dangerous",
+        "mystical",
+        "forest"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "铁锤镇",
+      "kind": "town",
+      "description": "以锻造闻名的矿业小镇，盛产精钢武器和防具。镇长正招募勇士对抗恶龙。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "industrial",
+        "friendly",
+        "town"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "古代神庙",
+      "kind": "dungeon",
+      "description": "隐藏在森林深处的废弃神庙，供奉着古代龙神。内部机关重重，藏有神器碎片。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "ancient",
+        "traps",
+        "dungeon"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "黑岩堡垒",
+      "kind": "castle",
+      "description": "王国边境的军事要塞，驻扎着皇家骑士团。指挥官掌握着通往龙巢的关键情报。",
+      "connected_to": [
+        "loc_003",
+        "loc_006"
+      ],
+      "tags": [
+        "military",
+        "secure",
+        "castle"
+      ]
+    },
+    {
+      "location_id": "loc_006",
+      "name": "龙之峰",
+      "kind": "dungeon",
+      "description": "恶龙盘踞的火山口，终年喷发熔岩。唯有真正的勇者才能抵达山顶并挑战恶龙。",
+      "connected_to": [
+        "loc_005"
+      ],
+      "tags": [
+        "final_battle",
+        "volcanic",
+        "dungeon"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "艾琳",
+      "profession": "村长的女儿",
+      "traits": [
+        "kind",
+        "worried",
+        "resourceful"
+      ],
+      "goals": [
+        "Protect the village",
+        "Find the legendary hero"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.8,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 2,
+      "refusal_style": "Politely explains she cannot leave the village unguarded."
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "巴洛克",
+      "profession": "铁匠",
+      "traits": [
+        "gruff",
+        "loyal",
+        "skilled"
+      ],
+      "goals": [
+        "Forge the ultimate weapon",
+        "Avenge his brother killed by the dragon"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.6,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 1,
+      "refusal_style": "Grumbles about wasting his time but won’t outright refuse."
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "瑟琳娜",
+      "profession": "神庙守护者",
+      "traits": [
+        "mystical",
+        "aloof",
+        "wise"
+      ],
+      "goals": [
+        "Preserve ancient knowledge",
+        "Test the worthiness of adventurers"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.4,
+      "stubbornness": 0.9,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 0,
+      "refusal_style": "Speaks in riddles and vanishes if pressed too hard."
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "雷奥爵士",
+      "profession": "皇家骑士指挥官",
+      "traits": [
+        "honorable",
+        "strict",
+        "strategic"
+      ],
+      "goals": [
+        "Defend the kingdom",
+        "Eliminate the dragon threat"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.9,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 3,
+      "refusal_style": "Orders you to prove your strength first before sharing intel."
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "你在一个小村庄醒来，耳边传来村民对恶龙袭击的恐慌议论。村长的女儿艾琳认出你可能是预言中的勇者，请求你帮助村庄。",
+  "initial_quest": "与艾琳交谈，了解村庄的困境，并决定是否接受成为勇者的使命。",
+  "main_quest": {
+    "quest_id": "quest_main_001",
+    "title": "屠龙勇士",
+    "category": "main",
+    "description": "古老的预言指出，唯有集齐三件神器碎片的勇者，方能击败盘踞龙之峰的恶龙。",
+    "objective": "击败龙之峰的恶龙，拯救王国。",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_006",
+    "required_items": {
+      "龙神护符碎片": 3
+    },
+    "reward_hint": "王国的感激、无尽荣耀，以及传说中的龙之心。"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_001",
+      "title": "失落的护符碎片",
+      "category": "side",
+      "description": "瑟琳娜提到神庙中藏有一块龙神护符碎片，但只有通过试炼的人才能取得。",
+      "objective": "在古代神庙中完成试炼并获得护符碎片。",
+      "giver_npc_id": "npc_003",
+      "suggested_location": "loc_004",
+      "required_items": {},
+      "reward_hint": "龙神护符碎片，以及瑟琳娜的信任。"
+    },
+    {
+      "quest_id": "quest_side_002",
+      "title": "铁匠的复仇",
+      "category": "side",
+      "description": "巴洛克希望打造一把能刺穿龙鳞的剑，但他需要黑岩堡垒特有的火纹矿石。",
+      "objective": "从黑岩堡垒带回一块火纹矿石。",
+      "giver_npc_id": "npc_002",
+      "suggested_location": "loc_005",
+      "required_items": {},
+      "reward_hint": "一把强力的屠龙剑，可大幅提升对龙类敌人的伤害。"
+    },
+    {
+      "quest_id": "quest_side_003",
+      "title": "骑士的考验",
+      "category": "side",
+      "description": "雷奥爵士不相信你是真正的勇者，除非你能证明自己的实力。",
+      "objective": "在堡垒训练场击败三名皇家骑士。",
+      "giver_npc_id": "npc_004",
+      "suggested_location": "loc_005",
+      "required_items": {},
+      "reward_hint": "获得进入龙之峰的秘密路径地图。"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 20.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 40.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 40.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 60.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 60.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_006",
+      "x": 85.0,
+      "y": 50.0
+    }
+  ]
+}

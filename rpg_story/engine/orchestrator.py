@@ -12,7 +12,7 @@ from rpg_story.config import AppConfig
 from rpg_story.llm.client import BaseLLMClient, make_json_schema_response_format
 from rpg_story.llm.schemas import validate_turn_output
 from rpg_story.models.world import GameState, WorldSpec
-from rpg_story.models.turn import TurnOutput, NPCDialogueLine
+from rpg_story.models.turn import TurnOutput, NPCDialogueLine, NPCMove
 from rpg_story.engine.state import apply_turn_output
 from rpg_story.engine.validators import validate_npc_move
 from rpg_story.engine.agency import apply_agency_gate
@@ -20,7 +20,7 @@ from rpg_story.rag.index import RAGIndex
 from rpg_story.rag.retriever import RAGRetriever
 from rpg_story.rag.stores.memory import InMemoryStore
 from rpg_story.rag.types import Document
-from rpg_story.persistence.store import append_turn_log, save_state, default_sessions_root
+from rpg_story.persistence.store import append_turn_log, save_state, default_sessions_root, read_turn_logs
 from rpg_story.world.term_guard import DEFAULT_ANACHRONISM_TERMS, detect_first_mention
 
 
@@ -63,27 +63,60 @@ class TurnPipeline:
         system_prompt = base + "\n" + narrator + "\n" + persona
         if rag_text:
             system_prompt += "\n\n" + rag_text
+        language = self._narrative_language(state.world)
+        language_name = "Chinese" if language == "zh" else "English"
+        system_prompt += (
+            "\n\n"
+            f"Language rule: ALL player-facing text must be in {language_name}."
+        )
         tech_level = getattr(state.world.world_bible, "tech_level", "medieval") or "medieval"
         world_constraints = (
-            f"World constraints: tech_level={tech_level}, maintain lore consistency."
+            f"World constraints: tech_level={tech_level}, maintain lore consistency, narrative_language={language}."
         )
+        met_flag = bool(state.flags.get(f"met_{npc_id}", False))
+        coercion_flag = bool(state.flags.get(f"coercion_{npc_id}", False))
+        npc_recent_context = self._npc_recent_context(state, npc_id)
+        inventory_context = self._inventory_brief(state)
+        quest_context = self._quest_brief(state)
+        neighbors_context = self._neighbor_brief(state)
+        memory_context = self._recent_memory_brief(state)
         schema_hint = (
             "Return JSON with keys: narration, npc_dialogue, world_updates, memory_summary, safety. "
-            "npc_dialogue is a list of {npc_id, text}. world_updates may include player_location, npc_moves, flags_delta, quest_updates. "
+            "npc_dialogue is a list of {npc_id, text}. world_updates may include player_location, npc_moves, "
+            "flags_delta, quest_updates, quest_progress_updates, inventory_delta. "
             "npc_moves MUST be a list (use [] if none). "
             "quest_updates MUST be an object/dict; if none, use {}. "
+            "quest_progress_updates MUST be a list (use [] if none). "
+            "inventory_delta MUST be an object/dict of item->signed int delta; if none, use {}. "
             "safety MUST be an object: {refuse: boolean, reason: string|null}."
         )
         user_prompt = (
             f"location_id: {state.player_location}\n"
             f"npc_id: {npc_id}\n"
             f"npc_name: {npc_name}\n"
+            f"npc_current_location: {npc_location}\n"
             f"player_text: {player_text}\n"
+            f"met_before_with_npc: {met_flag}\n"
+            f"npc_coercion_history: {coercion_flag}\n"
+            f"npc_recent_context: {npc_recent_context}\n"
+            f"reachable_neighbors: {neighbors_context}\n"
+            f"inventory: {inventory_context}\n"
+            f"quest_journal: {quest_context}\n"
+            f"recent_story_memory: {memory_context}\n"
             f"{world_constraints}\n"
+            f"Language requirement: Output narration and npc_dialogue.text in {language_name} only.\n"
             "NPC reply MUST be placed in npc_dialogue using the same npc_id. "
+            "NPC must treat npc_current_location as their true current position for this turn. "
+            "If met_before_with_npc=true, do NOT use first-meeting self-introduction lines. "
+            "If npc_coercion_history=true, maintain emotional continuity (fear/anger/resentment) instead of resetting tone. "
             "NPC identity must stay consistent with npc_name; correct the player if they use a wrong name. "
+            "NPC behavior must stay consistent with this NPC's traits/goals/refusal style and current disposition. "
             "If asked about other NPCs or roles, only use names/professions from the NPC roster in WORLD BIBLE; "
             "if a role does not exist, say there is no such person in town. "
+            "When an NPC gives a concrete task, create/update it via world_updates.quest_progress_updates. "
+            "Use stable quest_id values (prefer existing ids; new side quests should use side_<npc_id>_<keyword>). "
+            "If items are promised, found, consumed, or handed over, update world_updates.inventory_delta and "
+            "quest_progress_updates.collected_items_delta accordingly. "
             "Keep narration brief and optional.\n"
             f"schema_hint: {schema_hint}"
         )
@@ -101,12 +134,15 @@ class TurnPipeline:
         output = validate_turn_output(data)
         output = self._enforce_no_first_mention(state, player_text, output, response_format)
         output = self._ensure_npc_dialogue(output, npc_id)
+        output = self._enforce_identity_claims(state, output, npc_id, response_format)
         output = self._enforce_world_roster(state, output, npc_id, response_format)
+        output = self._inject_forced_move_if_missing(state, player_text, npc_id, output)
         state_non_move = apply_turn_output(state, output, npc_id)
 
         move_rejections = []
         legal_moves = []
         for move in output.world_updates.npc_moves:
+            move = self._normalize_move(move, state_non_move, player_text)
             ok, reason = validate_npc_move(move, state_non_move, state_non_move.world)
             if ok:
                 legal_moves.append(move)
@@ -136,6 +172,10 @@ class TurnPipeline:
         updated_state = state_non_move.model_copy(deep=True)
         for move in allowed_moves:
             updated_state.npc_locations[move.npc_id] = move.to_location
+        updated_state.flags[f"met_{npc_id}"] = True
+        if _is_coercive_text(player_text):
+            updated_state.flags[f"coercion_{npc_id}"] = True
+            updated_state.recent_summaries.append(f"{npc_id} experienced coercion from player.")
         updated_state = GameState.model_validate(updated_state.model_dump())
 
         total_moves = len(output.world_updates.npc_moves)
@@ -224,12 +264,16 @@ class TurnPipeline:
         if not refusals:
             return output
         updated = output.model_copy(deep=True)
+        prefer_chinese = self._narrative_language(world) == "zh"
         lines = []
         for refusal in refusals:
             npc_id = refusal.get("npc_id", "npc")
             npc_name = self._npc_name(world, npc_id)
             reason = refusal.get("reason", "refused")
-            lines.append(f"{npc_name} refuses to move: {reason}.")
+            if prefer_chinese:
+                lines.append(f"{npc_name}拒绝移动：{_localize_refusal_reason(reason, prefer_chinese=True)}。")
+            else:
+                lines.append(f"{npc_name} refuses to move: {_localize_refusal_reason(reason, prefer_chinese=False)}.")
         if updated.narration:
             updated.narration = updated.narration.rstrip() + " " + " ".join(lines)
         else:
@@ -256,6 +300,145 @@ class TurnPipeline:
         updated.narration = ""
         return updated
 
+    def _inventory_brief(self, state: GameState) -> str:
+        if not state.inventory:
+            return "{}"
+        pairs = [f"{name}:{count}" for name, count in sorted(state.inventory.items())]
+        return "{ " + ", ".join(pairs) + " }"
+
+    def _quest_brief(self, state: GameState) -> str:
+        if not state.quest_journal:
+            return "[]"
+        items = []
+        for quest_id, quest in state.quest_journal.items():
+            required = ", ".join([f"{k} x{v}" for k, v in quest.required_items.items()]) or "none"
+            collected = ", ".join([f"{k} x{v}" for k, v in quest.collected_items.items()]) or "none"
+            items.append(
+                f"{quest_id} ({quest.category}, {quest.status}): {quest.title}; "
+                f"objective={quest.objective}; required={required}; collected={collected}"
+            )
+        return " | ".join(items)
+
+    def _neighbor_brief(self, state: GameState) -> str:
+        loc = state.world.get_location(state.player_location)
+        if not loc or not loc.connected_to:
+            return "[]"
+        return "[" + ", ".join(loc.connected_to) + "]"
+
+    def _recent_memory_brief(self, state: GameState, limit: int = 3) -> str:
+        if not state.recent_summaries:
+            return "[]"
+        tail = state.recent_summaries[-limit:]
+        return "[" + " | ".join(tail) + "]"
+
+    def _npc_recent_context(self, state: GameState, npc_id: str, limit: int = 5) -> str:
+        sessions_root = self.sessions_root or default_sessions_root(self.cfg)
+        logs = read_turn_logs(state.session_id, sessions_root)
+        if not logs:
+            return "[]"
+        filtered = [record for record in logs if record.get("npc_id") == npc_id][-limit:]
+        if not filtered:
+            return "[]"
+        lines = []
+        for record in filtered:
+            player_text = str(record.get("player_text", "")).strip()
+            output = record.get("output", {}) if isinstance(record.get("output"), dict) else {}
+            npc_lines = output.get("npc_dialogue", [])
+            narration = str(output.get("narration", "")).strip()
+            if player_text:
+                lines.append(f"P:{player_text}")
+            if npc_lines:
+                for line in npc_lines:
+                    text = str(line.get("text", "")).strip()
+                    if text:
+                        lines.append(f"N:{text}")
+            if narration:
+                lines.append(f"S:{narration}")
+        if not lines:
+            return "[]"
+        return " || ".join(lines[-10:])
+
+    def _normalize_move(self, move, state: GameState, player_text: str):
+        current = state.npc_locations.get(move.npc_id)
+        if not current:
+            return move
+        if move.from_location == current:
+            return move
+        # If player is coercive, stale from_location should not block movement semantics.
+        if _is_coercive_text(player_text):
+            return move.model_copy(update={"from_location": current})
+        return move
+
+    def _inject_forced_move_if_missing(
+        self,
+        state: GameState,
+        player_text: str,
+        npc_id: str,
+        output: TurnOutput,
+    ) -> TurnOutput:
+        if not _is_coercive_text(player_text):
+            return output
+        if any(move.npc_id == npc_id for move in output.world_updates.npc_moves):
+            return output
+        destination = _infer_destination_from_text(player_text, state.world)
+        current = state.npc_locations.get(npc_id)
+        if not destination or not current or destination == current:
+            return output
+        updated = output.model_copy(deep=True)
+        updated.world_updates.npc_moves.append(
+            NPCMove(
+                npc_id=npc_id,
+                from_location=current,
+                to_location=destination,
+                trigger="player_instruction",
+                reason="coercion",
+                permanence="temporary",
+                confidence=0.99,
+            )
+        )
+        return updated
+
+    def _enforce_identity_claims(
+        self,
+        state: GameState,
+        output: TurnOutput,
+        npc_id: str,
+        response_format: dict,
+    ) -> TurnOutput:
+        npc_name = self._npc_name(state.world, npc_id)
+        other_names = [npc.name for npc in state.world.npcs if npc.npc_id != npc_id and npc.name]
+        identity_violation = False
+        for line in output.npc_dialogue:
+            if line.npc_id != npc_id or not line.text:
+                continue
+            if _claims_other_identity(line.text, npc_name, other_names):
+                identity_violation = True
+                break
+        if not identity_violation:
+            return output
+
+        rewrite_system = (
+            "You are a JSON repair tool. Return ONLY valid JSON. "
+            "Fix identity consistency so the speaking NPC does not claim to be another person."
+        )
+        language_name = "Chinese" if self._narrative_language(state.world) == "zh" else "English"
+        rewrite_user = (
+            f"Speaking npc_id={npc_id}, correct name={npc_name}. "
+            f"Other NPC names: {other_names}. "
+            f"Keep player-visible text in {language_name}. "
+            "Rewrite only identity-conflicting lines and keep all other content unchanged.\n\n"
+            f"Original JSON: {json.dumps(output.model_dump(), ensure_ascii=False)}"
+        )
+        fixed = self.llm_client.generate_json(rewrite_system, rewrite_user, response_format=response_format)
+        fixed_output = validate_turn_output(fixed)
+        fixed_output = self._ensure_npc_dialogue(fixed_output, npc_id)
+        for line in fixed_output.npc_dialogue:
+            if line.npc_id != npc_id or not line.text:
+                continue
+            if _claims_other_identity(line.text, npc_name, other_names):
+                raise ValueError("identity claim conflict remains after rewrite")
+        return fixed_output
+
     def _enforce_world_roster(
         self,
         state: GameState,
@@ -280,12 +463,14 @@ class TurnPipeline:
             "You are a JSON repair tool. Return ONLY valid JSON. "
             "Keep NPC/world consistency with the roster."
         )
+        language_name = "Chinese" if self._narrative_language(state.world) == "zh" else "English"
         rewrite_user = (
             "The NPC must only reference known NPCs and professions from the roster.\n"
             f"Known NPC names: {roster_names}\n"
             f"Known professions: {roster_professions}\n"
             f"Offending terms: {sorted(offending)}\n\n"
             "Remove or replace offending terms. If a role does not exist, state that no such person exists.\n\n"
+            f"Keep player-visible text in {language_name}.\n\n"
             f"Original JSON: {json.dumps(output.model_dump(), ensure_ascii=False)}"
         )
         fixed = self.llm_client.generate_json(rewrite_system, rewrite_user, response_format=response_format)
@@ -321,10 +506,12 @@ class TurnPipeline:
             "You are a JSON repair tool. Return ONLY valid JSON. "
             "Remove out-of-setting terms unless the player said them first."
         )
+        language_name = "Chinese" if self._narrative_language(state.world) == "zh" else "English"
         rewrite_user = (
             "Remove these terms from NPC output unless the player already said them:\n"
             f"{sorted(new_terms)}\n\n"
             f"Player text: {player_text}\n\n"
+            f"Keep player-visible text in {language_name}.\n"
             "Do not introduce these terms. Keep the rest of the content consistent.\n\n"
             f"Original JSON: {json.dumps(output.model_dump(), ensure_ascii=False)}"
         )
@@ -335,6 +522,15 @@ class TurnPipeline:
         if still_new:
             raise ValueError(f"first-mention anachronisms remain: {sorted(still_new)}")
         return fixed_output
+
+    def _narrative_language(self, world: WorldSpec) -> str:
+        lang = getattr(world.world_bible, "narrative_language", None)
+        if lang in {"zh", "en"}:
+            return lang
+        text = " ".join([world.title or "", world.starting_hook or "", world.initial_quest or ""])
+        if re.search(r"[\u4e00-\u9fff]", text):
+            return "zh"
+        return "en"
 
 
 def _filter_docs(docs: list[Document], doc_type: str) -> list[Document]:
@@ -389,3 +585,72 @@ def _detect_unknown_references(
                 if not any(role in prof for prof in prof_set):
                     offending.add(role)
     return offending
+
+
+def _claims_other_identity(text: str, npc_name: str, other_names: List[str]) -> bool:
+    lowered = text.lower()
+    for other in other_names:
+        other_clean = other.strip()
+        if not other_clean:
+            continue
+        if other_clean == npc_name:
+            continue
+        other_lower = other_clean.lower()
+        cn_patterns = [f"我是{other_clean}", f"我叫{other_clean}", f"我的名字是{other_clean}"]
+        en_patterns = [f"i am {other_lower}", f"i'm {other_lower}", f"my name is {other_lower}"]
+        if any(pattern in text for pattern in cn_patterns):
+            return True
+        if any(pattern in lowered for pattern in en_patterns):
+            return True
+    return False
+
+
+def _is_coercive_text(text: str) -> bool:
+    lowered = (text or "").lower()
+    cues = [
+        "绑架",
+        "强迫",
+        "威胁",
+        "杀了你",
+        "要么",
+        "不然",
+        "kidnap",
+        "abduct",
+        "force you",
+        "or i kill",
+        "threaten",
+    ]
+    return any(cue in lowered for cue in cues)
+
+
+def _infer_destination_from_text(text: str, world: WorldSpec) -> str | None:
+    if not text:
+        return None
+    lowered = text.lower()
+    for loc in world.locations:
+        if loc.location_id and loc.location_id.lower() in lowered:
+            return loc.location_id
+        if loc.name and loc.name in text:
+            return loc.location_id
+        if loc.name and loc.name.lower() in lowered:
+            return loc.location_id
+    return None
+
+
+def _localize_refusal_reason(reason: str, prefer_chinese: bool) -> str:
+    text = str(reason or "")
+    if not prefer_chinese:
+        return text
+    lowered = text.lower()
+    mapping = {
+        "refused: guarding their post": "必须留守岗位",
+        "refused: too risky": "风险过高",
+        "refused: doesn't trust the player": "不信任玩家",
+        "refused: too stubborn": "过于固执",
+        "refused: unwilling to comply": "不愿配合",
+    }
+    if lowered in mapping:
+        return mapping[lowered]
+    if lowered.startswith("refused:"):
+        return text.split(":", 1)[-1].strip()
+    return text

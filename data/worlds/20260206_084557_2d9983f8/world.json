@@ -1,0 +1,264 @@
+{
+  "world_id": "w_dq01",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "magic_rules": "Magic is rare and tied to ancient relics or divine blessings. Only a few can wield it, and overuse risks attracting dark entities.",
+    "tone": "Heroic fantasy with clear good vs evil themes, classic tropes, and a sense of destiny.",
+    "anachronism_policy": null,
+    "taboos": [
+      "betrayal of the crown",
+      "desecration of holy shrines"
+    ],
+    "do_not_mention": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "car",
+      "gun",
+      "computer",
+      "electricity",
+      "plastic"
+    ],
+    "anachronism_blocklist": [
+      "smartphone",
+      "internet",
+      "credit card",
+      "car",
+      "gun",
+      "computer",
+      "electricity",
+      "plastic"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "晨光村",
+      "kind": "town",
+      "description": "一个宁静的小村庄，坐落在群山环抱的谷地中，是勇者的故乡。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "peaceful",
+        "starting_area",
+        "village"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "迷雾森林",
+      "kind": "forest",
+      "description": "一片常年被浓雾笼罩的古老森林，传说中藏有失落的神庙和危险的魔物。",
+      "connected_to": [
+        "loc_001",
+        "loc_003",
+        "loc_004"
+      ],
+      "tags": [
+        "dangerous",
+        "mystical",
+        "forest"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "铁匠铺营地",
+      "kind": "town",
+      "description": "由流浪铁匠建立的临时营地，提供武器修理和锻造服务。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "crafting",
+        "merchant",
+        "camp"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "遗忘神庙",
+      "kind": "dungeon",
+      "description": "一座被藤蔓覆盖的古代神庙，内部机关重重，守护着神圣护符。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "dungeon",
+        "puzzle",
+        "holy"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "黑龙要塞",
+      "kind": "castle",
+      "description": "盘踞在火山口边缘的邪恶堡垒，黑龙在此统治着它的爪牙。",
+      "connected_to": [],
+      "tags": [
+        "final_boss",
+        "evil",
+        "fortress"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "艾拉",
+      "profession": "村长",
+      "traits": [
+        "wise",
+        "concerned",
+        "elderly"
+      ],
+      "goals": [
+        "protect the village",
+        "guide the hero"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.1,
+      "disposition_to_player": 4,
+      "refusal_style": "politely declines with concern"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "巴隆",
+      "profession": "铁匠",
+      "traits": [
+        "gruff",
+        "skilled",
+        "loyal"
+      ],
+      "goals": [
+        "forge legendary weapons",
+        "repay debt to the hero's family"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.7,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 3,
+      "refusal_style": "grumbles but eventually agrees"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "莉娜",
+      "profession": "神庙守护者",
+      "traits": [
+        "mystical",
+        "reserved",
+        "devout"
+      ],
+      "goals": [
+        "protect the sacred amulet",
+        "test the worthiness of seekers"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.5,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 2,
+      "refusal_style": "refuses unless proven worthy"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "黑龙再度苏醒，烧毁了边境村庄。作为被选中的勇者，你必须踏上征途，拯救王国。",
+  "initial_quest": "与村长艾拉交谈，了解黑龙的威胁和你的使命。",
+  "main_quest": {
+    "quest_id": "quest_main_01",
+    "title": "屠龙勇士",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得任务奖励物品，再返回推进终章。",
+    "objective": "完成支线并收集关键战利品：神圣护符 x1，龙鳞铠甲 x1，龙鳞盾 x1",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_005",
+    "required_items": {
+      "神圣护符": 1,
+      "龙鳞铠甲": 1,
+      "龙鳞盾": 1
+    },
+    "reward_items": {},
+    "reward_hint": "王国的和平与无尽荣耀"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_01",
+      "title": "神庙的试炼",
+      "category": "side",
+      "description": "在遗忘神庙中通过守护者的试炼，获得神圣护符。",
+      "objective": "从莉娜处接受试炼，并带回神圣护符。",
+      "giver_npc_id": "npc_003",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "月光草": 3
+      },
+      "reward_items": {
+        "神圣护符": 1
+      },
+      "reward_hint": "一件能抵御黑龙火焰的神圣护符"
+    },
+    {
+      "quest_id": "quest_side_02",
+      "title": "铁匠的承诺",
+      "category": "side",
+      "description": "帮助铁匠巴隆收集三块火岩，他将为你打造龙鳞铠甲。",
+      "objective": "在迷雾森林中找到三块火岩交给巴隆。",
+      "giver_npc_id": "npc_002",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "口粮": 2
+      },
+      "reward_items": {
+        "龙鳞铠甲": 1
+      },
+      "reward_hint": "一套用龙鳞强化的坚固铠甲"
+    },
+    {
+      "quest_id": "side_loc_004_3",
+      "title": "边境护送",
+      "category": "side",
+      "description": "与任务 NPC 一同前往遗忘神庙并完成材料采集。",
+      "objective": "在遗忘神庙与任务 NPC 同行时收集：古铁矿 x2",
+      "giver_npc_id": "npc_003",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "古铁矿": 2
+      },
+      "reward_items": {
+        "龙鳞盾": 1
+      },
+      "reward_hint": "完成后可获得：龙鳞盾 x1"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 10.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 35.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 35.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 35.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 80.0,
+      "y": 50.0
+    }
+  ]
+}

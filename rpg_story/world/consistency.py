@@ -54,6 +54,18 @@ def _snippet(text: str, start: int, end: int, context: int = 20) -> str:
 def _iter_anachronism_fields(world: WorldSpec) -> Iterator[Tuple[str, str]]:
     yield "starting_hook", world.starting_hook
     yield "initial_quest", world.initial_quest
+    if world.main_quest:
+        yield "main_quest.title", world.main_quest.title
+        yield "main_quest.description", world.main_quest.description
+        yield "main_quest.objective", world.main_quest.objective
+        if world.main_quest.reward_hint:
+            yield "main_quest.reward_hint", world.main_quest.reward_hint
+    for quest_idx, quest in enumerate(world.side_quests):
+        yield f"side_quests[{quest_idx}].title", quest.title
+        yield f"side_quests[{quest_idx}].description", quest.description
+        yield f"side_quests[{quest_idx}].objective", quest.objective
+        if quest.reward_hint:
+            yield f"side_quests[{quest_idx}].reward_hint", quest.reward_hint
 
     for loc_idx, loc in enumerate(world.locations):
         yield f"locations[{loc_idx}].name", loc.name

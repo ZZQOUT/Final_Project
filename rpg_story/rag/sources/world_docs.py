@@ -10,6 +10,7 @@ def build_world_bible_doc(world: WorldSpec, session_id: str) -> Document:
     parts = [
         f"Title: {world.title}",
         f"Tech level: {bible.tech_level}",
+        f"Narrative language: {bible.narrative_language or 'auto'}",
         f"Magic rules: {bible.magic_rules}",
         f"Tone: {bible.tone}",
     ]
@@ -23,6 +24,22 @@ def build_world_bible_doc(world: WorldSpec, session_id: str) -> Document:
         parts.append("Anachronism blocklist: " + ", ".join(bible.anachronism_blocklist))
     parts.append(f"Starting hook: {world.starting_hook}")
     parts.append(f"Initial quest: {world.initial_quest}")
+    if world.main_quest:
+        mq = world.main_quest
+        parts.append(f"Main quest: {mq.title} | objective: {mq.objective}")
+        if mq.required_items:
+            req = ", ".join([f"{k} x{v}" for k, v in mq.required_items.items()])
+            parts.append(f"Main quest required_items: {req}")
+    if world.side_quests:
+        quest_lines = []
+        for quest in world.side_quests:
+            req = ", ".join([f"{k} x{v}" for k, v in quest.required_items.items()]) or "none"
+            reward = ", ".join([f"{k} x{v}" for k, v in quest.reward_items.items()]) or "none"
+            quest_lines.append(
+                f"{quest.quest_id}: {quest.title} ({quest.category}) @ {quest.suggested_location} "
+                f"giver={quest.giver_npc_id} required={req} reward={reward}"
+            )
+        parts.append("Side quests: " + "; ".join(quest_lines))
     if world.npcs:
         roster = []
         for npc in world.npcs:
