@@ -1,232 +1,209 @@
-# Adaptive RPG Storytelling Prototype (LLM + Prompt Engineering + RAG)
+# Adaptive RPG Storytelling (LLM-driven NPC Dialogue Game)
 
-A thesis-driven RPG prototype that generates a **coherent medieval‑fantasy world** before play, then runs a **map‑based, location‑aware chat RPG**. The system uses an **API LLM** (OpenAI‑compatible) plus **prompt engineering**, **RAG memory**, and **engine‑side enforcement** (movement validators + NPC agency gate). The UI is **Streamlit** with Start → World Prompt → Generate → Play.
+This repository is a graduation-project prototype for a multi-genre, LLM-driven narrative RPG.
 
-## Features
-- **Streamlit UI**: Start button, chat panel, map/location panel
-- **World Generation before play**: world bible + map + NPC roster + starting hook
-- **Map navigation**: click locations, see NPCs present
-- **NPC chat**: dialogue per location, can affect world state
-- **NPC movement enforcement**: legality + reachability + agency gate
-- **Persistence**: state and turn logs stored per session
-- **RAG**: strict always‑include policy (world bible + location + NPC + recent summaries)
-- **API-only LLM**: OpenAI‑compatible base_url + api_key + model
+Players can:
+- describe a world in natural language (Chinese or English),
+- explore a generated map,
+- talk to NPCs,
+- collect and deliver quest items,
+- complete side quests and unlock the main finale,
+- enter a final trial and receive an end-of-run recap page.
 
----
-
-## Two‑Phase Architecture
-**Phase A — World Generation**
-`WorldGenPipeline(world_prompt) → WorldSpec (validated) → GameState init → RAG ingest → Persist`
-
-**Phase B — Turn Pipeline**
-`player_action → retrieval → prompt → LLM → validate → apply updates → persist → log`
-
-```mermaid
-graph TD
-  A[World Prompt] --> B[WorldGenPipeline]
-  B --> C[WorldSpec JSON]
-  C --> D[GameState Init + session_id]
-  D --> E[RAG Ingest Canonical Docs]
-  E --> F[Turn Pipeline]
-  F --> G[Retriever: always include bible + location + NPC + recent]
-  G --> H[Prompt Builder]
-  H --> I[LLM API]
-  I --> J[Schema + Safety + World Consistency Guard]
-  J --> K[Movement Validators]
-  K --> L[NPC Agency Gate]
-  L --> M[Apply Updates + Persist]
-  M --> F
-```
+The project focus is **dynamic generation with LLM + engine constraints + RAG memory**, rather than hardcoded scripts.
 
 ---
 
-## Data Models (Strict Minimal Fields)
+## 1. Current Capabilities
 
-### LocationSpec (mandatory)
-- `location_id` (stable id like `loc_001`)
-- `name`
-- `kind` enum: `town | dungeon | landmark | shop | forest | castle | bridge | …`
-- `description` (short lore)
-- `connected_to` (graph edges for reachability)
-- `tags` (optional)
+### 1.1 Multi-genre world generation
+- Generates worlds from user prompts (fantasy, campus, modern, sci-fi, etc.).
+- Produces:
+  - world background and starting hook,
+  - locations and connectivity,
+  - NPC roster with personality/agency parameters,
+  - one main quest plus side quests,
+  - map layout coordinates for visualization.
 
-Example:
-```json
-{
-  "location_id": "loc_003",
-  "name": "Elderwood",
-  "kind": "forest",
-  "description": "A misty forest where ancient trees whisper.",
-  "connected_to": ["loc_001", "loc_004"],
-  "tags": ["danger", "mystic"]
-}
-```
+### 1.2 Language consistency (CN/EN)
+- Detects the world prompt language.
+- Keeps player-facing outputs in the same language as much as possible:
+  dialogue, narration, quest text, and item names.
 
-### NPCProfile (with agency)
-- `npc_id`, `name`, `profession/class`, `traits`, `goals`, `starting_location`
-- **Agency fields**:
-  - `obedience_level` ∈ [0..1]
-  - `stubbornness` ∈ [0..1]
-  - `risk_tolerance` ∈ [0..1]
-  - `disposition_to_player` ∈ [-5..+5]
-  - `refusal_style`
+### 1.3 Quest system (main + side)
+- Side quests are progressed via item collection and explicit delivery to NPCs.
+- Main quest progression depends on side-quest rewards / key items.
+- Main quest is finalized through a dedicated **Final Trial** (not auto-completed).
+- Quest journal includes status and progress guidance.
 
-Example (stubborn NPC):
-```json
-{
-  "npc_id": "npc_007",
-  "name": "Garron",
-  "profession": "Blacksmith",
-  "traits": ["stubborn", "honest"],
-  "goals": ["finish the iron gate"],
-  "starting_location": "loc_001",
-  "obedience_level": 0.2,
-  "stubbornness": 0.9,
-  "risk_tolerance": 0.3,
-  "disposition_to_player": 0,
-  "refusal_style": "blunt and unwavering"
-}
-```
+### 1.4 Collection and inventory
+- Per-location resource stock with depletion.
+- Select item + quantity when collecting.
+- Inventory accumulates quest and reward items.
 
-### GameState (runtime)
-- `world_bible`, `world_rules/taboos`
-- `locations` (LocationSpec list)
-- `npc_profiles` (NPCProfile list)
-- `player_location`
-- `npc_locations` (derived at runtime)
-- `quests/flags`, `inventory` (optional)
-- `session_id`
+### 1.5 Explicit delivery flow
+- Delivery is a separate UI action (`Deliver to current NPC`).
+- Chat turns do not auto-submit required items.
+- Delivery updates quest progress and triggers rewards when complete.
+
+### 1.6 NPC dialogue consistency improvements
+- Per-NPC chat history view.
+- Scrollable chat panel (page does not infinitely extend).
+- Better continuity constraints for identity, tone, and prior context.
+- NPC movement changes generate UI notices.
+
+### 1.7 Interactive map
+- Zoom + pan map interaction.
+- Travel buttons for connected locations.
+- Location-specific NPC list and resource stock update after movement.
+
+### 1.8 Final recap page + story archive
+- After passing Final Trial, user is redirected to a recap page containing:
+  - collected item snapshot,
+  - dialogue summary,
+  - story summary,
+  - plot arc summary,
+  - epilogue.
+- Recaps are archived and visible on the start page history panel.
 
 ---
 
-## JSON Schemas (Strict)
+## 2. Architecture Overview
 
-### WorldSpec (WorldGen output)
-The LLM must return strict JSON validated by `rpg_story/world/schemas.py`.
-Minimal requirements:
-- world bible rules
-- locations (LocationSpec)
-- NPC roster (NPCProfile)
-- starting hook + starting location
+### 2.1 Two-phase flow
+1. **World Generation**: `world_prompt -> WorldSpec -> GameState initialization`
+2. **Turn Pipeline**: `player input -> RAG retrieval -> LLM output -> validation -> state update -> persistence`
 
-### TurnOutput (per‑turn output)
-```json
-{
-  "narration": "...",
-  "npc_dialogue": [{"npc_id": "...", "line": "..."}],
-  "world_updates": {
-    "player_location": "optional_location_id",
-    "npc_moves": [
-      {
-        "npc_id": "...",
-        "from_location": "...",
-        "to_location": "...",
-        "trigger": "player_instruction|story_event",
-        "reason": "player_request|story_event",
-        "permanence": "temporary|until_further_notice|permanent"
-      }
-    ]
-  },
-  "memory_summary": "short summary",
-  "safety": {"refusal": false, "reason": ""}
-}
-```
+### 2.2 Design principles
+- LLM handles generation and narration.
+- Engine enforces executable rules (movement validity, quest state, item accounting).
+- RAG injects world bible, location, NPC, and recent summaries to reduce context drift.
+- Persistent state/logs support resume and replay.
 
-### Example: LLM proposes move → engine rejects
-LLM proposes:
-```json
-{
-  "npc_id": "npc_007",
-  "from_location": "loc_001",
-  "to_location": "loc_003",
-  "trigger": "player_instruction",
-  "reason": "player_request",
-  "permanence": "temporary"
-}
-```
-Engine rejects (stubborn NPC):
-```
-Reason: npc_refused (stubbornness high, goal misaligned)
-Action: do NOT apply move; log refusal; narrate refusal via LLM.
-```
+### 2.3 Main modules
+- `rpg_story/world/`: world generation, sanitation, consistency checks
+- `rpg_story/engine/`: turn orchestration, state sync, delivery, agency/validation
+- `rpg_story/rag/`: indexing and retrieval
+- `rpg_story/ui/streamlit_app.py`: game UI
+- `rpg_story/persistence/`: state/turn/summary storage
+- `tests/`: world, quest, persistence, and orchestrator tests
 
 ---
 
-## NPC Movement Legality + Reachability Checks
-Before applying **any** `npc_moves`:
-1. `npc_id` exists
-2. `from_location` matches `npc_locations[npc_id]`
-3. `to_location` exists in world locations
-4. `to_location` reachable through `connected_to` graph
-   - unless world bible explicitly allows special travel
+## 3. Setup
 
-**Engine enforces this.** The LLM only proposes moves.
-
----
-
-## Persistence (Mandatory)
-After world generation and after every turn:
-- `data/sessions/<session_id>/state.json` (overwrite)
-- `data/sessions/<session_id>/turns.jsonl` (append)
-
-Session lifecycle:
-- `session_id` generated at world creation
-- UI loads from persisted `state.json`
-
----
-
-## RAG Injection Policy (Strict)
-Every turn prompt MUST include:
-1. **World bible rules** (always)
-2. **Current location doc** (always)
-3. **Target NPC profile** (always when talking)
-4. **Recent N turn summaries** (always)
-5. **Optional top_k memories** filtered by `location_id` and `npc_id`
-
-Metadata fields for docs:
-- `doc_type`: `world_bible | location | npc_profile | turn_summary | event`
-- `session_id`
-- `location_id` (optional)
-- `npc_id` (optional)
-- `turn_id` (optional)
-- `timestamp`
-
----
-
-## Setup & Run
-### .env template
-```
-LLM_API_KEY=your_api_key
-LLM_BASE_URL=https://api.example.com
-LLM_MODEL=gpt-5
-```
-
-### Install
+### 3.1 Install dependencies
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Run Streamlit UI (primary)
+Current dependencies include:
+- `openai`
+- `streamlit`
+- `python-dotenv`
+- `pyyaml`
+- `pytest`
+
+### 3.2 Configure API key
+Default key environment variable: `DASHSCOPE_API_KEY`
+
+Create `.env` in project root:
+```env
+DASHSCOPE_API_KEY=your_key_here
+# optional overrides:
+# LLM_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
+# LLM_MODEL=qwen3-max
+```
+
+---
+
+## 4. Run
+
+### 4.1 Streamlit UI (recommended)
 ```bash
 streamlit run rpg_story/ui/streamlit_app.py
 ```
 
-### Optional CLI mode
+Typical loop:
+1. Create world from prompt.
+2. Move on map.
+3. Talk to local NPCs.
+4. Collect resources.
+5. Deliver required items to quest NPCs.
+6. Complete side quests.
+7. Trigger Final Trial with the finale NPC.
+8. View recap page and archive entry.
+
+### 4.2 CLI (debug)
 ```bash
-python -m rpg_story.cli --config configs/config.yaml
+python -m rpg_story.cli --config configs/config.yaml --npc <npc_id> --text "hello"
 ```
 
----
-
-## Code Modules (Enforcement)
-- `rpg_story/engine/validators.py`: movement legality + reachability checks
-- `rpg_story/engine/agency.py`: deterministic NPC acceptance gate
-- `rpg_story/persistence/store.py`: save/load/append logs
-- `rpg_story/rag/retriever.py`: strict always‑include injection policy
+Optional flags:
+- `--session <session_id>` to continue a saved run
+- `--world <world_json_path>` to bootstrap from a world file
 
 ---
 
-## License / Citation Note
-No license file is included yet. Add one if required. Cite referenced papers in the final thesis/report.
+## 5. Configuration
+
+Config file: `configs/config.yaml`
+
+Important fields:
+- `app.sessions_dir`: session data (`state.json`, `turns.jsonl`)
+- `app.worlds_dir`: generated world files
+- `llm.base_url`, `llm.model`, `llm.api_key_env`
+- `rag.enabled`, `rag.top_k`, `rag.summary_window`
+- `worldgen.locations_min/max`, `worldgen.npcs_min/max`
+
+---
+
+## 6. Persistence Layout
+
+### 6.1 Per session
+- `data/sessions/<session_id>/state.json`
+- `data/sessions/<session_id>/turns.jsonl`
+
+### 6.2 World snapshot
+- `data/worlds/<session_id>/world.json`
+
+### 6.3 Story recap archive
+- `data/stories.jsonl`
+
+---
+
+## 7. Testing
+
+Run all tests:
+```bash
+PYTHONPATH=. pytest -q
+```
+
+Key coverage areas:
+- world generation validity
+- quest/delivery/reward progression
+- final-trial main-quest flow
+- persistence and summary history
+
+---
+
+## 8. Known Limitations / Next Steps
+
+- World generation still uses some rule-based fallback logic.
+- Very long sessions can still produce occasional narrative drift.
+- Final recap is hybrid (template + LLM); event-level summarization can be improved.
+- UI is function-first; visual polish and animation can be expanded.
+
+---
+
+## 9. Thesis Alignment
+
+This project targets **LLM-based NPC dialogue gameplay with consistency and controllability**:
+- player-driven world generation,
+- personality-aware NPC interaction,
+- integration of dialogue, quests, map, and inventory,
+- replayable finale summary and archive.
+
+It aligns with the thesis goal of moving from hardcoded content to **model-generated content under engine constraints**.
