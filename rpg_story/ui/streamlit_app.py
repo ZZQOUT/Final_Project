@@ -941,6 +941,107 @@ def _build_story_summary(
     return fallback
 
 
+def _inventory_snapshot_text(state: GameState, prefer_chinese: bool) -> list[str]:
+    if not state.inventory:
+        return ["无" if prefer_chinese else "None"]
+    lines = []
+    for item, count in sorted(state.inventory.items(), key=lambda pair: _display_item_name(pair[0], prefer_chinese)):
+        lines.append(f"{_display_item_name(item, prefer_chinese)} x{int(count)}")
+    return lines
+
+
+def _dialogue_digest(world: WorldSpec, logs: list[dict], prefer_chinese: bool) -> str:
+    npc_name = {npc.npc_id: npc.name for npc in world.npcs}
+    snippets: list[str] = []
+    for record in logs[-24:]:
+        player_text = str(record.get("player_text") or "").strip()
+        if player_text:
+            prefix = "你" if prefer_chinese else "You"
+            snippets.append(f"{prefix}：{player_text}")
+        output = record.get("output") or {}
+        npc_lines = output.get("npc_dialogue", []) if isinstance(output, dict) else []
+        for line in npc_lines[:1]:
+            raw_id = str((line or {}).get("npc_id") or "").strip()
+            raw_text = str((line or {}).get("text") or "").strip()
+            if not raw_text:
+                continue
+            speaker = npc_name.get(raw_id, raw_id or ("NPC" if not prefer_chinese else "角色"))
+            snippets.append(f"{speaker}：{raw_text}")
+        if len(snippets) >= 8:
+            break
+    if not snippets:
+        return "本局对话较少，主要通过探索推进剧情。" if prefer_chinese else "Dialogue was limited in this run; progression relied mostly on exploration."
+    if prefer_chinese:
+        return "关键对话片段：" + " / ".join(snippets[:8])
+    return "Key dialogue snippets: " + " / ".join(snippets[:8])
+
+
+def _plot_digest(world: WorldSpec, state: GameState, prefer_chinese: bool) -> str:
+    main_title = (
+        state.quest_journal[state.main_quest_id].title
+        if state.main_quest_id and state.main_quest_id in state.quest_journal
+        else world.initial_quest
+    )
+    completed_side = []
+    for quest in state.world.side_quests:
+        progress = state.quest_journal.get(quest.quest_id)
+        if progress and progress.status == "completed":
+            completed_side.append(progress.title or quest.title)
+    if prefer_chinese:
+        if completed_side:
+            return (
+                f"你围绕主线“{main_title}”推进剧情，并完成了这些关键支线："
+                + "、".join(completed_side[:6])
+                + "。"
+            )
+        return f"你围绕主线“{main_title}”推进剧情，并持续与各地角色互动推进世界变化。"
+    if completed_side:
+        return (
+            f"You advanced the main arc '{main_title}' and completed key side quests: "
+            + ", ".join(completed_side[:6])
+            + "."
+        )
+    return f"You advanced the main arc '{main_title}' mainly through exploration and NPC interactions."
+
+
+def _epilogue_text(world: WorldSpec, state: GameState, prefer_chinese: bool) -> str:
+    key_items = _inventory_snapshot_text(state, prefer_chinese)
+    if prefer_chinese:
+        return (
+            f"后日谈：{world.title}暂时恢复了秩序。你留下的影响仍在发酵，"
+            f"人们会记住你带回的关键物资（{ '、'.join(key_items[:4]) }）与最终抉择。"
+        )
+    return (
+        f"Epilogue: {world.title} enters a fragile peace. Your choices and the key items "
+        f"you secured ({', '.join(key_items[:4])}) continue to shape what comes next."
+    )
+
+
+def _build_final_report(
+    cfg,
+    world: WorldSpec,
+    state: GameState,
+    logs: list[dict],
+    prefer_chinese: bool,
+    has_api_key: bool,
+) -> dict:
+    summary = _build_story_summary(
+        cfg=cfg,
+        world=world,
+        state=state,
+        logs=logs,
+        prefer_chinese=prefer_chinese,
+        has_api_key=has_api_key,
+    )
+    return {
+        "summary": summary,
+        "inventory_snapshot": _inventory_snapshot_text(state, prefer_chinese),
+        "dialogue_summary": _dialogue_digest(world, logs, prefer_chinese),
+        "plot_summary": _plot_digest(world, state, prefer_chinese),
+        "epilogue": _epilogue_text(world, state, prefer_chinese),
+    }
+
+
 def _render_story_history_panel(sessions_root: Path) -> None:
     st.markdown("---")
     st.subheader("游玩历史总结")
@@ -953,7 +1054,15 @@ def _render_story_history_panel(sessions_root: Path) -> None:
         timestamp = rec.get("timestamp") or rec.get("created_at") or ""
         title = f"{world_title} | {timestamp}" if timestamp else str(world_title)
         with st.expander(title, expanded=(idx == 0)):
-            st.write(rec.get("summary") or "")
+            summary = rec.get("summary") or ""
+            if summary:
+                st.write(summary)
+            plot_summary = rec.get("plot_summary")
+            if plot_summary:
+                st.caption(plot_summary)
+            epilogue = rec.get("epilogue")
+            if epilogue:
+                st.caption(epilogue)
             sid = rec.get("session_id")
             if sid:
                 st.caption(f"session_id: {sid}")
@@ -962,7 +1071,25 @@ def _render_story_history_panel(sessions_root: Path) -> None:
 def _render_story_summary_page(summary_record: dict, prefer_chinese: bool) -> None:
     st.header("终局总结" if prefer_chinese else "Final Recap")
     st.markdown(f"**{summary_record.get('world_title', '')}**")
+    st.markdown("**剧情总结**" if prefer_chinese else "**Story Summary**")
     st.write(summary_record.get("summary", ""))
+
+    st.markdown("**对话总结**" if prefer_chinese else "**Dialogue Summary**")
+    st.write(summary_record.get("dialogue_summary", ""))
+
+    st.markdown("**收集物品**" if prefer_chinese else "**Collected Items**")
+    items = summary_record.get("inventory_snapshot") or []
+    if isinstance(items, list) and items:
+        for line in items:
+            st.write(f"- {line}")
+    else:
+        st.write("无" if prefer_chinese else "None")
+
+    st.markdown("**剧情脉络**" if prefer_chinese else "**Plot Arc**")
+    st.write(summary_record.get("plot_summary", ""))
+
+    st.markdown("**后日谈**" if prefer_chinese else "**Epilogue**")
+    st.write(summary_record.get("epilogue", ""))
 
 cfg = load_config("configs/config.yaml")
 sessions_root = default_sessions_root(cfg)
@@ -1283,37 +1410,43 @@ else:
                     if st.button("参加最终考验" if prefer_chinese else "Start Final Trial", key=f"trial_yes_{session_id}"):
                         ready, progress = evaluate_main_trial_readiness(state)
                         if not ready:
-                            updated_state = resolve_main_trial(state, passed=False)
-                            save_state(session_id, updated_state, sessions_root)
                             missing = []
                             for item, info in progress.items():
                                 if int(info.get("have", 0)) < int(info.get("need", 0)):
                                     missing.append(
                                         f"{_display_item_name(item, prefer_chinese)} {info.get('have', 0)}/{info.get('need', 0)}"
                                     )
+                            if not missing:
+                                missing.append("主线关键道具尚未满足" if prefer_chinese else "Main key items are not ready")
                             st.session_state.quest_notice = [
                                 ("最终考验失败，缺少：" if prefer_chinese else "Final trial failed. Missing: ")
                                 + ("，".join(missing) if prefer_chinese else ", ".join(missing))
                             ]
-                            st.session_state[trial_pending_key] = False
+                            # Keep pending state so the player can retry after preparing items.
+                            st.session_state[trial_pending_key] = True
                             st.rerun()
-                        updated_state = resolve_main_trial(state, passed=True)
-                        save_state(session_id, updated_state, sessions_root)
-                        logs_now = read_turn_logs(session_id, sessions_root)
-                        summary_text = _build_story_summary(
-                            cfg=cfg,
-                            world=world,
-                            state=updated_state,
-                            logs=logs_now,
-                            prefer_chinese=prefer_chinese,
-                            has_api_key=has_api_key,
-                        )
+                        with st.spinner("正在结算终局..." if prefer_chinese else "Resolving finale..."):
+                            updated_state = resolve_main_trial(state, passed=True)
+                            save_state(session_id, updated_state, sessions_root)
+                            logs_now = read_turn_logs(session_id, sessions_root)
+                            final_report = _build_final_report(
+                                cfg=cfg,
+                                world=world,
+                                state=updated_state,
+                                logs=logs_now,
+                                prefer_chinese=prefer_chinese,
+                                has_api_key=has_api_key,
+                            )
                         summary_record = {
                             "session_id": session_id,
                             "world_id": world.world_id,
                             "world_title": world.title,
                             "timestamp": datetime.now(timezone.utc).isoformat(),
-                            "summary": summary_text,
+                            "summary": final_report.get("summary", ""),
+                            "inventory_snapshot": final_report.get("inventory_snapshot", []),
+                            "dialogue_summary": final_report.get("dialogue_summary", ""),
+                            "plot_summary": final_report.get("plot_summary", ""),
+                            "epilogue": final_report.get("epilogue", ""),
                             "language": "zh" if prefer_chinese else "en",
                         }
                         append_story_summary(summary_record, sessions_root)

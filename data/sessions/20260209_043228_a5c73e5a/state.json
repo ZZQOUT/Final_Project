@@ -1,0 +1,559 @@
+{
+  "session_id": "20260209_043228_a5c73e5a",
+  "created_at": "2026-02-09T04:33:25.909657+00:00",
+  "world": {
+    "world_id": "w_dq01",
+    "title": "勇者斗恶龙",
+    "world_bible": {
+      "tech_level": "medieval",
+      "narrative_language": "zh",
+      "magic_rules": "魔法由古代符文与自然元素驱动，仅限受过训练的法师或持有魔法物品者使用。施法需消耗魔力，过度使用会导致昏迷。",
+      "tone": "史诗奇幻，充满冒险与牺牲，强调勇气、忠诚与命运。",
+      "anachronism_policy": null,
+      "taboos": [
+        "亵渎神明",
+        "背叛王国",
+        "屠杀平民"
+      ],
+      "do_not_mention": [
+        "智能手机",
+        "互联网",
+        "信用卡",
+        "汽车",
+        "电力",
+        "枪械",
+        "飞机",
+        "电脑",
+        "社交媒体",
+        "现代医学"
+      ],
+      "anachronism_blocklist": [
+        "智能手机",
+        "互联网",
+        "信用卡",
+        "汽车",
+        "电力",
+        "枪械",
+        "飞机",
+        "电脑",
+        "社交媒体",
+        "现代医学"
+      ]
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "晨光村",
+        "kind": "town",
+        "description": "宁静的小村庄，坐落于群山环抱之中，是勇者的故乡。村中炊烟袅袅，鸡犬相闻。",
+        "connected_to": [
+          "loc_002"
+        ],
+        "tags": [
+          "和平",
+          "起始",
+          "乡村"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "迷雾森林",
+        "kind": "forest",
+        "description": "浓雾终年不散的古老森林，传说中藏有通往龙巢的秘密小径。林中常有哥布林出没。",
+        "connected_to": [
+          "loc_001",
+          "loc_003"
+        ],
+        "tags": [
+          "危险",
+          "神秘",
+          "怪物"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "铁炉堡",
+        "kind": "castle",
+        "description": "矮人建造的坚固堡垒，以锻造闻名。城墙高耸，熔炉日夜不息，是冒险者获取装备的重要据点。",
+        "connected_to": [
+          "loc_002",
+          "loc_004"
+        ],
+        "tags": [
+          "工业",
+          "防御",
+          "锻造"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "龙脊山脉",
+        "kind": "dungeon",
+        "description": "险峻的高山群，恶龙盘踞于最高峰的洞穴中。山道狭窄，常有落石与翼龙袭击。",
+        "connected_to": [
+          "loc_003",
+          "loc_005"
+        ],
+        "tags": [
+          "终极",
+          "危险",
+          "龙巢"
+        ]
+      },
+      {
+        "location_id": "loc_005",
+        "name": "遗忘神庙",
+        "kind": "dungeon",
+        "description": "被藤蔓覆盖的古老神庙，供奉着封印之神。内部机关重重，藏有对抗恶龙的关键圣物。",
+        "connected_to": [
+          "loc_004"
+        ],
+        "tags": [
+          "神圣",
+          "解谜",
+          "遗迹"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_001",
+        "name": "老村长艾德温",
+        "profession": "村长",
+        "traits": [
+          "慈祥",
+          "谨慎",
+          "爱国"
+        ],
+        "goals": [
+          "保护村民安全",
+          "指引勇者踏上征途"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.8,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.2,
+        "disposition_to_player": 4,
+        "refusal_style": "唉，孩子，外面太危险了，但我知道你必须去。"
+      },
+      {
+        "npc_id": "npc_002",
+        "name": "莉娜",
+        "profession": "草药师",
+        "traits": [
+          "热心",
+          "细心",
+          "胆小"
+        ],
+        "goals": [
+          "采集稀有草药",
+          "帮助受伤的旅人"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.9,
+        "stubbornness": 0.1,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": 3,
+        "refusal_style": "我……我不敢去森林，但你可以拿走这些药草。"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "格鲁姆",
+        "profession": "哥布林斥候",
+        "traits": [
+          "狡猾",
+          "贪婪",
+          "多疑"
+        ],
+        "goals": [
+          "偷取人类物资",
+          "向首领报告入侵者"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.2,
+        "stubbornness": 0.8,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": -3,
+        "refusal_style": "滚开！这片森林是我们的！"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "精灵向导瑟琳",
+        "profession": "向导",
+        "traits": [
+          "冷静",
+          "可靠",
+          "寡言"
+        ],
+        "goals": [
+          "守护森林平衡",
+          "协助值得信任的勇者"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.7,
+        "stubbornness": 0.4,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": 2,
+        "refusal_style": "若你证明自己值得信任，我便为你指路。"
+      },
+      {
+        "npc_id": "npc_005",
+        "name": "铁匠博林",
+        "profession": "铁匠",
+        "traits": [
+          "豪爽",
+          "固执",
+          "技艺精湛"
+        ],
+        "goals": [
+          "打造传奇武器",
+          "收集稀有矿石"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.6,
+        "stubbornness": 0.7,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 3,
+        "refusal_style": "没有上好的材料，休想让我动锤子！"
+      },
+      {
+        "npc_id": "npc_006",
+        "name": "矮人守卫队长达格",
+        "profession": "守卫队长",
+        "traits": [
+          "忠诚",
+          "勇敢",
+          "直率"
+        ],
+        "goals": [
+          "保卫铁炉堡",
+          "招募勇士对抗恶龙"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.85,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.7,
+        "disposition_to_player": 4,
+        "refusal_style": "朋友，跟我来，我们需要像你这样的英雄！"
+      },
+      {
+        "npc_id": "npc_008",
+        "name": "流浪诗人凯尔",
+        "profession": "吟游诗人",
+        "traits": [
+          "幽默",
+          "机智",
+          "爱吹牛"
+        ],
+        "goals": [
+          "传颂勇者事迹",
+          "寻找创作灵感"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.75,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 3,
+        "refusal_style": "哈哈，这故事可值一杯酒钱！"
+      },
+      {
+        "npc_id": "npc_auto_001",
+        "name": "凯洛",
+        "profession": "铁匠",
+        "traits": [
+          "热情",
+          "果断"
+        ],
+        "goals": [
+          "协助旅人"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.85,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 3,
+        "refusal_style": "直爽友好"
+      },
+      {
+        "npc_id": "npc_auto_002",
+        "name": "艾文",
+        "profession": "药师",
+        "traits": [
+          "谨慎",
+          "多疑"
+        ],
+        "goals": [
+          "守护家园"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.35,
+        "stubbornness": 0.75,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": -1,
+        "refusal_style": "冷淡保守"
+      },
+      {
+        "npc_id": "npc_007",
+        "name": "祭司玛拉",
+        "profession": "神庙祭司",
+        "traits": [
+          "虔诚",
+          "智慧",
+          "严厉"
+        ],
+        "goals": [
+          "守护封印圣物",
+          "考验勇者之心"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.5,
+        "stubbornness": 0.9,
+        "risk_tolerance": 0.1,
+        "disposition_to_player": 1,
+        "refusal_style": "凡心未净者，不得触碰圣物。"
+      },
+      {
+        "npc_id": "npc_auto_003",
+        "name": "塔莎",
+        "profession": "猎人",
+        "traits": [
+          "冷静",
+          "理性"
+        ],
+        "goals": [
+          "收集情报"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.55,
+        "stubbornness": 0.45,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": 1,
+        "refusal_style": "简洁克制"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "恶龙焚毁了北方村庄，国王发出召集令：谁能击败恶龙，将获封为护国英雄。你是晨光村的少年，自幼听闻勇者传说，如今命运之轮开始转动。",
+    "initial_quest": "前往迷雾森林寻找通往龙巢的线索。",
+    "main_quest": {
+      "quest_id": "quest_main_01",
+      "title": "屠龙使命",
+      "category": "main",
+      "description": "主线推进条件：先完成各支线任务，获得任务奖励物品，再返回推进终章。",
+      "objective": "完成支线并收集关键战利品：勇气药剂 x1，龙鳞匕首 x1，封印之戒 x1",
+      "giver_npc_id": "npc_001",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "勇气药剂": 1,
+        "龙鳞匕首": 1,
+        "封印之戒": 1
+      },
+      "reward_items": {},
+      "reward_hint": "王国的和平与你的荣耀"
+    },
+    "side_quests": [
+      {
+        "quest_id": "quest_side_01",
+        "title": "草药师的请求",
+        "category": "side",
+        "description": "莉娜需要月光草治疗受伤的村民，但不敢独自进入森林。",
+        "objective": "在迷雾森林采集3株月光草交给莉娜。",
+        "giver_npc_id": "npc_002",
+        "suggested_location": "loc_002",
+        "required_items": {
+          "月光草": 3
+        },
+        "reward_items": {
+          "勇气药剂": 1
+        },
+        "reward_hint": "一瓶能暂时提升勇气的神奇药剂"
+      },
+      {
+        "quest_id": "quest_side_02",
+        "title": "铁匠的委托",
+        "category": "side",
+        "description": "博林听说恶龙鳞片可打造神兵，但缺乏原料。",
+        "objective": "从迷雾森林的哥布林营地找到一片龙鳞碎片。（需求：王庭药叶 x2）",
+        "giver_npc_id": "npc_005",
+        "suggested_location": "loc_002",
+        "required_items": {
+          "王庭药叶": 2
+        },
+        "reward_items": {
+          "龙鳞匕首": 1
+        },
+        "reward_hint": "一把由龙鳞打造的锋利匕首"
+      },
+      {
+        "quest_id": "quest_side_03",
+        "title": "神庙的试炼",
+        "category": "side",
+        "description": "祭司玛拉要求勇者通过试炼，证明配得上圣物。",
+        "objective": "在遗忘神庙解开三道机关谜题。（需求：古铁矿 x2）",
+        "giver_npc_id": "npc_007",
+        "suggested_location": "loc_005",
+        "required_items": {
+          "古铁矿": 2
+        },
+        "reward_items": {
+          "封印之戒": 1
+        },
+        "reward_hint": "一枚蕴含封印之力的古老戒指"
+      }
+    ],
+    "map_layout": [
+      {
+        "location_id": "loc_001",
+        "x": 10.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_002",
+        "x": 30.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_003",
+        "x": 50.0,
+        "y": 40.0
+      },
+      {
+        "location_id": "loc_004",
+        "x": 70.0,
+        "y": 30.0
+      },
+      {
+        "location_id": "loc_005",
+        "x": 85.0,
+        "y": 50.0
+      }
+    ]
+  },
+  "player_location": "loc_003",
+  "npc_locations": {
+    "npc_001": "loc_001",
+    "npc_002": "loc_001",
+    "npc_003": "loc_002",
+    "npc_004": "loc_002",
+    "npc_005": "loc_003",
+    "npc_006": "loc_003",
+    "npc_008": "loc_003",
+    "npc_auto_001": "loc_004",
+    "npc_auto_002": "loc_004",
+    "npc_007": "loc_005",
+    "npc_auto_003": "loc_005"
+  },
+  "flags": {
+    "met_npc_002": true,
+    "met_npc_005": true
+  },
+  "quests": {
+    "quest_main_01": "active",
+    "quest_side_01": "completed",
+    "quest_side_02": "active",
+    "quest_side_03": "active"
+  },
+  "quest_journal": {
+    "quest_main_01": {
+      "quest_id": "quest_main_01",
+      "title": "屠龙使命",
+      "category": "main",
+      "status": "active",
+      "objective": "完成支线并收集关键战利品：勇气药剂 x1，龙鳞匕首 x1，封印之戒 x1",
+      "guidance": "主线准备进度：勇气药剂 1/1，龙鳞匕首 0/1，封印之戒 0/1",
+      "giver_npc_id": "npc_001",
+      "required_items": {
+        "勇气药剂": 1,
+        "龙鳞匕首": 1,
+        "封印之戒": 1
+      },
+      "collected_items": {
+        "勇气药剂": 1,
+        "龙鳞匕首": 0,
+        "封印之戒": 0
+      },
+      "reward_items": {},
+      "reward_hint": "王国的和平与你的荣耀"
+    },
+    "quest_side_01": {
+      "quest_id": "quest_side_01",
+      "title": "草药师的请求",
+      "category": "side",
+      "status": "completed",
+      "objective": "在迷雾森林采集3株月光草交给莉娜。",
+      "guidance": "材料已齐，请与任务 NPC 同地交付领取奖励。",
+      "giver_npc_id": "npc_002",
+      "required_items": {
+        "月光草": 3
+      },
+      "collected_items": {},
+      "reward_items": {
+        "勇气药剂": 1
+      },
+      "reward_hint": "一瓶能暂时提升勇气的神奇药剂"
+    },
+    "quest_side_02": {
+      "quest_id": "quest_side_02",
+      "title": "铁匠的委托",
+      "category": "side",
+      "status": "active",
+      "objective": "从迷雾森林的哥布林营地找到一片龙鳞碎片。（需求：王庭药叶 x2）",
+      "guidance": "交付进度：王庭药叶 已交付0/2（背包0）",
+      "giver_npc_id": "npc_005",
+      "required_items": {
+        "王庭药叶": 2
+      },
+      "collected_items": {
+        "王庭药叶": 0
+      },
+      "reward_items": {
+        "龙鳞匕首": 1
+      },
+      "reward_hint": "一把由龙鳞打造的锋利匕首"
+    },
+    "quest_side_03": {
+      "quest_id": "quest_side_03",
+      "title": "神庙的试炼",
+      "category": "side",
+      "status": "active",
+      "objective": "在遗忘神庙解开三道机关谜题。（需求：古铁矿 x2）",
+      "guidance": "交付进度：古铁矿 已交付0/2（背包0）",
+      "giver_npc_id": "npc_007",
+      "required_items": {
+        "古铁矿": 2
+      },
+      "collected_items": {
+        "古铁矿": 0
+      },
+      "reward_items": {
+        "封印之戒": 1
+      },
+      "reward_hint": "一枚蕴含封印之力的古老戒指"
+    }
+  },
+  "main_quest_id": "quest_main_01",
+  "inventory": {
+    "勇气药剂": 1
+  },
+  "location_resource_stock": {
+    "loc_001": {
+      "口粮": 2
+    },
+    "loc_002": {
+      "疗伤草": 4,
+      "硬木": 3,
+      "月光草": 0,
+      "王庭药叶": 3
+    },
+    "loc_003": {
+      "徽印碎片": 5
+    }
+  },
+  "recent_summaries": [
+    "玩家向莉娜打招呼，莉娜认出玩家持有月光草，并触发了任务‘草药师的请求’的物品交付。",
+    "玩家将三株月光草交给莉娜，她完成了任务‘草药师的请求’，并交付了勇气药剂作为奖励。",
+    "玩家在铁炉堡与铁匠博林首次见面，博林表明自己只接有材料的活。",
+    "玩家询问铁匠博林需要什么材料，博林明确要求王庭药叶 x2 以完成任务‘铁匠的委托’。",
+    "玩家声称‘给你了’，但未提供王庭药叶，铁匠博林拒绝接受并重申任务要求。"
+  ],
+  "last_turn_id": 5
+}

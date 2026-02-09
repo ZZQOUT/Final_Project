@@ -1,0 +1,411 @@
+{
+  "world_id": "wd_001",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "narrative_language": "zh",
+    "magic_rules": "魔法源自古代符文与自然之力，需通过吟唱或法杖引导。只有经过训练的法师才能安全使用。",
+    "tone": "史诗奇幻，充满冒险与牺牲精神，强调勇气与正义。",
+    "anachronism_policy": null,
+    "taboos": [
+      "不可亵渎神殿",
+      "不可伤害平民"
+    ],
+    "do_not_mention": [
+      "智能手机",
+      "互联网",
+      "信用卡",
+      "汽车",
+      "飞机",
+      "电脑",
+      "电力"
+    ],
+    "anachronism_blocklist": [
+      "智能手机",
+      "互联网",
+      "信用卡",
+      "汽车",
+      "飞机",
+      "电脑",
+      "电力"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "晨光村",
+      "kind": "town",
+      "description": "一个宁静的小村庄，坐落在森林边缘，村民以农耕和采集为生。村中有一座小教堂和一家旅店。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "和平",
+        "起始点",
+        "村庄"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "幽暗森林",
+      "kind": "forest",
+      "description": "一片浓密而危险的森林，传说有狼人和树精出没。通往北方城堡的必经之路。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "危险",
+        "野兽",
+        "迷雾"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "石桥镇",
+      "kind": "town",
+      "description": "建在河流上的小镇，以石桥闻名。镇上有铁匠铺、草药店和酒馆。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "贸易",
+        "工匠",
+        "桥梁"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "黑岩城堡",
+      "kind": "castle",
+      "description": "邪恶巫师盘踞的古老城堡，高墙环绕，守卫森严。恶龙据说就藏在地牢深处。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "敌对",
+        "最终地点",
+        "城堡"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "银叶湖",
+      "kind": "lake",
+      "description": "清澈如镜的湖泊，湖心小岛上有座废弃神庙。传说湖底沉睡着一把圣剑。",
+      "connected_to": [
+        "loc_003"
+      ],
+      "tags": [
+        "神秘",
+        "神圣",
+        "水域"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "艾琳",
+      "profession": "村长",
+      "traits": [
+        "慈祥",
+        "谨慎"
+      ],
+      "goals": [
+        "保护村民安全",
+        "寻找勇者对抗恶龙"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.8,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 3,
+      "refusal_style": "我会尽力帮忙，但请不要让我做太危险的事。"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "托尔",
+      "profession": "猎人",
+      "traits": [
+        "勇敢",
+        "固执"
+      ],
+      "goals": [
+        "清除森林中的怪物",
+        "证明自己的实力"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.4,
+      "stubbornness": 0.9,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 1,
+      "refusal_style": "除非你先帮我干掉那头狼王，否则别指望我跟你走！"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "莉娜",
+      "profession": "旅店老板娘",
+      "traits": [
+        "热情",
+        "精明"
+      ],
+      "goals": [
+        "扩大生意",
+        "收集各地消息"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.7,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 4,
+      "refusal_style": "哎呀，这可不行，但我可以给你打折住店哦！"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "凯尔",
+      "profession": "游侠",
+      "traits": [
+        "冷静",
+        "孤僻"
+      ],
+      "goals": [
+        "追踪巫师踪迹",
+        "复仇"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.5,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": 0,
+      "refusal_style": "我的路我自己走，别挡道。"
+    },
+    {
+      "npc_id": "npc_auto_001",
+      "name": "凯洛",
+      "profession": "向导",
+      "traits": [
+        "勇敢",
+        "冲动"
+      ],
+      "goals": [
+        "猎杀威胁"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.7,
+      "stubbornness": 0.35,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 0,
+      "refusal_style": "急躁直接"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "格鲁姆",
+      "profession": "铁匠",
+      "traits": [
+        "粗鲁",
+        "可靠"
+      ],
+      "goals": [
+        "打造最强武器",
+        "找到稀有矿石"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.6,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 2,
+      "refusal_style": "哼！没材料我可不干！"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "梅林达",
+      "profession": "草药师",
+      "traits": [
+        "温柔",
+        "博学"
+      ],
+      "goals": [
+        "研究治愈魔法",
+        "保护银叶湖生态"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.9,
+      "stubbornness": 0.1,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 5,
+      "refusal_style": "对不起，这违背自然法则……但我可以给你一些药水。"
+    },
+    {
+      "npc_id": "npc_auto_002",
+      "name": "艾文",
+      "profession": "铁匠",
+      "traits": [
+        "热情",
+        "果断"
+      ],
+      "goals": [
+        "协助旅人"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.85,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 3,
+      "refusal_style": "直爽友好"
+    },
+    {
+      "npc_id": "npc_auto_003",
+      "name": "塔莎",
+      "profession": "药师",
+      "traits": [
+        "谨慎",
+        "多疑"
+      ],
+      "goals": [
+        "守护家园"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.35,
+      "stubbornness": 0.75,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": -1,
+      "refusal_style": "冷淡保守"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "奥利维亚",
+      "profession": "神庙守护者",
+      "traits": [
+        "虔诚",
+        "坚定"
+      ],
+      "goals": [
+        "守护圣剑",
+        "等待真正的勇者"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.85,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 3,
+      "refusal_style": "只有通过试炼的人，才能获得圣剑。"
+    },
+    {
+      "npc_id": "npc_auto_004",
+      "name": "罗恩",
+      "profession": "猎人",
+      "traits": [
+        "冷静",
+        "理性"
+      ],
+      "goals": [
+        "收集情报"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.55,
+      "stubbornness": 0.45,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 1,
+      "refusal_style": "简洁克制"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "你在晨光村醒来，村民们正因恶龙肆虐而惶恐不安。村长艾琳恳请你成为勇者，拯救王国。",
+  "initial_quest": "与村长艾琳交谈，了解恶龙的威胁并接受勇者使命。",
+  "main_quest": {
+    "quest_id": "quest_main_001",
+    "title": "屠龙救世",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得任务奖励物品，再返回推进终章。",
+    "objective": "完成支线并收集关键战利品：狼王之牙 x1，圣剑 x1，强效治疗药水 x3",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_004",
+    "required_items": {
+      "狼王之牙": 1,
+      "圣剑": 1,
+      "强效治疗药水": 3
+    },
+    "reward_items": {},
+    "reward_hint": "王国将为你举行盛大庆典，并授予你无上荣耀。"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_001",
+      "title": "招募猎人托尔",
+      "category": "side",
+      "description": "猎人托尔熟悉幽暗森林，若能说服他加入，将大大提升穿越森林的安全性。",
+      "objective": "帮助托尔击败森林中的狼王，赢得他的信任。（需求：月光草 x3）",
+      "giver_npc_id": "npc_002",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "月光草": 3
+      },
+      "reward_items": {
+        "狼王之牙": 1
+      },
+      "reward_hint": "托尔将赠予你狼王之牙作为信物，并承诺在需要时提供支援。"
+    },
+    {
+      "quest_id": "quest_side_002",
+      "title": "修复圣剑",
+      "category": "side",
+      "description": "圣剑虽沉睡湖底，但已锈迹斑斑。需要铁匠格鲁姆用特殊矿石修复。",
+      "objective": "从银叶湖取得圣剑，并交给石桥镇的铁匠格鲁姆修复。",
+      "giver_npc_id": "npc_007",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "圣剑": 1
+      },
+      "reward_items": {
+        "圣剑": 1
+      },
+      "reward_hint": "修复后的圣剑将闪耀神圣光芒，足以斩杀恶龙。"
+    },
+    {
+      "quest_id": "quest_side_003",
+      "title": "收集王庭药叶",
+      "category": "side",
+      "description": "草药师梅林达需要月光草制作强力治疗药水，用于对抗城堡中的毒雾。",
+      "objective": "在幽暗森林深处采集三株月光草交给梅林达。（需求：王庭药叶 x2）",
+      "giver_npc_id": "npc_005",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "王庭药叶": 2
+      },
+      "reward_items": {
+        "强效治疗药水": 3
+      },
+      "reward_hint": "梅林达会赠送你三瓶强效治疗药水，可在关键时刻救命。"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 20.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 40.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 40.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 70.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 70.0,
+      "y": 70.0
+    }
+  ]
+}

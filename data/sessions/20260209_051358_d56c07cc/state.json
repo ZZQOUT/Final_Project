@@ -1,0 +1,566 @@
+{
+  "session_id": "20260209_051358_d56c07cc",
+  "created_at": "2026-02-09T05:14:48.234137+00:00",
+  "world": {
+    "world_id": "w_dq001",
+    "title": "勇者斗恶龙",
+    "world_bible": {
+      "tech_level": "medieval",
+      "narrative_language": "zh",
+      "magic_rules": "魔法源自古代符文与自然元素共鸣，需通过吟唱或法杖引导。高阶魔法消耗施法者生命力。",
+      "tone": "史诗冒险，充满希望与牺牲精神",
+      "anachronism_policy": "严格禁止现代科技概念",
+      "taboos": [
+        "亵渎神明",
+        "背叛誓言",
+        "食人行为"
+      ],
+      "do_not_mention": [
+        "智能手机",
+        "互联网",
+        "信用卡",
+        "汽车",
+        "电脑",
+        "飞机"
+      ],
+      "anachronism_blocklist": []
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "晨光村",
+        "kind": "town",
+        "description": "宁静的小村庄，被金色麦田环绕，是勇者的故乡。",
+        "connected_to": [
+          "loc_002"
+        ],
+        "tags": [
+          "和平",
+          "农业",
+          "起点"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "幽影森林",
+        "kind": "forest",
+        "description": "浓密阴森的古老森林，传说中栖息着哥布林与迷途亡魂。",
+        "connected_to": [
+          "loc_001",
+          "loc_003"
+        ],
+        "tags": [
+          "危险",
+          "神秘",
+          "资源"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "铁炉镇",
+        "kind": "town",
+        "description": "以锻造闻名的山脚小镇，工匠们日夜打造武器与护甲。",
+        "connected_to": [
+          "loc_002",
+          "loc_004"
+        ],
+        "tags": [
+          "工业",
+          "交易",
+          "防御"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "遗忘废墟",
+        "kind": "dungeon",
+        "description": "被时间掩埋的古代遗迹，藏有失落的神器与致命陷阱。",
+        "connected_to": [
+          "loc_003",
+          "loc_005"
+        ],
+        "tags": [
+          "探索",
+          "宝藏",
+          "诅咒"
+        ]
+      },
+      {
+        "location_id": "loc_005",
+        "name": "龙脊山脉",
+        "kind": "mountain",
+        "description": "终年积雪的险峻山脉，恶龙巢穴位于最高峰的火山口。",
+        "connected_to": [
+          "loc_004"
+        ],
+        "tags": [
+          "终极挑战",
+          "寒冷",
+          "飞行生物"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_001",
+        "name": "艾拉",
+        "profession": "村长",
+        "traits": [
+          "慈祥",
+          "睿智",
+          "谨慎"
+        ],
+        "goals": [
+          "保护村民安全",
+          "指引勇者踏上征途"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.9,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": 4,
+        "refusal_style": "温和劝阻"
+      },
+      {
+        "npc_id": "npc_002",
+        "name": "托姆",
+        "profession": "农夫",
+        "traits": [
+          "勤劳",
+          "固执",
+          "多疑"
+        ],
+        "goals": [
+          "丰收庄稼",
+          "远离麻烦"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.4,
+        "stubbornness": 0.8,
+        "risk_tolerance": 0.1,
+        "disposition_to_player": 1,
+        "refusal_style": "抱怨推脱"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "莉娜",
+        "profession": "猎人",
+        "traits": [
+          "敏捷",
+          "独立",
+          "警惕"
+        ],
+        "goals": [
+          "清除森林威胁",
+          "寻找失踪弟弟"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.6,
+        "stubbornness": 0.5,
+        "risk_tolerance": 0.7,
+        "disposition_to_player": 2,
+        "refusal_style": "条件交换"
+      },
+      {
+        "npc_id": "npc_auto_001",
+        "name": "林晨曦",
+        "profession": "旅店老板",
+        "traits": [
+          "冷静",
+          "理性"
+        ],
+        "goals": [
+          "收集情报"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.55,
+        "stubbornness": 0.45,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": 1,
+        "refusal_style": "简洁克制"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "巴尔克",
+        "profession": "铁匠",
+        "traits": [
+          "豪爽",
+          "技艺精湛",
+          "爱财"
+        ],
+        "goals": [
+          "打造传奇武器",
+          "收集稀有矿石"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.8,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": 3,
+        "refusal_style": "讨价还价"
+      },
+      {
+        "npc_id": "npc_auto_002",
+        "name": "林子涵",
+        "profession": "向导",
+        "traits": [
+          "勇敢",
+          "冲动"
+        ],
+        "goals": [
+          "猎杀威胁"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.7,
+        "stubbornness": 0.35,
+        "risk_tolerance": 0.8,
+        "disposition_to_player": 0,
+        "refusal_style": "急躁直接"
+      },
+      {
+        "npc_id": "npc_005",
+        "name": "老学者莫林",
+        "profession": "历史学家",
+        "traits": [
+          "博学",
+          "健忘",
+          "神经质"
+        ],
+        "goals": [
+          "解读古代碑文",
+          "阻止神器滥用"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.7,
+        "stubbornness": 0.4,
+        "risk_tolerance": 0.2,
+        "disposition_to_player": 3,
+        "refusal_style": "引经据典"
+      },
+      {
+        "npc_id": "npc_006",
+        "name": "守卫队长罗恩",
+        "profession": "战士",
+        "traits": [
+          "忠诚",
+          "严肃",
+          "勇敢"
+        ],
+        "goals": [
+          "守护废墟入口",
+          "招募帮手"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.85,
+        "stubbornness": 0.6,
+        "risk_tolerance": 0.9,
+        "disposition_to_player": 4,
+        "refusal_style": "职责为先"
+      },
+      {
+        "npc_id": "npc_auto_003",
+        "name": "林若宁",
+        "profession": "铁匠",
+        "traits": [
+          "热情",
+          "果断"
+        ],
+        "goals": [
+          "协助旅人"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.85,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 3,
+        "refusal_style": "直爽友好"
+      },
+      {
+        "npc_id": "npc_auto_004",
+        "name": "林思远",
+        "profession": "药师",
+        "traits": [
+          "谨慎",
+          "多疑"
+        ],
+        "goals": [
+          "守护家园"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.35,
+        "stubbornness": 0.75,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": -1,
+        "refusal_style": "冷淡保守"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "恶龙焚毁了北方村庄，国王悬赏招募勇者。你作为晨光村的年轻战士，被村长艾拉托付使命。",
+    "initial_quest": "前往铁炉镇寻找武器大师巴尔克，获取屠龙装备。",
+    "main_quest": {
+      "quest_id": "quest_main_01",
+      "title": "屠龙救国",
+      "category": "main",
+      "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+      "objective": "完成支线并收集关键道具：龙语护符 x1，龙鳞匕首 x1，神圣护符 x1",
+      "giver_npc_id": "npc_001",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "龙语护符": 1,
+        "龙鳞匕首": 1,
+        "神圣护符": 1
+      },
+      "reward_items": {},
+      "reward_hint": "王国的无尽财富与英雄称号"
+    },
+    "side_quests": [
+      {
+        "quest_id": "quest_side_01",
+        "title": "森林的求救信号",
+        "category": "side",
+        "description": "猎人莉娜请求帮助寻找她失踪的弟弟，他最后出现在幽影森林深处。",
+        "objective": "在幽影森林找到莉娜的弟弟并护送回铁炉镇。（需求：疗伤草 x2，硬木 x2）",
+        "giver_npc_id": "npc_003",
+        "suggested_location": "loc_002",
+        "required_items": {
+          "疗伤草": 2,
+          "硬木": 2
+        },
+        "reward_items": {
+          "龙语护符": 1
+        },
+        "reward_hint": "弟弟随身携带的古老护符，据说能抵御龙焰"
+      },
+      {
+        "quest_id": "quest_side_02",
+        "title": "铁匠的委托",
+        "category": "side",
+        "description": "铁匠巴尔克需要龙鳞打造传奇匕首，但无法亲自冒险。",
+        "objective": "从遗忘废墟的龙族祭坛取得一片龙鳞交给巴尔克。（需求：布条 x2，口粮 x1）",
+        "giver_npc_id": "npc_004",
+        "suggested_location": "loc_004",
+        "required_items": {
+          "布条": 2,
+          "口粮": 1
+        },
+        "reward_items": {
+          "龙鳞匕首": 1
+        },
+        "reward_hint": "用龙鳞锻造的匕首，可刺穿龙鳞防御"
+      },
+      {
+        "quest_id": "side_loc_004_3",
+        "title": "边境护送",
+        "category": "side",
+        "description": "与任务 NPC 一同前往遗忘废墟并完成材料采集。",
+        "objective": "在遗忘废墟与任务 NPC 同行时收集：远古碎片 x2，铁铆钉 x1",
+        "giver_npc_id": "npc_003",
+        "suggested_location": "loc_004",
+        "required_items": {
+          "远古碎片": 2,
+          "铁铆钉": 1
+        },
+        "reward_items": {
+          "神圣护符": 1
+        },
+        "reward_hint": "完成后可获得：神圣护符 x1"
+      }
+    ],
+    "map_layout": [
+      {
+        "location_id": "loc_001",
+        "x": 10.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_002",
+        "x": 30.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_003",
+        "x": 50.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_004",
+        "x": 70.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_005",
+        "x": 90.0,
+        "y": 20.0
+      }
+    ]
+  },
+  "player_location": "loc_005",
+  "npc_locations": {
+    "npc_001": "loc_001",
+    "npc_002": "loc_001",
+    "npc_003": "loc_002",
+    "npc_auto_001": "loc_002",
+    "npc_004": "loc_003",
+    "npc_auto_002": "loc_003",
+    "npc_005": "loc_004",
+    "npc_006": "loc_004",
+    "npc_auto_003": "loc_005",
+    "npc_auto_004": "loc_005"
+  },
+  "flags": {
+    "met_npc_003": true,
+    "met_npc_004": true,
+    "met_npc_auto_003": true,
+    "met_npc_005": true,
+    "met_npc_006": true,
+    "met_npc_auto_004": true,
+    "met_npc_001": true,
+    "met_npc_002": true
+  },
+  "quests": {
+    "quest_main_01": "active",
+    "quest_side_01": "completed",
+    "quest_side_02": "completed",
+    "side_loc_004_3": "completed"
+  },
+  "quest_journal": {
+    "quest_main_01": {
+      "quest_id": "quest_main_01",
+      "title": "屠龙救国",
+      "category": "main",
+      "status": "active",
+      "objective": "完成支线并收集关键道具：龙语护符 x1，龙鳞匕首 x1，神圣护符 x1",
+      "guidance": "已达成主线物资要求，前往终局 NPC 发起最终考验。",
+      "giver_npc_id": "npc_001",
+      "required_items": {
+        "龙语护符": 1,
+        "龙鳞匕首": 1,
+        "神圣护符": 1
+      },
+      "collected_items": {
+        "龙语护符": 1,
+        "龙鳞匕首": 1,
+        "神圣护符": 1
+      },
+      "reward_items": {},
+      "reward_hint": "王国的无尽财富与英雄称号"
+    },
+    "quest_side_01": {
+      "quest_id": "quest_side_01",
+      "title": "森林的求救信号",
+      "category": "side",
+      "status": "completed",
+      "objective": "在幽影森林找到莉娜的弟弟并护送回铁炉镇。（需求：疗伤草 x2，硬木 x2）",
+      "guidance": "支线已完成，奖励已发放。",
+      "giver_npc_id": "npc_003",
+      "required_items": {
+        "疗伤草": 2,
+        "硬木": 2
+      },
+      "collected_items": {
+        "疗伤草": 2,
+        "硬木": 2
+      },
+      "reward_items": {
+        "龙语护符": 1
+      },
+      "reward_hint": "弟弟随身携带的古老护符，据说能抵御龙焰"
+    },
+    "quest_side_02": {
+      "quest_id": "quest_side_02",
+      "title": "铁匠的委托",
+      "category": "side",
+      "status": "completed",
+      "objective": "从遗忘废墟的龙族祭坛取得一片龙鳞交给巴尔克。（需求：布条 x2，口粮 x1）",
+      "guidance": "支线已完成，奖励已发放。",
+      "giver_npc_id": "npc_004",
+      "required_items": {
+        "布条": 2,
+        "口粮": 1
+      },
+      "collected_items": {
+        "布条": 2,
+        "口粮": 1
+      },
+      "reward_items": {
+        "龙鳞匕首": 1
+      },
+      "reward_hint": "用龙鳞锻造的匕首，可刺穿龙鳞防御"
+    },
+    "side_loc_004_3": {
+      "quest_id": "side_loc_004_3",
+      "title": "边境护送",
+      "category": "side",
+      "status": "completed",
+      "objective": "在遗忘废墟与任务 NPC 同行时收集：远古碎片 x2，铁铆钉 x1",
+      "guidance": "支线已完成，奖励已发放。",
+      "giver_npc_id": "npc_003",
+      "required_items": {
+        "远古碎片": 2,
+        "铁铆钉": 1
+      },
+      "collected_items": {
+        "远古碎片": 2,
+        "铁铆钉": 1
+      },
+      "reward_items": {
+        "神圣护符": 1
+      },
+      "reward_hint": "完成后可获得：神圣护符 x1"
+    }
+  },
+  "main_quest_id": "quest_main_01",
+  "inventory": {
+    "疗伤草": 1,
+    "硬木": 1,
+    "龙语护符": 1,
+    "龙鳞匕首": 1,
+    "神圣护符": 1
+  },
+  "location_resource_stock": {
+    "loc_001": {
+      "口粮": 2
+    },
+    "loc_002": {
+      "疗伤草": 0,
+      "硬木": 0
+    },
+    "loc_003": {
+      "口粮": 2
+    },
+    "loc_004": {
+      "远古碎片": 1,
+      "铁铆钉": 1,
+      "布条": 1,
+      "口粮": 1
+    },
+    "loc_005": {
+      "探险样本": 2
+    }
+  },
+  "recent_summaries": [
+    "玩家首次在幽影森林遇见猎人莉娜，她正为寻找弟弟而焦急，明确表示需要疗伤草 x2 和硬木 x2 才愿意深入交流。",
+    "玩家首次在铁炉镇与铁匠巴尔克见面，巴尔克豪爽地自我介绍，并表明自己爱财的性格。",
+    "玩家首次在龙脊山脉遇见铁匠林若宁，她热情而果断地自我介绍，并主动提供帮助。",
+    "玩家询问林若宁是否有委托，她表示自己不发布任务，但提示玩家关注已有支线：铁匠的委托和边境护送。",
+    "玩家询问巴尔克是否有委托，巴尔克确认并重申了‘铁匠的委托’任务细节，要求玩家前往遗忘废墟取得龙鳞，并提醒需自备布条和口粮。",
+    "玩家首次在遗忘废墟遇见历史学家莫林，询问是否需要护送。莫林确认了‘边境护送’任务，并重申需收集远古碎片 x2 和铁铆钉 x1 才能继续。",
+    "玩家再次与历史学家莫林交谈，莫林急切地追问是否已收集齐‘边境护送’任务所需的远古碎片 x2 和铁铆钉 x1。",
+    "玩家首次在遗忘废墟与战士罗恩交谈，罗恩简要说明废墟危险，并指引其协助历史学家莫林完成‘边境护送’任务。",
+    "玩家再次与林若宁交谈，她确认玩家已完成部分支线任务，并催促其完成‘边境护送’以获取神圣护符。",
+    "玩家再次与历史学家莫林交谈，莫林引用《古卷残章·第七卷》，继续催促其收集远古碎片 x2 和铁铆钉 x1 以推进‘边境护送’任务。",
+    "玩家再次与战士罗恩交谈，罗恩催促其尽快收集‘边境护送’任务所需的远古碎片和铁铆钉，以推进主线任务。",
+    "玩家再次与守卫队长罗恩交谈，罗恩强调‘边境护送’任务尚未完成，催促其尽快收集远古碎片 x2 和铁铆钉 x1 以获取神圣护符，推进主线任务。",
+    "玩家已集齐主线任务所需全部道具，历史学家莫林确认其可前往龙脊山脉屠龙，并引用《古卷残章·终章》给予指引。",
+    "玩家已集齐全部主线任务道具，林若宁确认其可直接前往龙脊山脉最高峰屠龙，并引用古卷激励其行动。",
+    "玩家已集齐全部主线任务道具，药师林思远确认其可前往龙脊山脉最高峰屠龙，但语气谨慎多疑，提醒其危险。",
+    "玩家表明即将前往屠龙，药师林思远再次提醒其危险，并建议携带疗伤草以备不时之需。",
+    "玩家表明即将前往屠龙，村长艾拉确认其已集齐三件圣物，表达担忧并提醒其谨慎行事，特别指出疗伤草数量不足。",
+    "玩家询问是否需要将收集到的三件圣物交给某人，村长艾拉解释这些物品是屠龙的关键装备，无需交付他人，应直接用于龙脊山脉的最终决战。",
+    "玩家请求村长艾拉一同前往屠龙，艾拉以年迈和守护村庄为由婉拒，鼓励玩家独自前行并为其祈福。",
+    "玩家向农夫托姆打招呼，托姆表现出多疑和不耐烦，催促玩家离开以免打扰他照看庄稼。",
+    "玩家声称已帮托姆收完麦子并邀请其一同前往铁炉镇，托姆表示怀疑并拒绝同行，强调自己要留在晨光村照看庄稼。",
+    "玩家表示要完成主线任务，林若宁确认其已集齐全部关键道具，并指引其前往龙脊山脉最高峰火山口屠龙。"
+  ],
+  "last_turn_id": 28
+}

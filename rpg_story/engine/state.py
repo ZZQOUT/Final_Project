@@ -476,7 +476,8 @@ def evaluate_main_trial_readiness(state: GameState) -> tuple[bool, Dict[str, Dic
         return False, {}
     required = main.required_items or {}
     if not required:
-        return False, {}
+        # Allow finale to proceed even when the generator produced no explicit item gate.
+        return True, {}
     progress: Dict[str, Dict[str, int]] = {}
     for item, need in required.items():
         have = _inventory_amount_for_item(state.inventory, item)

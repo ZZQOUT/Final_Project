@@ -351,6 +351,34 @@ def test_main_guidance_points_to_realtime_finale_npc_location() -> None:
     assert "Mila" in guidance
 
 
+def test_main_trial_readiness_true_when_no_required_items() -> None:
+    world = _world_with_quest(required=1)
+    state = GameState(
+        session_id="sess_no_required",
+        created_at=datetime.now(timezone.utc).isoformat(),
+        world=world,
+        player_location="town",
+        npc_locations={"npc_herbalist": "town"},
+        quest_journal={
+            "main_healing": {
+                "quest_id": "main_healing",
+                "title": "Village Remedy",
+                "category": "main",
+                "status": "active",
+                "objective": "Collect healing herbs.",
+                "giver_npc_id": "npc_herbalist",
+                "required_items": {},
+                "collected_items": {},
+            }
+        },
+        quests={"main_healing": "active"},
+        main_quest_id="main_healing",
+    )
+    ready, progress = evaluate_main_trial_readiness(state)
+    assert ready is True
+    assert progress == {}
+
+
 def test_main_progress_tracks_inventory_but_needs_trial_to_complete() -> None:
     world = _world_with_quest(required=2)
     state = GameState(

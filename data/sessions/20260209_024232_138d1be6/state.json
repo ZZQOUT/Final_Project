@@ -1,0 +1,551 @@
+{
+  "session_id": "20260209_024232_138d1be6",
+  "created_at": "2026-02-09T02:43:32.777489+00:00",
+  "world": {
+    "world_id": "w_dq001",
+    "title": "勇者斗恶龙",
+    "world_bible": {
+      "tech_level": "medieval",
+      "narrative_language": "zh",
+      "magic_rules": "魔法由古代符文驱动，需吟唱咒语并消耗魔力水晶。只有被选中的法师或神殿祭司才能安全使用。",
+      "tone": "史诗奇幻，充满冒险与牺牲精神，强调勇气、忠诚与命运的对抗。",
+      "anachronism_policy": null,
+      "taboos": [
+        "背叛盟友",
+        "亵渎神殿",
+        "伤害平民"
+      ],
+      "do_not_mention": [
+        "智能手机",
+        "互联网",
+        "信用卡",
+        "汽车",
+        "飞机",
+        "电脑",
+        "电力",
+        "枪械"
+      ],
+      "anachronism_blocklist": [
+        "智能手机",
+        "互联网",
+        "信用卡",
+        "汽车",
+        "飞机",
+        "电脑",
+        "电力",
+        "枪械"
+      ]
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "晨光村",
+        "kind": "town",
+        "description": "一个宁静的小村庄，坐落在山脚之下，是勇者的故乡。村中石屋错落，炊烟袅袅，村民淳朴友善。",
+        "connected_to": [
+          "loc_002"
+        ],
+        "tags": [
+          "和平",
+          "起始点",
+          "农田"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "迷雾森林",
+        "kind": "forest",
+        "description": "浓雾终年不散的古老森林，传说中藏有通往龙巢的秘密小径。林中常有哥布林出没，旅人需谨慎。",
+        "connected_to": [
+          "loc_001",
+          "loc_003"
+        ],
+        "tags": [
+          "危险",
+          "神秘",
+          "怪物"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "铁锤镇",
+        "kind": "town",
+        "description": "矮人与人类混居的矿业小镇，以锻造武器和盔甲闻名。镇中心有巨大的熔炉日夜不息。",
+        "connected_to": [
+          "loc_002",
+          "loc_004"
+        ],
+        "tags": [
+          "工业",
+          "交易",
+          "防御"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "龙脊山脉",
+        "kind": "dungeon",
+        "description": "高耸入云的险峻山脉，恶龙盘踞于山顶洞穴。山道狭窄，风雪交加，唯有真正的勇者方能登顶。",
+        "connected_to": [
+          "loc_003"
+        ],
+        "tags": [
+          "终极挑战",
+          "寒冷",
+          "龙巢"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_001",
+        "name": "老村长艾尔文",
+        "profession": "村长",
+        "traits": [
+          "慈祥",
+          "睿智",
+          "谨慎"
+        ],
+        "goals": [
+          "保护村民安全",
+          "引导勇者踏上征途"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.8,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.2,
+        "disposition_to_player": 4,
+        "refusal_style": "我会尽力帮助你，但请不要鲁莽行事。"
+      },
+      {
+        "npc_id": "npc_002",
+        "name": "莉娜",
+        "profession": "草药师",
+        "traits": [
+          "温柔",
+          "乐于助人",
+          "细心"
+        ],
+        "goals": [
+          "收集稀有药草",
+          "治愈受伤的旅人"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.9,
+        "stubbornness": 0.1,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 5,
+        "refusal_style": "我愿意为你准备药水，只要你平安归来。"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "格鲁姆",
+        "profession": "猎人",
+        "traits": [
+          "粗犷",
+          "独立",
+          "多疑"
+        ],
+        "goals": [
+          "狩猎森林中的猛兽",
+          "保护村庄不受侵扰"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.4,
+        "stubbornness": 0.7,
+        "risk_tolerance": 0.8,
+        "disposition_to_player": 2,
+        "refusal_style": "我不信任陌生人，除非你证明自己有用。"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "影子凯尔",
+        "profession": "盗贼",
+        "traits": [
+          "狡猾",
+          "机警",
+          "自私"
+        ],
+        "goals": [
+          "寻找宝藏",
+          "避开守卫"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.3,
+        "stubbornness": 0.6,
+        "risk_tolerance": 0.9,
+        "disposition_to_player": 0,
+        "refusal_style": "帮你可以，但得先付定金。"
+      },
+      {
+        "npc_id": "npc_005",
+        "name": "森林守护者奥拉",
+        "profession": "德鲁伊",
+        "traits": [
+          "神秘",
+          "公正",
+          "自然亲和"
+        ],
+        "goals": [
+          "维持森林平衡",
+          "阻止滥伐"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.6,
+        "stubbornness": 0.5,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": 3,
+        "refusal_style": "若你尊重自然，我便助你一臂之力。"
+      },
+      {
+        "npc_id": "npc_006",
+        "name": "铁匠布洛克",
+        "profession": "铁匠",
+        "traits": [
+          "豪爽",
+          "勤劳",
+          "固执"
+        ],
+        "goals": [
+          "打造最强武器",
+          "训练学徒"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.7,
+        "stubbornness": 0.8,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 4,
+        "refusal_style": "我可以为你打造武器，但材料得你自己找。"
+      },
+      {
+        "npc_id": "npc_007",
+        "name": "商人玛莎",
+        "profession": "商人",
+        "traits": [
+          "精明",
+          "圆滑",
+          "慷慨"
+        ],
+        "goals": [
+          "扩大贸易网络",
+          "收购稀有物品"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.85,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.7,
+        "disposition_to_player": 3,
+        "refusal_style": "成交！不过下次记得带点好货来。"
+      },
+      {
+        "npc_id": "npc_008",
+        "name": "矮人战士托格",
+        "profession": "战士",
+        "traits": [
+          "勇敢",
+          "忠诚",
+          "暴躁"
+        ],
+        "goals": [
+          "保卫铁锤镇",
+          "寻找失落的族人"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.75,
+        "stubbornness": 0.9,
+        "risk_tolerance": 0.95,
+        "disposition_to_player": 4,
+        "refusal_style": "只要你敢上，我就陪你打！"
+      },
+      {
+        "npc_id": "npc_009",
+        "name": "龙骑士残魂",
+        "profession": "幽灵",
+        "traits": [
+          "悲壮",
+          "执着",
+          "威严"
+        ],
+        "goals": [
+          "指引勇者击败恶龙",
+          "完成未竟使命"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.95,
+        "stubbornness": 0.4,
+        "risk_tolerance": 1.0,
+        "disposition_to_player": 5,
+        "refusal_style": "孩子，拿起这把剑，替我完成最后的誓言。"
+      },
+      {
+        "npc_id": "npc_auto_001",
+        "name": "凯洛",
+        "profession": "药师",
+        "traits": [
+          "谨慎",
+          "多疑"
+        ],
+        "goals": [
+          "守护家园"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.35,
+        "stubbornness": 0.75,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": -1,
+        "refusal_style": "冷淡保守"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "你自幼在晨光村长大，近日村庄接连遭受怪物袭击。村长艾尔文告诉你，唯有击败盘踞在龙脊山脉的恶龙，才能终结灾祸。",
+    "initial_quest": "前往迷雾森林，寻找通往龙巢的线索。",
+    "main_quest": {
+      "quest_id": "quest_main_001",
+      "title": "屠龙勇士",
+      "category": "main",
+      "description": "主线推进条件：先完成各支线任务，获得任务奖励物品，再返回推进终章。",
+      "objective": "完成支线并收集关键战利品：火焰抗性药水 x3，屠龙之剑 x1，金币 x100，龙鳞护符 x1",
+      "giver_npc_id": "npc_001",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "火焰抗性药水": 3,
+        "屠龙之剑": 1,
+        "金币": 100,
+        "龙鳞护符": 1
+      },
+      "reward_items": {},
+      "reward_hint": "龙之心可用来净化被诅咒的土地，勇者称号将使你受万民敬仰。"
+    },
+    "side_quests": [
+      {
+        "quest_id": "quest_side_001",
+        "title": "森林的馈赠",
+        "category": "side",
+        "description": "德鲁伊奥拉请求你采集三株月光草，以制作抵御龙焰的药水。",
+        "objective": "在迷雾森林中采集3株月光草，交给奥拉。",
+        "giver_npc_id": "npc_005",
+        "suggested_location": "loc_002",
+        "required_items": {
+          "月光草": 3
+        },
+        "reward_items": {
+          "火焰抗性药水": 3
+        },
+        "reward_hint": "这些药水能让你在龙焰中坚持更久。"
+      },
+      {
+        "quest_id": "quest_side_002",
+        "title": "铁匠的试炼",
+        "category": "side",
+        "description": "铁匠布洛克需要龙鳞来打造屠龙之剑，但他无法亲自前往龙巢。",
+        "objective": "从迷雾森林深处的哥布林营地夺回被盗的龙鳞护符。",
+        "giver_npc_id": "npc_006",
+        "suggested_location": "loc_002",
+        "required_items": {
+          "口粮": 2
+        },
+        "reward_items": {
+          "屠龙之剑": 1
+        },
+        "reward_hint": "这把剑专为斩杀恶龙而铸，锋利无比。"
+      },
+      {
+        "quest_id": "quest_side_003",
+        "title": "商人的委托",
+        "category": "side",
+        "description": "商人玛莎愿以重金收购龙鳞护符，但她真正目的是将其献给神殿以换取庇护。",
+        "objective": "将龙鳞护符交给玛莎。",
+        "giver_npc_id": "npc_007",
+        "suggested_location": "loc_003",
+        "required_items": {
+          "龙鳞护符": 1
+        },
+        "reward_items": {
+          "金币": 100,
+          "龙鳞护符": 1
+        },
+        "reward_hint": "她会复制一份护符给你，原件用于神殿仪式。"
+      }
+    ],
+    "map_layout": [
+      {
+        "location_id": "loc_001",
+        "x": 10.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_002",
+        "x": 35.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_003",
+        "x": 60.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_004",
+        "x": 85.0,
+        "y": 20.0
+      }
+    ]
+  },
+  "player_location": "loc_002",
+  "npc_locations": {
+    "npc_001": "loc_001",
+    "npc_002": "loc_001",
+    "npc_003": "loc_001",
+    "npc_004": "loc_002",
+    "npc_005": "loc_002",
+    "npc_006": "loc_003",
+    "npc_007": "loc_003",
+    "npc_008": "loc_003",
+    "npc_009": "loc_004",
+    "npc_auto_001": "loc_004"
+  },
+  "flags": {
+    "met_npc_006": true,
+    "met_npc_002": true,
+    "met_npc_003": true,
+    "met_npc_005": true,
+    "met_npc_007": true,
+    "met_npc_009": true,
+    "met_npc_001": true
+  },
+  "quests": {
+    "quest_main_001": "completed",
+    "quest_side_001": "completed",
+    "quest_side_002": "completed",
+    "quest_side_003": "completed"
+  },
+  "quest_journal": {
+    "quest_main_001": {
+      "quest_id": "quest_main_001",
+      "title": "屠龙勇士",
+      "category": "main",
+      "status": "completed",
+      "objective": "完成支线并收集关键战利品：火焰抗性药水 x3，屠龙之剑 x1，金币 x100，龙鳞护符 x1",
+      "guidance": "交付进度：火焰抗性药水 已交付0/3（背包3），屠龙之剑 已交付0/1（背包1），金币 已交付0/100（背包100），龙鳞护符 已交付0/1（背包2）",
+      "giver_npc_id": "npc_001",
+      "required_items": {
+        "火焰抗性药水": 3,
+        "屠龙之剑": 1,
+        "金币": 100,
+        "龙鳞护符": 1
+      },
+      "collected_items": {
+        "火焰抗性药水": 3,
+        "屠龙之剑": 1,
+        "金币": 100,
+        "龙鳞护符": 1
+      },
+      "reward_items": {},
+      "reward_hint": "龙之心可用来净化被诅咒的土地，勇者称号将使你受万民敬仰。"
+    },
+    "quest_side_001": {
+      "quest_id": "quest_side_001",
+      "title": "森林的馈赠",
+      "category": "side",
+      "status": "completed",
+      "objective": "在迷雾森林中采集3株月光草，交给奥拉。",
+      "guidance": "支线已完成，奖励已发放。",
+      "giver_npc_id": "npc_005",
+      "required_items": {
+        "月光草": 3
+      },
+      "collected_items": {
+        "月光草": 3
+      },
+      "reward_items": {
+        "火焰抗性药水": 3
+      },
+      "reward_hint": "完成任务后将获得火焰抗性药水 x3。"
+    },
+    "quest_side_002": {
+      "quest_id": "quest_side_002",
+      "title": "铁匠的试炼",
+      "category": "side",
+      "status": "completed",
+      "objective": "交给铁匠布洛克两份口粮，以换取屠龙之剑。",
+      "guidance": "交付进度：口粮 已交付0/2（背包6）",
+      "giver_npc_id": "npc_006",
+      "required_items": {
+        "口粮": 2
+      },
+      "collected_items": {
+        "口粮": 2
+      },
+      "reward_items": {
+        "屠龙之剑": 1
+      },
+      "reward_hint": "屠龙之剑 x1"
+    },
+    "quest_side_003": {
+      "quest_id": "quest_side_003",
+      "title": "商人的委托",
+      "category": "side",
+      "status": "completed",
+      "objective": "将龙鳞护符交给玛莎。",
+      "guidance": "支线已完成，奖励已发放。",
+      "giver_npc_id": "npc_007",
+      "required_items": {
+        "龙鳞护符": 1
+      },
+      "collected_items": {
+        "龙鳞护符": 1
+      },
+      "reward_items": {
+        "金币": 100,
+        "龙鳞护符": 1
+      },
+      "reward_hint": "金币 x100, 龙鳞护符 x1"
+    }
+  },
+  "main_quest_id": "quest_main_001",
+  "inventory": {
+    "口粮": 4,
+    "疗伤草药": 1,
+    "火焰抗性药水": 3,
+    "龙鳞护符": 2,
+    "金币": 100,
+    "屠龙之剑": 1,
+    "月光草种子": 3,
+    "疗伤草种子": 3
+  },
+  "location_resource_stock": {
+    "loc_001": {
+      "口粮": 2
+    },
+    "loc_002": {
+      "疗伤草": 4,
+      "硬木": 3,
+      "月光草": 4,
+      "口粮": 3
+    },
+    "loc_003": {
+      "口粮": 2,
+      "龙鳞护符": 2
+    },
+    "loc_004": {
+      "远古碎片": 4,
+      "铁铆钉": 2
+    }
+  },
+  "recent_summaries": [
+    "玩家首次与铁匠布洛克对话，布洛克要求说明来意。",
+    "玩家表明要屠龙，铁匠布洛克提出需用两份口粮换取屠龙之剑，并激活了‘铁匠的试炼’任务。",
+    "玩家首次与草药师莉娜对话，莉娜表示愿意提供帮助。",
+    "莉娜赠予玩家一瓶疗伤草药，并提示迷雾森林中的月光草对完成任务很重要。",
+    "玩家首次与猎人格鲁姆对话，请求其一同屠龙，但格鲁姆表示不信任并质疑玩家的能力。",
+    "玩家首次与森林守护者奥拉对话，奥拉提出需采集月光草以换取火焰抗性药水，并确认了‘森林的馈赠’任务细节。",
+    "玩家首次与商人玛莎对话，玛莎提出用一枚龙鳞护符换取一百金币和归还的护符，正式确认‘商人的委托’任务细节。",
+    "玩家再次与商人玛莎对话，玛莎重申用一枚龙鳞护符换取一百金币和归还护符的委托，催促玩家完成‘商人的委托’任务。",
+    "玩家向铁匠布洛克交付了两份口粮，完成了‘铁匠的试炼’任务，获得屠龙之剑。",
+    "玩家在龙脊山脉询问恶龙位置，龙骑士残魂确认其已具备屠龙条件，并指引其前往山顶洞穴。",
+    "玩家向莉娜索要草药种子，莉娜表示可以提供，但建议优先使用现成药水。",
+    "玩家坚持索要草药种子，莉娜最终给予月光草和疗伤草种子各三粒，并叮嘱其种植条件。",
+    "玩家向老村长艾尔文问好，村长对其完成任务表示欣慰。",
+    "玩家询问恶龙是否还活着，老村长艾尔文确认恶龙仍在，并暗示屠龙任务尚未真正完成。"
+  ],
+  "last_turn_id": 16
+}

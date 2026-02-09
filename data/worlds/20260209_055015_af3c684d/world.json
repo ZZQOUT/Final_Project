@@ -1,0 +1,467 @@
+{
+  "world_id": "w_dragon_slayer_001",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "narrative_language": "zh",
+    "magic_rules": "魔法存在于世界中，但仅限于特定职业（如法师、祭司）使用。普通村民无法施法，但可借助魔法物品。",
+    "tone": "史诗奇幻，带有英雄主义色彩，强调勇气与牺牲。",
+    "anachronism_policy": "严格禁止现代科技或概念出现。",
+    "taboos": [
+      "背叛王国",
+      "亵渎神明",
+      "伤害无辜"
+    ],
+    "do_not_mention": [
+      "智能手机",
+      "互联网",
+      "信用卡",
+      "汽车",
+      "电脑",
+      "飞机"
+    ],
+    "anachronism_blocklist": []
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "晨光村",
+      "kind": "town",
+      "description": "一个宁静的小村庄，位于王国边境。村民们以农耕为生，最近因恶龙威胁而人心惶惶。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "starting",
+        "peaceful",
+        "rural"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "迷雾森林",
+      "kind": "forest",
+      "description": "一片常年笼罩浓雾的古老森林，传说中藏有神秘生物和古代遗物。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "dangerous",
+        "mystical"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "断桥驿站",
+      "kind": "bridge",
+      "description": "一座年久失修的石桥，连接晨光村与远方的山脉。桥边有个小驿站，供旅人歇脚。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "travel",
+        "remote"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "古法师塔",
+      "kind": "dungeon",
+      "description": "废弃的法师塔，曾是强大魔法师的研究场所。如今被怪物占据，但仍有珍贵魔法物品遗留。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "magic",
+        "ruins"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "铁炉堡",
+      "kind": "castle",
+      "description": "矮人建造的坚固堡垒，以其精湛的锻造技艺闻名。堡内可打造强力武器与防具。",
+      "connected_to": [
+        "loc_003",
+        "loc_006"
+      ],
+      "tags": [
+        "fortified",
+        "crafting"
+      ]
+    },
+    {
+      "location_id": "loc_006",
+      "name": "龙之谷",
+      "kind": "dungeon",
+      "description": "恶龙盘踞的险恶山谷，终日火焰缭绕。唯有最勇敢的勇者才敢踏入此地。",
+      "connected_to": [
+        "loc_005"
+      ],
+      "tags": [
+        "final_battle",
+        "dangerous"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "老村长艾德温",
+      "profession": "村长",
+      "traits": [
+        "慈祥",
+        "谨慎",
+        "传统"
+      ],
+      "goals": [
+        "保护村民安全",
+        "寻找勇者对抗恶龙"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.8,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 3,
+      "refusal_style": "唉，年轻人，这太危险了，但如果你坚持……"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "猎人莉娜",
+      "profession": "猎人",
+      "traits": [
+        "独立",
+        "机敏",
+        "实用主义"
+      ],
+      "goals": [
+        "探索迷雾森林",
+        "收集稀有草药"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.5,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 1,
+      "refusal_style": "我有自己的事要做，别指望我帮你。"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "商人托比",
+      "profession": "旅行商人",
+      "traits": [
+        "精明",
+        "友善",
+        "贪财"
+      ],
+      "goals": [
+        "赚取金币",
+        "安全抵达下一个城镇"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 2,
+      "refusal_style": "这个价格不能再低了，朋友！"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "精灵向导瑟兰",
+      "profession": "向导",
+      "traits": [
+        "优雅",
+        "知识渊博",
+        "冷静"
+      ],
+      "goals": [
+        "守护森林秘密",
+        "协助值得信赖的冒险者"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.7,
+      "stubbornness": 0.4,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 2,
+      "refusal_style": "若你心怀恶意，我不会为你引路。"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "守林人布鲁克",
+      "profession": "守林人",
+      "traits": [
+        "粗暴",
+        "忠诚",
+        "多疑"
+      ],
+      "goals": [
+        "驱逐入侵者",
+        "保护森林生态"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.3,
+      "stubbornness": 0.9,
+      "risk_tolerance": 0.7,
+      "disposition_to_player": -1,
+      "refusal_style": "滚出我的森林！这里不欢迎外人！"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "驿站老板玛莎",
+      "profession": "驿站老板",
+      "traits": [
+        "热情",
+        "健谈",
+        "乐于助人"
+      ],
+      "goals": [
+        "维持驿站运营",
+        "帮助旅人安全通行"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.9,
+      "stubbornness": 0.1,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 4,
+      "refusal_style": "没问题，亲爱的！让我想想办法。"
+    },
+    {
+      "npc_id": "npc_auto_001",
+      "name": "林晨曦",
+      "profession": "药师",
+      "traits": [
+        "谨慎",
+        "多疑"
+      ],
+      "goals": [
+        "守护家园"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.35,
+      "stubbornness": 0.75,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": -1,
+      "refusal_style": "冷淡保守"
+    },
+    {
+      "npc_id": "npc_008",
+      "name": "法师学徒米拉",
+      "profession": "法师学徒",
+      "traits": [
+        "好奇",
+        "胆小",
+        "勤奋"
+      ],
+      "goals": [
+        "找回法师塔的遗失典籍",
+        "成为正式法师"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.7,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 3,
+      "refusal_style": "我……我不敢去那里，但也许你能帮我？"
+    },
+    {
+      "npc_id": "npc_auto_002",
+      "name": "林子涵",
+      "profession": "猎人",
+      "traits": [
+        "冷静",
+        "理性"
+      ],
+      "goals": [
+        "收集情报"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.55,
+      "stubbornness": 0.45,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 1,
+      "refusal_style": "简洁克制"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "矮人铁匠格罗姆",
+      "profession": "铁匠",
+      "traits": [
+        "固执",
+        "技艺高超",
+        "重诺"
+      ],
+      "goals": [
+        "打造传奇武器",
+        "保卫铁炉堡"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.6,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 2,
+      "refusal_style": "材料不够？那别浪费我的时间！"
+    },
+    {
+      "npc_id": "npc_auto_003",
+      "name": "林若宁",
+      "profession": "商贩",
+      "traits": [
+        "勇敢",
+        "冲动"
+      ],
+      "goals": [
+        "猎杀威胁"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.7,
+      "stubbornness": 0.35,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 0,
+      "refusal_style": "急躁直接"
+    },
+    {
+      "npc_id": "npc_009",
+      "name": "龙骑士残魂",
+      "profession": "幽灵",
+      "traits": [
+        "悲壮",
+        "执着",
+        "沉默"
+      ],
+      "goals": [
+        "指引勇者击败恶龙",
+        "完成未竟使命"
+      ],
+      "starting_location": "loc_006",
+      "obedience_level": 1.0,
+      "stubbornness": 0.0,
+      "risk_tolerance": 1.0,
+      "disposition_to_player": 5,
+      "refusal_style": "拿起圣剑，终结黑暗！"
+    },
+    {
+      "npc_id": "npc_auto_004",
+      "name": "林思远",
+      "profession": "卫兵",
+      "traits": [
+        "热情",
+        "果断"
+      ],
+      "goals": [
+        "协助旅人"
+      ],
+      "starting_location": "loc_006",
+      "obedience_level": 0.85,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 3,
+      "refusal_style": "直爽友好"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "恶龙肆虐王国边境，晨光村危在旦夕。老村长艾德温召集所有可用之人，希望能找到一位真正的勇者。",
+  "initial_quest": "与老村长艾德温交谈，了解恶龙的威胁并接受初步任务。",
+  "main_quest": {
+    "quest_id": "quest_main_001",
+    "title": "屠龙勇士",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+    "objective": "完成支线并收集关键道具：勇气之心 x1，龙鳞盾 x1，圣剑 x1",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_006",
+    "required_items": {
+      "勇气之心": 1,
+      "龙鳞盾": 1,
+      "圣剑": 1
+    },
+    "reward_items": {},
+    "reward_hint": "王国将赐予你无尽荣耀与财富。"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_001",
+      "title": "法师塔的秘密",
+      "category": "side",
+      "description": "法师学徒米拉请求你进入古法师塔，找回遗失的魔法典籍。",
+      "objective": "从古法师塔带回《火焰魔法初阶》。（需求：疗伤草 x2，硬木 x2）",
+      "giver_npc_id": "npc_008",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "疗伤草": 2,
+        "硬木": 2
+      },
+      "reward_items": {
+        "勇气之心": 1
+      },
+      "reward_hint": "这颗宝石蕴含无畏之力，或许对你有帮助。"
+    },
+    {
+      "quest_id": "quest_side_002",
+      "title": "矮人的委托",
+      "category": "side",
+      "description": "矮人铁匠格罗姆需要龙鳞来打造一面坚不可摧的盾牌。",
+      "objective": "从迷雾森林深处的龙裔巢穴取得一片龙鳞。（需求：奇异小物 x2）",
+      "giver_npc_id": "npc_007",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "奇异小物": 2
+      },
+      "reward_items": {
+        "龙鳞盾": 1
+      },
+      "reward_hint": "这面盾牌能抵御龙焰，保你一命。"
+    },
+    {
+      "quest_id": "quest_side_003",
+      "title": "精灵的试炼",
+      "category": "side",
+      "description": "精灵向导瑟兰要求你证明自己的勇气，才能获得圣剑的线索。",
+      "objective": "在迷雾森林中击败三只影狼。（需求：远古碎片 x2，铁铆钉 x1）",
+      "giver_npc_id": "npc_004",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "远古碎片": 2,
+        "铁铆钉": 1
+      },
+      "reward_items": {
+        "圣剑": 1
+      },
+      "reward_hint": "圣剑埋藏于铁炉堡地窖，凭此信物可取。"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 20.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 40.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 40.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 60.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 60.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_006",
+      "x": 80.0,
+      "y": 60.0
+    }
+  ]
+}
