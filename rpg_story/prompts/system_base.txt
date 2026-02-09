@@ -9,4 +9,4 @@ quest_updates MUST be an object/dictionary. If no updates, use {} (not []).
 quest_progress_updates MUST be a list. If no updates, use [].
 inventory_delta MUST be an object/dictionary of item->signed int. If no updates, use {}.
 npc_moves MUST be a list. If no moves, use [] (not {}).
-Stay consistent with the medieval world constraints.
+Stay consistent with world_bible constraints (tech_level, tone, narrative_language).

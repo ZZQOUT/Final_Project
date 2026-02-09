@@ -1,2 +1,3 @@
-Style: concise, second-person, grounded fantasy tone.
-Avoid modern references.
+Style: concise, second-person.
+Match world_bible tone and setting genre.
+Avoid anachronisms relative to world_bible.tech_level.

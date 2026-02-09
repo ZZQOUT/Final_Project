@@ -9,6 +9,8 @@ from rpg_story.persistence.store import (
     load_state,
     append_turn_log,
     read_turn_logs,
+    append_story_summary,
+    read_story_summaries,
     validate_session_id,
 )
 
@@ -127,3 +129,16 @@ def test_invalid_session_id_rejected():
     for sid in bad_ids:
         with pytest.raises(ValueError):
             validate_session_id(sid)
+
+
+def test_story_summary_roundtrip(tmp_path: Path):
+    sessions_root = tmp_path / "sessions"
+    record_a = {"session_id": "s1", "world_title": "A", "summary": "first"}
+    record_b = {"session_id": "s2", "world_title": "B", "summary": "second"}
+    append_story_summary(record_a, sessions_root)
+    append_story_summary(record_b, sessions_root)
+    got = read_story_summaries(sessions_root, limit=10)
+    assert len(got) == 2
+    # Read order is newest first.
+    assert got[0]["session_id"] == "s2"
+    assert got[1]["session_id"] == "s1"

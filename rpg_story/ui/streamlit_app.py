@@ -19,7 +19,12 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from rpg_story.config import load_config
 from rpg_story.engine.orchestrator import TurnPipeline
-from rpg_story.engine.state import sync_quest_journal, deliver_items_to_npc
+from rpg_story.engine.state import (
+    sync_quest_journal,
+    deliver_items_to_npc,
+    evaluate_main_trial_readiness,
+    resolve_main_trial,
+)
 from rpg_story.llm.client import QwenOpenAICompatibleClient
 from rpg_story.models.world import WorldSpec, GameState, LocationSpec
 from rpg_story.persistence.store import (
@@ -29,8 +34,14 @@ from rpg_story.persistence.store import (
     read_turn_logs,
     default_sessions_root,
     append_turn_log,
+    append_story_summary,
+    read_story_summaries,
 )
-from rpg_story.world.generator import generate_world_spec, initialize_game_state
+from rpg_story.world.generator import (
+    generate_world_spec,
+    initialize_game_state,
+    suggest_location_resource_template,
+)
 
 
 st.set_page_config(page_title="RPG Story Prototype", layout="wide")
@@ -382,31 +393,12 @@ def _quest_suggested_location(world: WorldSpec, quest_id: str) -> str | None:
     return None
 
 
-def _base_resource_template(loc: LocationSpec, prefer_chinese: bool) -> dict[str, int]:
-    kind = (loc.kind or "").lower()
-    if prefer_chinese:
-        mapping = {
-            "forest": {"疗伤草": 4, "硬木": 3},
-            "dungeon": {"远古碎片": 4, "铁铆钉": 2},
-            "bridge": {"铁铆钉": 3, "硬木": 2},
-            "castle": {"徽印碎片": 5},
-            "town": {"口粮": 2},
-            "shop": {"布条": 3},
-        }
-        return mapping.get(kind, {"奇异小物": 2})
-    mapping = {
-        "forest": {"healing_herb": 4, "hardwood": 3},
-        "dungeon": {"ancient_shard": 4, "iron_rivet": 2},
-        "bridge": {"iron_rivet": 3, "hardwood": 2},
-        "castle": {"crest_fragment": 5},
-        "town": {"ration": 2},
-        "shop": {"cloth_strip": 3},
-    }
-    return mapping.get(kind, {"strange_trinket": 2})
+def _base_resource_template(world: WorldSpec, loc: LocationSpec, prefer_chinese: bool) -> dict[str, int]:
+    return suggest_location_resource_template(world, loc, prefer_chinese=prefer_chinese)
 
 
 def _initial_resource_stock(state: GameState, loc: LocationSpec, prefer_chinese: bool) -> dict[str, int]:
-    stock = dict(_base_resource_template(loc, prefer_chinese))
+    stock = dict(_base_resource_template(state.world, loc, prefer_chinese))
     for quest_id, quest in state.quest_journal.items():
         if quest.category != "side":
             continue
@@ -428,19 +420,19 @@ def _ensure_location_stock(state: GameState, loc: LocationSpec, prefer_chinese: 
     loc_id = loc.location_id
     existing = state.location_resource_stock.get(loc_id)
     target = _initial_resource_stock(state, loc, prefer_chinese)
-    if isinstance(existing, dict):
-        normalized = {str(k): max(0, int(v)) for k, v in existing.items()}
-    else:
-        normalized = {}
+    if not isinstance(existing, dict):
+        state.location_resource_stock[loc_id] = {str(item): max(0, int(count)) for item, count in target.items()}
+        return True
+    normalized = {str(k): max(0, int(v)) for k, v in existing.items()}
     changed = False
+    # Keep depletion persistent; only seed NEW item types that were not present before.
     for item, count in target.items():
-        if int(normalized.get(item, 0)) < int(count):
-            normalized[item] = int(count)
-            changed = True
-    if normalized != existing:
+        if item in normalized:
+            continue
+        normalized[item] = max(0, int(count))
         changed = True
-    if not normalized:
-        normalized = target
+    if not normalized and target:
+        normalized = {str(item): max(0, int(count)) for item, count in target.items()}
         changed = True
     state.location_resource_stock[loc_id] = normalized
     return changed
@@ -561,7 +553,11 @@ def _render_quests(state: GameState, prefer_chinese: bool) -> None:
     main = state.quest_journal.get(state.main_quest_id) if state.main_quest_id else None
     if main:
         st.markdown(f"**主线**：{main.title} [{main.status}]")
-        st.write(main.objective or main.guidance or "暂无描述。")
+        st.write(main.objective or "暂无描述。")
+        if main.guidance:
+            st.caption(main.guidance)
+        if main.status != "completed":
+            st.caption(_main_trial_target_text(state, prefer_chinese))
         if main.required_items:
             req = []
             for item, need in main.required_items.items():
@@ -781,6 +777,193 @@ def _append_delivery_log(
     append_turn_log(session_id, record, sessions_root)
 
 
+def _all_side_quests_completed(state: GameState) -> bool:
+    world_side_ids = [q.quest_id for q in state.world.side_quests]
+    if not world_side_ids:
+        return False
+    for quest_id in world_side_ids:
+        progress = state.quest_journal.get(quest_id)
+        if not progress or progress.status != "completed":
+            return False
+    return True
+
+
+def _remaining_side_quest_titles(state: GameState) -> list[str]:
+    remaining: list[str] = []
+    for quest in state.world.side_quests:
+        progress = state.quest_journal.get(quest.quest_id)
+        if progress and progress.status == "completed":
+            continue
+        title = progress.title if progress else quest.title
+        remaining.append(title)
+    return remaining
+
+
+def _main_trial_target(state: GameState) -> tuple[str | None, str | None]:
+    world = state.world
+    main_spec = world.main_quest
+    if not main_spec:
+        return None, None
+    npc_id = main_spec.giver_npc_id
+    if not npc_id and world.npcs:
+        npc_id = world.npcs[0].npc_id
+    # NPC may move during gameplay; use realtime npc_locations first.
+    loc_id = state.npc_locations.get(npc_id) if npc_id else None
+    if not loc_id:
+        loc_id = main_spec.suggested_location
+    if not loc_id:
+        loc_id = state.player_location
+    return npc_id, loc_id
+
+
+def _main_trial_target_text(state: GameState, prefer_chinese: bool) -> str:
+    npc_id, loc_id = _main_trial_target(state)
+    npc_name = next((npc.name for npc in state.world.npcs if npc.npc_id == npc_id), npc_id or "")
+    loc_name = state.world.get_location(loc_id).name if loc_id and state.world.get_location(loc_id) else (loc_id or "")
+    if prefer_chinese:
+        if npc_name and loc_name:
+            return f"终局目标：前往【{loc_name}】并与【{npc_name}】对话。"
+        if npc_name:
+            return f"终局目标：与【{npc_name}】对话。"
+        if loc_name:
+            return f"终局目标：前往【{loc_name}】。"
+        return "终局目标：等待终局 NPC 线索。"
+    if npc_name and loc_name:
+        return f"Final target: go to [{loc_name}] and talk to [{npc_name}]."
+    if npc_name:
+        return f"Final target: talk to [{npc_name}]."
+    if loc_name:
+        return f"Final target: go to [{loc_name}]."
+    return "Final target: waiting for finale NPC clue."
+
+
+def _can_trigger_main_trial(state: GameState, selected_npc_id: str | None) -> bool:
+    if not state.main_quest_id or state.main_quest_id not in state.quest_journal:
+        return False
+    main = state.quest_journal[state.main_quest_id]
+    if main.status == "completed":
+        return False
+    target_npc, target_loc = _main_trial_target(state)
+    if not target_npc or not target_loc:
+        return False
+    if selected_npc_id != target_npc:
+        return False
+    if state.player_location != target_loc:
+        return False
+    if not _all_side_quests_completed(state):
+        return False
+    return True
+
+
+def _build_story_summary_fallback(
+    world: WorldSpec,
+    state: GameState,
+    logs: list[dict],
+    prefer_chinese: bool,
+) -> str:
+    recent_talks = [str(r.get("player_text") or "").strip() for r in logs[-8:] if str(r.get("player_text") or "").strip()]
+    key_items = ", ".join([f"{_display_item_name(k, prefer_chinese)} x{v}" for k, v in sorted(state.inventory.items())]) or (
+        "无" if prefer_chinese else "none"
+    )
+    main_title = state.quest_journal.get(state.main_quest_id).title if state.main_quest_id and state.main_quest_id in state.quest_journal else world.initial_quest
+    if prefer_chinese:
+        parts = [
+            f"在《{world.title}》中，你从{world.starting_hook}出发，逐步推进主线“{main_title}”。",
+            f"你在旅途中与多个 NPC 交流，并完成关键支线，最终整备了决战所需物资：{key_items}。",
+            "经过最终考验，你成功通过终章挑战，世界危机得以解除。",
+        ]
+        if recent_talks:
+            parts.append("旅程中的关键抉择包括：" + "；".join(recent_talks[-3:]) + "。")
+        return "\n\n".join(parts)
+    parts = [
+        f"In '{world.title}', you began with: {world.starting_hook}, then advanced the main arc '{main_title}'.",
+        f"Through dialogue and side quests, you prepared key resources for the finale: {key_items}.",
+        "You passed the final trial and resolved the central world crisis.",
+    ]
+    if recent_talks:
+        parts.append("Key choices included: " + " | ".join(recent_talks[-3:]) + ".")
+    return "\n\n".join(parts)
+
+
+def _build_story_summary(
+    cfg,
+    world: WorldSpec,
+    state: GameState,
+    logs: list[dict],
+    prefer_chinese: bool,
+    has_api_key: bool,
+) -> str:
+    fallback = _build_story_summary_fallback(world, state, logs, prefer_chinese)
+    if not has_api_key:
+        return fallback
+    try:
+        llm = QwenOpenAICompatibleClient(cfg)
+        language = "Chinese" if prefer_chinese else "English"
+        snippet_lines = []
+        for record in logs[-20:]:
+            player_text = str(record.get("player_text") or "").strip()
+            output = record.get("output") or {}
+            narration = str((output.get("narration") if isinstance(output, dict) else "") or "").strip()
+            npc_lines = output.get("npc_dialogue", []) if isinstance(output, dict) else []
+            if player_text:
+                snippet_lines.append(f"P: {player_text}")
+            for line in npc_lines:
+                text = str((line or {}).get("text") or "").strip()
+                if text:
+                    snippet_lines.append(f"N: {text}")
+            if narration:
+                snippet_lines.append(f"S: {narration}")
+        convo = "\n".join(snippet_lines[-40:])
+        system = "You are a narrative summarizer for RPG session recaps."
+        user = (
+            f"Write the recap in {language} only.\n"
+            "Use 2-4 short paragraphs, coherent and story-like.\n"
+            "Do not output JSON, markdown list, or code.\n\n"
+            f"World title: {world.title}\n"
+            f"Starting hook: {world.starting_hook}\n"
+            f"Initial quest: {world.initial_quest}\n"
+            f"Current inventory: {json.dumps(state.inventory, ensure_ascii=False)}\n"
+            f"Quest journal: {json.dumps({k: v.model_dump() for k, v in state.quest_journal.items()}, ensure_ascii=False)}\n"
+            f"Recent dialogue and narration:\n{convo}\n"
+        )
+        text = llm.generate_text(
+            [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            temperature=0.4,
+            top_p=0.9,
+        ).strip()
+        if text:
+            return text
+    except Exception:
+        pass
+    return fallback
+
+
+def _render_story_history_panel(sessions_root: Path) -> None:
+    st.markdown("---")
+    st.subheader("游玩历史总结")
+    history = read_story_summaries(sessions_root, limit=30)
+    if not history:
+        st.caption("暂无历史总结。")
+        return
+    for idx, rec in enumerate(history):
+        world_title = rec.get("world_title") or rec.get("world_id") or "Unknown World"
+        timestamp = rec.get("timestamp") or rec.get("created_at") or ""
+        title = f"{world_title} | {timestamp}" if timestamp else str(world_title)
+        with st.expander(title, expanded=(idx == 0)):
+            st.write(rec.get("summary") or "")
+            sid = rec.get("session_id")
+            if sid:
+                st.caption(f"session_id: {sid}")
+
+
+def _render_story_summary_page(summary_record: dict, prefer_chinese: bool) -> None:
+    st.header("终局总结" if prefer_chinese else "Final Recap")
+    st.markdown(f"**{summary_record.get('world_title', '')}**")
+    st.write(summary_record.get("summary", ""))
+
 cfg = load_config("configs/config.yaml")
 sessions_root = default_sessions_root(cfg)
 api_key_env = cfg.llm.api_key_env or "DASHSCOPE_API_KEY"
@@ -794,6 +977,10 @@ if "quest_notice" not in st.session_state:
     st.session_state.quest_notice = []
 if "inventory_notice" not in st.session_state:
     st.session_state.inventory_notice = []
+if "summary_view" not in st.session_state:
+    st.session_state.summary_view = False
+if "summary_record" not in st.session_state:
+    st.session_state.summary_record = None
 
 st.title("Adaptive RPG Storytelling")
 
@@ -806,6 +993,8 @@ with st.sidebar:
         st.rerun()
 
 if not st.session_state.session_id:
+    st.session_state.summary_view = False
+    st.session_state.summary_record = None
     st.header("创建世界")
     world_prompt = st.text_area(
         "世界设定（World Prompt）",
@@ -854,6 +1043,7 @@ if not st.session_state.session_id:
                     st.rerun()
                 except Exception as exc:
                     st.error(f"加载失败：{exc}")
+    _render_story_history_panel(sessions_root)
 else:
     session_id = st.session_state.session_id
     try:
@@ -866,7 +1056,29 @@ else:
     world = _load_world_for_session(cfg, session_id, state.world)
     state = state.model_copy(deep=True)
     state.world = world
+    synced_state = sync_quest_journal(state)
+    if synced_state.model_dump() != state.model_dump():
+        state = synced_state
+        save_state(session_id, state, sessions_root)
     prefer_chinese = _prefer_chinese_ui(world)
+    trial_pending_key = f"final_trial_pending_{session_id}"
+    if trial_pending_key not in st.session_state:
+        st.session_state[trial_pending_key] = False
+
+    if st.session_state.summary_view and isinstance(st.session_state.summary_record, dict):
+        _render_story_summary_page(st.session_state.summary_record, prefer_chinese)
+        col_back_a, col_back_b = st.columns([1, 1])
+        with col_back_a:
+            if st.button("返回创建页"):
+                st.session_state.session_id = None
+                st.session_state.summary_view = False
+                st.session_state.summary_record = None
+                st.rerun()
+        with col_back_b:
+            if st.button("返回当前会话"):
+                st.session_state.summary_view = False
+                st.rerun()
+        st.stop()
 
     col_left, col_mid, col_right = st.columns([1.25, 2.25, 1.15])
     npcs_here = [npc for npc in world.npcs if state.npc_locations.get(npc.npc_id) == state.player_location]
@@ -1030,7 +1242,9 @@ else:
                         notices=delivery_notices,
                         prefer_chinese=prefer_chinese,
                     )
-                    player_delivery_text = "我交付了：" + _inventory_delta_text(delivered_delta, prefer_chinese)
+                    player_delivery_text = (
+                        "我交付了：" if prefer_chinese else "I delivered: "
+                    ) + _inventory_delta_text(delivered_delta, prefer_chinese)
                     _append_delivery_log(
                         session_id=session_id,
                         sessions_root=sessions_root,
@@ -1046,11 +1260,87 @@ else:
                     )
                     quest_lines.extend(delivery_notices)
                     if reward_delta:
-                        quest_lines.append("支线奖励发放：" + _inventory_delta_text(reward_delta, prefer_chinese))
+                        prefix = "支线奖励发放：" if prefer_chinese else "Side reward granted: "
+                        quest_lines.append(prefix + _inventory_delta_text(reward_delta, prefer_chinese))
+                    if _can_trigger_main_trial(new_state, selected_npc_id):
+                        st.session_state[trial_pending_key] = True
+                        quest_lines.append("终局 NPC 已准备好，是否发起最终考验？" if prefer_chinese else "The finale NPC is ready. Start the final trial?")
                     st.session_state.move_notice = moved_lines
                     st.session_state.quest_notice = quest_lines
                     st.session_state.inventory_notice = inv_lines
                     st.rerun()
+
+        if _can_trigger_main_trial(state, selected_npc_id):
+            st.markdown("**最终考验**" if prefer_chinese else "**Final Trial**")
+            if st.session_state.get(trial_pending_key, False):
+                st.warning(
+                    "你已满足支线前置条件。是否现在接受终局考验？"
+                    if prefer_chinese
+                    else "You completed side prerequisites. Do you want to start the final trial now?"
+                )
+                c_yes, c_no = st.columns([1, 1])
+                with c_yes:
+                    if st.button("参加最终考验" if prefer_chinese else "Start Final Trial", key=f"trial_yes_{session_id}"):
+                        ready, progress = evaluate_main_trial_readiness(state)
+                        if not ready:
+                            updated_state = resolve_main_trial(state, passed=False)
+                            save_state(session_id, updated_state, sessions_root)
+                            missing = []
+                            for item, info in progress.items():
+                                if int(info.get("have", 0)) < int(info.get("need", 0)):
+                                    missing.append(
+                                        f"{_display_item_name(item, prefer_chinese)} {info.get('have', 0)}/{info.get('need', 0)}"
+                                    )
+                            st.session_state.quest_notice = [
+                                ("最终考验失败，缺少：" if prefer_chinese else "Final trial failed. Missing: ")
+                                + ("，".join(missing) if prefer_chinese else ", ".join(missing))
+                            ]
+                            st.session_state[trial_pending_key] = False
+                            st.rerun()
+                        updated_state = resolve_main_trial(state, passed=True)
+                        save_state(session_id, updated_state, sessions_root)
+                        logs_now = read_turn_logs(session_id, sessions_root)
+                        summary_text = _build_story_summary(
+                            cfg=cfg,
+                            world=world,
+                            state=updated_state,
+                            logs=logs_now,
+                            prefer_chinese=prefer_chinese,
+                            has_api_key=has_api_key,
+                        )
+                        summary_record = {
+                            "session_id": session_id,
+                            "world_id": world.world_id,
+                            "world_title": world.title,
+                            "timestamp": datetime.now(timezone.utc).isoformat(),
+                            "summary": summary_text,
+                            "language": "zh" if prefer_chinese else "en",
+                        }
+                        append_story_summary(summary_record, sessions_root)
+                        st.session_state.summary_record = summary_record
+                        st.session_state.summary_view = True
+                        st.session_state[trial_pending_key] = False
+                        st.rerun()
+                with c_no:
+                    if st.button("暂不参加" if prefer_chinese else "Not now", key=f"trial_no_{session_id}"):
+                        st.session_state[trial_pending_key] = False
+                        st.rerun()
+            else:
+                if not _all_side_quests_completed(state):
+                    remaining = _remaining_side_quest_titles(state)
+                    if remaining:
+                        st.info(
+                            ("尚未完成支线：" + "，".join(remaining))
+                            if prefer_chinese
+                            else ("Incomplete side quests: " + ", ".join(remaining))
+                        )
+                    else:
+                        st.info(
+                            "请先完成全部支线任务。"
+                            if prefer_chinese
+                            else "Please complete all side quests first."
+                        )
+                st.info(_main_trial_target_text(state, prefer_chinese))
 
         player_text = st.text_input("你的输入")
         if st.button("Send") and player_text:
@@ -1077,6 +1367,9 @@ else:
                     moved_lines, quest_lines, inv_lines = _state_diff_notices(
                         before_state, updated_state, world, prefer_chinese
                     )
+                    if _can_trigger_main_trial(updated_state, selected_npc_id):
+                        st.session_state[trial_pending_key] = True
+                        quest_lines.append("终局 NPC 已准备好，是否发起最终考验？" if prefer_chinese else "The finale NPC is ready. Start the final trial?")
                     st.session_state.move_notice = moved_lines
                     st.session_state.quest_notice = quest_lines
                     st.session_state.inventory_notice = inv_lines

@@ -7,7 +7,12 @@ from rpg_story.config import load_config
 from rpg_story.llm.client import MockLLMClient
 from rpg_story.models.world import WorldSpec, WorldBibleRules, LocationSpec, NPCProfile
 from rpg_story.persistence.store import load_state
-from rpg_story.world.generator import generate_world_spec, initialize_game_state, create_new_session
+from rpg_story.world.generator import (
+    generate_world_spec,
+    initialize_game_state,
+    create_new_session,
+    suggest_location_resource_template,
+)
 from rpg_story.world.consistency import find_anachronisms
 
 
@@ -172,6 +177,81 @@ def chinese_world_json() -> str:
     )
 
 
+def chinese_sidequest_mismatch_json() -> str:
+    return (
+        "{"
+        '"world_id":"world_zh_mismatch",'
+        '"title":"边境试炼",'
+        '"world_bible":{"tech_level":"medieval","narrative_language":"zh","magic_rules":"低魔","tone":"冒险"},'
+        '"locations":['
+        ' {"location_id":"loc_001","name":"晨光村","kind":"town","description":"村庄。","connected_to":["loc_002"],"tags":[]},'
+        ' {"location_id":"loc_002","name":"迷雾森林","kind":"forest","description":"森林。","connected_to":["loc_001"],"tags":[]}'
+        '],'
+        '"npcs":['
+        ' {"npc_id":"npc_001","name":"莉娜","profession":"药师","traits":["谨慎"],"goals":["采药"],"starting_location":"loc_001",'
+        '  "obedience_level":0.4,"stubbornness":0.7,"risk_tolerance":0.2,"disposition_to_player":0,"refusal_style":"紧张"},'
+        ' {"npc_id":"npc_002","name":"凯洛","profession":"守卫","traits":["勇敢"],"goals":["巡逻"],"starting_location":"loc_002",'
+        '  "obedience_level":0.8,"stubbornness":0.2,"risk_tolerance":0.8,"disposition_to_player":1,"refusal_style":"直接"}'
+        '],'
+        '"starting_location":"loc_001",'
+        '"starting_hook":"恶龙威胁边境。",'
+        '"initial_quest":"完成准备并屠龙。",'
+        '"side_quests":['
+        ' {"quest_id":"side_mismatch","title":"寻找秘银","category":"side","description":"请帮我完成试炼。",'
+        '  "objective":"前往迷雾森林寻找秘银。","giver_npc_id":"npc_001","suggested_location":"loc_002",'
+        '  "required_items":{"月光草":3},"reward_items":{"龙鳞护符":1},"reward_hint":"完成后可得护符。"}'
+        "]"
+        "}"
+    )
+
+
+def mostly_english_with_single_cjk_json() -> str:
+    return (
+        "{"
+        '"world_id":"world_mix_001",'
+        '"title":"龙",'
+        '"world_bible":{"tech_level":"medieval","magic_rules":"low","tone":"adventurous"},'
+        '"locations":['
+        ' {"location_id":"loc_001","name":"Town","kind":"town","description":"A small town.","connected_to":["loc_002"],"tags":[]},'
+        ' {"location_id":"loc_002","name":"Forest","kind":"forest","description":"A dark forest.","connected_to":["loc_001"],"tags":[]}'
+        '],'
+        '"npcs":['
+        ' {"npc_id":"npc_001","name":"Ala","profession":"Merchant","traits":["curious"],"goals":["trade"],"starting_location":"loc_001",'
+        '  "obedience_level":0.5,"stubbornness":0.5,"risk_tolerance":0.5,"disposition_to_player":0,"refusal_style":"polite"},'
+        ' {"npc_id":"npc_002","name":"Bren","profession":"Guard","traits":["stern"],"goals":["protect"],"starting_location":"loc_002",'
+        '  "obedience_level":0.6,"stubbornness":0.4,"risk_tolerance":0.4,"disposition_to_player":0,"refusal_style":"firm"}'
+        '],'
+        '"starting_location":"loc_001",'
+        '"starting_hook":"You arrive.",'
+        '"initial_quest":"Find the relic."'
+        "}"
+    )
+
+
+def campus_world_json() -> str:
+    return (
+        "{"
+        '"world_id":"world_campus_001",'
+        '"title":"青岚大学恋爱物语",'
+        '"world_bible":{"tech_level":"modern","narrative_language":"zh","magic_rules":"无","tone":"青春校园"},'
+        '"locations":['
+        ' {"location_id":"loc_001","name":"教学楼","kind":"classroom","description":"午后阳光照进走廊。","connected_to":["loc_002","loc_003"],"tags":["校园"]},'
+        ' {"location_id":"loc_002","name":"图书馆","kind":"library","description":"安静的自习区。","connected_to":["loc_001","loc_004"],"tags":["学习"]},'
+        ' {"location_id":"loc_003","name":"宿舍区","kind":"dorm","description":"夜晚灯光温暖。","connected_to":["loc_001"],"tags":["生活"]},'
+        ' {"location_id":"loc_004","name":"樱花广场","kind":"square","description":"表白热点。","connected_to":["loc_002"],"tags":["恋爱","活动"]}'
+        '],'
+        '"npcs":['
+        ' {"npc_id":"npc_001","name":"赵阳","profession":"图书管理员","traits":["温和"],"goals":["帮助学生"],"starting_location":"loc_002",'
+        '  "obedience_level":0.6,"stubbornness":0.3,"risk_tolerance":0.3,"disposition_to_player":1,"refusal_style":"礼貌"}'
+        '],'
+        '"starting_location":"loc_001",'
+        '"starting_hook":"你在校园里遇见了让你心动的人。",'
+        '"initial_quest":"准备校园文化节并完成告白。",'
+        '"side_quests":[]'
+        "}"
+    )
+
+
 def _has_ascii_letters(text: str) -> bool:
     return bool(re.search(r"[A-Za-z]", text or ""))
 
@@ -197,6 +277,15 @@ def test_prompt_language_forces_world_language_with_rewrite():
     assert re.search(r"[\u4e00-\u9fff]", world.title)
     assert re.search(r"[\u4e00-\u9fff]", world.starting_hook)
     assert re.search(r"[\u4e00-\u9fff]", world.initial_quest)
+
+
+def test_prompt_language_rewrites_when_world_is_mostly_english_but_contains_cjk():
+    cfg = load_config("configs/config.yaml")
+    llm = MockLLMClient([mostly_english_with_single_cjk_json(), chinese_world_json()])
+    world = generate_world_spec(cfg, llm, "请用中文生成一个中世纪世界")
+    assert world.world_bible.narrative_language == "zh"
+    assert not _has_ascii_letters(world.starting_hook)
+    assert not _has_ascii_letters(world.initial_quest)
 
 
 def test_invalid_connected_to_triggers_rewrite():
@@ -410,3 +499,43 @@ def test_chinese_world_localizes_items_and_dedupes_npc_names():
     for item_name in world.main_quest.required_items.keys():
         assert not _has_ascii_letters(item_name)
     assert "Phoenix Feather" not in world.main_quest.objective
+
+
+def test_side_quest_objective_and_title_are_aligned_with_required_items() -> None:
+    cfg = load_config("configs/config.yaml")
+    llm = MockLLMClient([chinese_sidequest_mismatch_json()])
+    world = generate_world_spec(cfg, llm, "请生成中文中世纪屠龙世界")
+
+    side = next(q for q in world.side_quests if q.quest_id == "side_mismatch")
+    assert "月光草" in side.objective
+    assert "月光草" in side.title
+
+
+def test_campus_world_uses_theme_aware_professions_items_and_resources() -> None:
+    cfg = load_config("configs/config.yaml")
+    llm = MockLLMClient([campus_world_json()])
+    world = generate_world_spec(cfg, llm, "请生成校园恋爱主题世界")
+
+    professions = {npc.profession for npc in world.npcs}
+    assert any(p in professions for p in {"学生", "班长", "图书管理员", "社团干部", "辅导员", "学生会干事"})
+    assert "铁匠" not in professions
+    assert "药师" not in professions
+
+    auto_names = [npc.name for npc in world.npcs if npc.npc_id.startswith("npc_auto_")]
+    assert auto_names
+    assert all(not re.match(r"^(旅者|同学|成员|市民)\d+$", name) for name in auto_names)
+
+    for quest in world.side_quests:
+        required_keys = set(quest.required_items.keys())
+        assert "探险样本" not in required_keys
+        assert "古铁矿" not in required_keys
+
+    assert world.main_quest is not None
+    main_required = set(world.main_quest.required_items.keys())
+    assert "神圣护符" not in main_required
+    assert "龙鳞盾" not in main_required
+
+    library = next(loc for loc in world.locations if loc.location_id == "loc_002")
+    stock = suggest_location_resource_template(world, library, prefer_chinese=True)
+    assert stock
+    assert all(item not in {"探险样本", "古铁矿"} for item in stock.keys())

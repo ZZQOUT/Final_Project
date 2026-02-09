@@ -109,3 +109,35 @@ def read_turn_logs(session_id: str, sessions_root: Path, limit: int | None = Non
             except json.JSONDecodeError:
                 continue
     return results
+
+
+def append_story_summary(record: Dict[str, Any], sessions_root: Path) -> Path:
+    """Append one story summary record to stories.jsonl under the data root."""
+    root = Path(sessions_root)
+    history_path = root.parent / "stories.jsonl"
+    history_path.parent.mkdir(parents=True, exist_ok=True)
+    with history_path.open("a", encoding="utf-8") as f:
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+    return history_path
+
+
+def read_story_summaries(sessions_root: Path, limit: int | None = 50) -> List[Dict[str, Any]]:
+    """Read stories.jsonl records in reverse chronological order."""
+    root = Path(sessions_root)
+    history_path = root.parent / "stories.jsonl"
+    if not history_path.exists():
+        return []
+    records: List[Dict[str, Any]] = []
+    with history_path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                records.append(json.loads(line))
+            except json.JSONDecodeError:
+                continue
+    records.reverse()
+    if limit is not None:
+        return records[: max(0, int(limit))]
+    return records
