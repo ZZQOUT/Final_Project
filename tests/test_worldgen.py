@@ -252,6 +252,30 @@ def campus_world_json() -> str:
     )
 
 
+def bad_npc_identity_world_json() -> str:
+    return (
+        "{"
+        '"world_id":"world_bad_npc_identity",'
+        '"title":"龙影边境",'
+        '"world_bible":{"tech_level":"medieval","narrative_language":"zh","magic_rules":"低魔","tone":"冒险"},'
+        '"locations":['
+        ' {"location_id":"loc_001","name":"龙脊山脉","kind":"mountain","description":"冰冷山脉。","connected_to":["loc_002"],"tags":[]},'
+        ' {"location_id":"loc_002","name":"晨光村","kind":"town","description":"宁静村庄。","connected_to":["loc_001"],"tags":[]},'
+        ' {"location_id":"loc_003","name":"迷雾森林","kind":"forest","description":"迷雾缭绕。","connected_to":["loc_002"],"tags":[]}'
+        '],'
+        '"npcs":['
+        ' {"npc_id":"npc_001","name":"龙脊山脉龙脊山脉工作人员","profession":"龙脊山脉工作人员","traits":["谨慎"],'
+        '  "goals":["巡查道路"],"starting_location":"loc_001","obedience_level":0.4,"stubbornness":0.6,'
+        '  "risk_tolerance":0.3,"disposition_to_player":0,"refusal_style":"直接"}'
+        '],'
+        '"starting_location":"loc_002",'
+        '"starting_hook":"你抵达边境村落。",'
+        '"initial_quest":"整备后前往山脉。",'
+        '"side_quests":[]'
+        "}"
+    )
+
+
 def _has_ascii_letters(text: str) -> bool:
     return bool(re.search(r"[A-Za-z]", text or ""))
 
@@ -539,3 +563,44 @@ def test_campus_world_uses_theme_aware_professions_items_and_resources() -> None
     stock = suggest_location_resource_template(world, library, prefer_chinese=True)
     assert stock
     assert all(item not in {"探险样本", "古铁矿"} for item in stock.keys())
+
+
+def test_main_quest_requires_side_rewards_not_collectible_materials() -> None:
+    cfg = load_config("configs/config.yaml")
+    llm = MockLLMClient([campus_world_json()])
+    world = generate_world_spec(cfg, llm, "请生成校园恋爱主题世界")
+
+    side_reward_items = {item for quest in world.side_quests for item in quest.reward_items.keys()}
+    side_required_items = {item for quest in world.side_quests for item in quest.required_items.keys()}
+    assert world.main_quest is not None
+    assert set(world.main_quest.required_items.keys()) == side_reward_items
+    assert set(world.main_quest.required_items.keys()).isdisjoint(side_required_items)
+
+
+def test_collectible_item_types_are_diverse_and_location_stock_differs() -> None:
+    cfg = load_config("configs/config.yaml")
+    llm = MockLLMClient([campus_world_json()])
+    world = generate_world_spec(cfg, llm, "请生成校园恋爱主题世界")
+
+    collectible_items = {item for quest in world.side_quests for item in quest.required_items.keys()}
+    assert len(collectible_items) >= 5
+
+    stocks = {
+        loc.location_id: suggest_location_resource_template(world, loc, prefer_chinese=True)
+        for loc in world.locations
+    }
+    non_empty = {loc_id: stock for loc_id, stock in stocks.items() if stock}
+    assert non_empty
+    unique_stock_sets = {tuple(sorted(stock.keys())) for stock in non_empty.values()}
+    assert len(unique_stock_sets) >= 2
+
+
+def test_bad_npc_identity_is_rewritten_to_non_duplicate_name_and_profession() -> None:
+    cfg = load_config("configs/config.yaml")
+    llm = MockLLMClient([bad_npc_identity_world_json()])
+    world = generate_world_spec(cfg, llm, "请生成中文中世纪世界")
+
+    bad_npc = next(npc for npc in world.npcs if npc.npc_id == "npc_001")
+    assert bad_npc.name != bad_npc.profession
+    assert "龙脊山脉龙脊山脉" not in bad_npc.name
+    assert "龙脊山脉" not in bad_npc.profession

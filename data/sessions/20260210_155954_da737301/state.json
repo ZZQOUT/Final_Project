@@ -1,0 +1,468 @@
+{
+  "session_id": "20260210_155954_da737301",
+  "created_at": "2026-02-10T16:00:49.251325+00:00",
+  "world": {
+    "world_id": "school_romance_01",
+    "title": "樱花下的告白",
+    "world_bible": {
+      "tech_level": "modern",
+      "narrative_language": "zh",
+      "magic_rules": "无魔法，基于现实校园生活。",
+      "tone": "温馨、青春、略带羞涩的校园恋爱氛围。",
+      "anachronism_policy": null,
+      "taboos": [
+        "暴力",
+        "超自然现象",
+        "成人内容"
+      ],
+      "do_not_mention": [],
+      "anachronism_blocklist": []
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "教学楼",
+        "kind": "school_building",
+        "description": "充满书卷气的教学楼，走廊上贴满了社团招新海报，阳光透过窗户洒在课桌上。",
+        "connected_to": [
+          "loc_002",
+          "loc_003"
+        ],
+        "tags": [
+          "indoors",
+          "classroom",
+          "study"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "天台",
+        "kind": "rooftop",
+        "description": "视野开阔的天台，是学生午休时的秘密基地，微风中飘着淡淡的樱花香。",
+        "connected_to": [
+          "loc_001"
+        ],
+        "tags": [
+          "outdoors",
+          "quiet",
+          "romantic"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "图书馆",
+        "kind": "library",
+        "description": "安静整洁的图书馆，书架间偶尔传来翻书声，是自习和偶遇的好地方。",
+        "connected_to": [
+          "loc_001",
+          "loc_004"
+        ],
+        "tags": [
+          "indoors",
+          "quiet",
+          "study"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "樱花小径",
+        "kind": "garden_path",
+        "description": "两旁种满樱花树的小路，春天时落英缤纷，是校园情侣最爱的散步地点。",
+        "connected_to": [
+          "loc_003",
+          "loc_005"
+        ],
+        "tags": [
+          "outdoors",
+          "romantic",
+          "scenic"
+        ]
+      },
+      {
+        "location_id": "loc_005",
+        "name": "文化祭筹备室",
+        "kind": "club_room",
+        "description": "堆满装饰材料和海报的房间，文化祭临近，大家正热火朝天地准备活动。",
+        "connected_to": [
+          "loc_004",
+          "loc_006"
+        ],
+        "tags": [
+          "indoors",
+          "busy",
+          "creative"
+        ]
+      },
+      {
+        "location_id": "loc_006",
+        "name": "音乐教室",
+        "kind": "music_room",
+        "description": "钢琴声悠扬的音乐教室，墙上挂着历届合唱比赛的奖状，空气中弥漫着音符的气息。",
+        "connected_to": [
+          "loc_005"
+        ],
+        "tags": [
+          "indoors",
+          "artistic",
+          "practice"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_001",
+        "name": "青木阳菜",
+        "profession": "学生（班长）",
+        "traits": [
+          "认真",
+          "温柔",
+          "有点害羞"
+        ],
+        "goals": [
+          "组织好文化祭",
+          "帮助同学",
+          "隐藏自己的心意"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.7,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 2,
+        "refusal_style": "低头摆弄衣角，小声说‘现在还不行……’"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "高桥翔",
+        "profession": "学生（常客）",
+        "traits": [
+          "孤僻",
+          "观察力强",
+          "讨厌被打扰"
+        ],
+        "goals": [
+          "独自看云",
+          "避开人群",
+          "记录天气变化"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.2,
+        "stubbornness": 0.9,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": -1,
+        "refusal_style": "冷淡地转过头，说‘别烦我。’"
+      },
+      {
+        "npc_id": "npc_002",
+        "name": "佐藤健太",
+        "profession": "学生（图书委员）",
+        "traits": [
+          "内向",
+          "可靠",
+          "喜欢读书"
+        ],
+        "goals": [
+          "整理完所有新书",
+          "帮朋友找参考资料",
+          "不被注意"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.8,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": 1,
+        "refusal_style": "推了推眼镜，轻声说‘抱歉，我现在有事。’"
+      },
+      {
+        "npc_id": "npc_006",
+        "name": "田中一郎",
+        "profession": "学生（园艺社）",
+        "traits": [
+          "随和",
+          "热爱自然",
+          "话不多"
+        ],
+        "goals": [
+          "照料樱花树",
+          "收集落花",
+          "制作干花书签"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.8,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 2,
+        "refusal_style": "温和地摇头，说‘下次吧，我得先浇水。’"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "铃木美咲",
+        "profession": "学生（文化祭执行委员）",
+        "traits": [
+          "活泼",
+          "热情",
+          "有点急躁"
+        ],
+        "goals": [
+          "完成文化祭布置",
+          "拉更多人帮忙",
+          "吃遍所有小吃摊"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.9,
+        "stubbornness": 0.1,
+        "risk_tolerance": 0.7,
+        "disposition_to_player": 3,
+        "refusal_style": "双手叉腰，笑着说‘你可不能偷懒哦！’"
+      },
+      {
+        "npc_id": "npc_005",
+        "name": "小林由纪",
+        "profession": "学生（合唱团成员）",
+        "traits": [
+          "优雅",
+          "细心",
+          "有点完美主义"
+        ],
+        "goals": [
+          "练好独唱部分",
+          "调音钢琴",
+          "保持教室整洁"
+        ],
+        "starting_location": "loc_006",
+        "obedience_level": 0.6,
+        "stubbornness": 0.5,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 2,
+        "refusal_style": "微微皱眉，说‘等我练完这一段好吗？’"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "新学期开始，你注意到班长青木阳菜最近总是心不在焉，似乎有什么心事。文化祭即将到来，或许这是个机会？",
+    "initial_quest": "和青木阳菜聊聊文化祭的安排，了解她的近况。",
+    "main_quest": {
+      "quest_id": "quest_main_01",
+      "title": "樱花下的告白",
+      "category": "main",
+      "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+      "objective": "完成支线并收集关键道具：手工樱花书签 x1，文化祭特别徽章 x1，合唱团纪念乐谱 x1",
+      "giver_npc_id": "npc_001",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "手工樱花书签": 1,
+        "文化祭特别徽章": 1,
+        "合唱团纪念乐谱": 1
+      },
+      "reward_items": {},
+      "reward_hint": "告白成功后，阳菜会送你她亲手织的围巾。"
+    },
+    "side_quests": [
+      {
+        "quest_id": "quest_side_01",
+        "title": "收集天台遗物",
+        "category": "side",
+        "description": "佐藤健太需要帮忙整理一批新到的参考书，完成后他会送你一份特别的礼物。",
+        "objective": "在图书馆帮佐藤健太整理10本书（需求：天台遗物 x2，天台手稿 x1）",
+        "giver_npc_id": "npc_002",
+        "suggested_location": "loc_003",
+        "required_items": {
+          "天台遗物": 2,
+          "天台手稿": 1
+        },
+        "reward_items": {
+          "手工樱花书签": 1
+        },
+        "reward_hint": "由园艺社提供的樱花压制而成的精美书签。（奖励：手工樱花书签 x1）"
+      },
+      {
+        "quest_id": "quest_side_02",
+        "title": "文化祭徽章",
+        "category": "side",
+        "description": "铃木美咲需要有人帮忙分发宣传单，作为回报，她会给你一枚限量版文化祭徽章。",
+        "objective": "在樱花小径分发20份文化祭传单（需求：图书馆手稿 x3，图书馆矿石 x2）",
+        "giver_npc_id": "npc_003",
+        "suggested_location": "loc_004",
+        "required_items": {
+          "图书馆手稿": 3,
+          "图书馆矿石": 2
+        },
+        "reward_items": {
+          "文化祭特别徽章": 1
+        },
+        "reward_hint": "只有工作人员才有的闪亮徽章。（奖励：文化祭特别徽章 x1）"
+      },
+      {
+        "quest_id": "quest_side_03",
+        "title": "音乐教室的请求",
+        "category": "side",
+        "description": "小林由纪希望有人能帮她校对合唱团的乐谱，完成后她会送你一份纪念乐谱。",
+        "objective": "在音乐教室帮小林由纪校对5页乐谱（需求：樱花小径矿石 x2，樱花小径徽记 x1）",
+        "giver_npc_id": "npc_005",
+        "suggested_location": "loc_006",
+        "required_items": {
+          "樱花小径矿石": 2,
+          "樱花小径徽记": 1
+        },
+        "reward_items": {
+          "合唱团纪念乐谱": 1
+        },
+        "reward_hint": "印有合唱团签名的珍贵乐谱。（奖励：合唱团纪念乐谱 x1）"
+      }
+    ],
+    "map_layout": [
+      {
+        "location_id": "loc_001",
+        "x": 50.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_002",
+        "x": 50.0,
+        "y": 20.0
+      },
+      {
+        "location_id": "loc_003",
+        "x": 30.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_004",
+        "x": 30.0,
+        "y": 70.0
+      },
+      {
+        "location_id": "loc_005",
+        "x": 50.0,
+        "y": 70.0
+      },
+      {
+        "location_id": "loc_006",
+        "x": 70.0,
+        "y": 70.0
+      }
+    ]
+  },
+  "player_location": "loc_003",
+  "npc_locations": {
+    "npc_001": "loc_003",
+    "npc_004": "loc_002",
+    "npc_002": "loc_003",
+    "npc_006": "loc_004",
+    "npc_003": "loc_005",
+    "npc_005": "loc_006"
+  },
+  "flags": {
+    "met_npc_001": true
+  },
+  "quests": {
+    "quest_main_01": "active",
+    "quest_side_01": "active",
+    "quest_side_02": "active",
+    "quest_side_03": "active"
+  },
+  "quest_journal": {
+    "quest_main_01": {
+      "quest_id": "quest_main_01",
+      "title": "樱花下的告白",
+      "category": "main",
+      "status": "active",
+      "objective": "完成支线并收集关键道具：手工樱花书签 x1，文化祭特别徽章 x1，合唱团纪念乐谱 x1",
+      "guidance": "主线准备进度：手工樱花书签 0/1，文化祭特别徽章 0/1，合唱团纪念乐谱 0/1",
+      "giver_npc_id": "npc_001",
+      "required_items": {
+        "手工樱花书签": 1,
+        "文化祭特别徽章": 1,
+        "合唱团纪念乐谱": 1
+      },
+      "collected_items": {
+        "手工樱花书签": 0,
+        "文化祭特别徽章": 0,
+        "合唱团纪念乐谱": 0
+      },
+      "reward_items": {},
+      "reward_hint": "告白成功后，阳菜会送你她亲手织的围巾。"
+    },
+    "quest_side_01": {
+      "quest_id": "quest_side_01",
+      "title": "收集天台遗物",
+      "category": "side",
+      "status": "active",
+      "objective": "在图书馆帮佐藤健太整理10本书（需求：天台遗物 x2，天台手稿 x1）",
+      "guidance": "交付进度：天台遗物 已交付0/2（背包0），天台手稿 已交付0/1（背包0）",
+      "giver_npc_id": "npc_002",
+      "required_items": {
+        "天台遗物": 2,
+        "天台手稿": 1
+      },
+      "collected_items": {
+        "天台遗物": 0,
+        "天台手稿": 0
+      },
+      "reward_items": {
+        "手工樱花书签": 1
+      },
+      "reward_hint": "由园艺社提供的樱花压制而成的精美书签。（奖励：手工樱花书签 x1）"
+    },
+    "quest_side_02": {
+      "quest_id": "quest_side_02",
+      "title": "文化祭徽章",
+      "category": "side",
+      "status": "active",
+      "objective": "在樱花小径分发20份文化祭传单（需求：图书馆手稿 x3，图书馆矿石 x2）",
+      "guidance": "交付进度：图书馆手稿 已交付0/3（背包0），图书馆矿石 已交付0/2（背包0）",
+      "giver_npc_id": "npc_003",
+      "required_items": {
+        "图书馆手稿": 3,
+        "图书馆矿石": 2
+      },
+      "collected_items": {
+        "图书馆手稿": 0,
+        "图书馆矿石": 0
+      },
+      "reward_items": {
+        "文化祭特别徽章": 1
+      },
+      "reward_hint": "只有工作人员才有的闪亮徽章。（奖励：文化祭特别徽章 x1）"
+    },
+    "quest_side_03": {
+      "quest_id": "quest_side_03",
+      "title": "音乐教室的请求",
+      "category": "side",
+      "status": "active",
+      "objective": "在音乐教室帮小林由纪校对5页乐谱（需求：樱花小径矿石 x2，樱花小径徽记 x1）",
+      "guidance": "交付进度：樱花小径矿石 已交付0/2（背包0），樱花小径徽记 已交付0/1（背包0）",
+      "giver_npc_id": "npc_005",
+      "required_items": {
+        "樱花小径矿石": 2,
+        "樱花小径徽记": 1
+      },
+      "collected_items": {
+        "樱花小径矿石": 0,
+        "樱花小径徽记": 0
+      },
+      "reward_items": {
+        "合唱团纪念乐谱": 1
+      },
+      "reward_hint": "印有合唱团签名的珍贵乐谱。（奖励：合唱团纪念乐谱 x1）"
+    }
+  },
+  "main_quest_id": "quest_main_01",
+  "inventory": {},
+  "location_resource_stock": {
+    "loc_001": {
+      "教学楼矿石": 1,
+      "教学楼徽记": 1
+    },
+    "loc_003": {
+      "天台手稿": 2,
+      "天台遗物": 3
+    }
+  },
+  "recent_summaries": [
+    "玩家首次与青木阳菜对话，她表现出些许害羞，但主动提到了文化祭。",
+    "青木阳菜邀请玩家一同前往文化祭筹备室查看布置，语气中透露出犹豫和期待。",
+    "玩家答应陪青木阳菜一起去文化祭筹备室，她显得既开心又紧张，并说明了前往路线。",
+    "青木阳菜与玩家一同出发前往文化祭筹备室，首站是图书馆，她显得有些紧张但努力保持镇定。",
+    "青木阳菜在图书馆向玩家说明了文化祭班级摊位的安排，希望得到帮助，语气中透露出对完美的执着和一丝不安。"
+  ],
+  "last_turn_id": 5
+}

@@ -1,0 +1,406 @@
+{
+  "world_id": "w_dq001",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "narrative_language": "zh",
+    "magic_rules": "魔法源自古代符文与自然元素共鸣，仅限特定血脉或经年训练者使用。过度施法将导致精神枯竭。",
+    "tone": "史诗奇幻，带有希望与牺牲的主题",
+    "anachronism_policy": "严格禁止现代科技元素",
+    "taboos": [
+      "不可亵渎圣物",
+      "不得背叛誓约"
+    ],
+    "do_not_mention": [
+      "智能手机",
+      "互联网",
+      "信用卡",
+      "汽车",
+      "电脑",
+      "电力",
+      "枪械"
+    ],
+    "anachronism_blocklist": [
+      "电池",
+      "塑料",
+      "钢铁工厂",
+      "卫星"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "晨光村",
+      "kind": "town",
+      "description": "坐落于山谷入口的小村庄，以麦田和风车闻名，村民淳朴善良，是勇者的故乡。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "和平",
+        "农业",
+        "起始点"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "迷雾森林",
+      "kind": "forest",
+      "description": "常年被浓雾笼罩的古老森林，栖息着精灵与野兽，传说藏有失落的符文石板。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "危险",
+        "神秘",
+        "资源"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "铁砧镇",
+      "kind": "town",
+      "description": "山脚下的矿业小镇，以锻造技艺著称，铁匠铺林立，是装备补给的重要据点。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "工业",
+        "交易",
+        "工匠"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "水晶湖",
+      "kind": "lake",
+      "description": "湖水清澈如镜，湖底沉睡着古代精灵遗迹，只有纯净之心者方可进入。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "神圣",
+        "试炼",
+        "隐秘"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "黑岩堡",
+      "kind": "castle",
+      "description": "废弃的古老堡垒，如今被亡灵占据，通往恶龙巢穴的必经之路。",
+      "connected_to": [
+        "loc_003",
+        "loc_006"
+      ],
+      "tags": [
+        "危险",
+        "战斗",
+        "废墟"
+      ]
+    },
+    {
+      "location_id": "loc_006",
+      "name": "龙脊峰",
+      "kind": "mountain",
+      "description": "高耸入云的火山之巅，恶龙‘烬喉’盘踞于此，守护着远古宝藏与诅咒。",
+      "connected_to": [
+        "loc_005"
+      ],
+      "tags": [
+        "最终战场",
+        "火焰",
+        "毁灭"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "艾琳",
+      "profession": "村长",
+      "traits": [
+        "慈祥",
+        "智慧",
+        "谨慎"
+      ],
+      "goals": [
+        "保护村民安全",
+        "引导勇者踏上征程"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.8,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 4,
+      "refusal_style": "温和劝阻"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "托林",
+      "profession": "猎人",
+      "traits": [
+        "勇敢",
+        "固执",
+        "直率"
+      ],
+      "goals": [
+        "清除森林中的怪物",
+        "找回失踪的妹妹"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.5,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 2,
+      "refusal_style": "直接拒绝并质疑你的能力"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "莉亚",
+      "profession": "草药师",
+      "traits": [
+        "温柔",
+        "耐心",
+        "博学"
+      ],
+      "goals": [
+        "收集稀有草药",
+        "治愈村民疾病"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.1,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 5,
+      "refusal_style": "委婉解释自己无法离开"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "瑟兰",
+      "profession": "精灵向导",
+      "traits": [
+        "神秘",
+        "冷静",
+        "忠诚"
+      ],
+      "goals": [
+        "守护森林秘密",
+        "协助值得信赖的勇者"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.7,
+      "stubbornness": 0.4,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 3,
+      "refusal_style": "沉默不语，转身离开"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "格鲁姆",
+      "profession": "铁匠",
+      "traits": [
+        "豪爽",
+        "贪杯",
+        "技艺高超"
+      ],
+      "goals": [
+        "打造传奇武器",
+        "偿还酒债"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.6,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.7,
+      "disposition_to_player": 3,
+      "refusal_style": "大笑后说你付不起工钱"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "玛拉",
+      "profession": "矿工",
+      "traits": [
+        "勤劳",
+        "胆小",
+        "诚实"
+      ],
+      "goals": [
+        "找到安全的矿道",
+        "养活家人"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.85,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 4,
+      "refusal_style": "颤抖着请求你别让他冒险"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "奥蕾莉亚",
+      "profession": "湖中祭司",
+      "traits": [
+        "庄严",
+        "公正",
+        "寡言"
+      ],
+      "goals": [
+        "维持湖之结界",
+        "考验勇者之心"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.4,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.1,
+      "disposition_to_player": 0,
+      "refusal_style": "冷冷地宣布你未通过试炼"
+    },
+    {
+      "npc_id": "npc_008",
+      "name": "巴隆",
+      "profession": "退役骑士",
+      "traits": [
+        "坚毅",
+        "悲观",
+        "荣誉感强"
+      ],
+      "goals": [
+        "赎罪",
+        "阻止恶龙复苏"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.65,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": 1,
+      "refusal_style": "叹气后说命运已定"
+    },
+    {
+      "npc_id": "npc_009",
+      "name": "烬喉",
+      "profession": "远古恶龙",
+      "traits": [
+        "傲慢",
+        "贪婪",
+        "狡诈"
+      ],
+      "goals": [
+        "守护宝藏",
+        "吞噬勇者灵魂"
+      ],
+      "starting_location": "loc_006",
+      "obedience_level": 0.0,
+      "stubbornness": 1.0,
+      "risk_tolerance": 1.0,
+      "disposition_to_player": -5,
+      "refusal_style": "喷吐烈焰作为回应"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "恶龙‘烬喉’苏醒，焚毁了边境村落。村长艾琳召集全村，唯有你——被预言选中的勇者，能终结这场灾厄。",
+  "initial_quest": "前往迷雾森林寻找精灵向导瑟兰，获取通往龙巢的线索。",
+  "main_quest": {
+    "quest_id": "quest_main_01",
+    "title": "屠龙救世",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+    "objective": "完成支线并收集关键道具：湖心圣水 x1，龙血淬火剑 x1，精灵符文石板 x1",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_006",
+    "required_items": {
+      "湖心圣水": 1,
+      "龙血淬火剑": 1,
+      "精灵符文石板": 1
+    },
+    "reward_items": {},
+    "reward_hint": "王国的和平与无尽荣耀"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_01",
+      "title": "森林的低语",
+      "category": "side",
+      "description": "精灵向导瑟兰要求你证明自己的纯洁之心，带回水晶湖的圣水。",
+      "objective": "从水晶湖取得湖心圣水（需求：迷雾森林遗物 x2，迷雾森林手稿 x1）",
+      "giver_npc_id": "npc_004",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "迷雾森林遗物": 2,
+        "迷雾森林手稿": 1
+      },
+      "reward_items": {
+        "湖心圣水": 1
+      },
+      "reward_hint": "精灵的信任与进入遗迹的许可（奖励：湖心圣水 x1）"
+    },
+    {
+      "quest_id": "quest_side_02",
+      "title": "收集铁砧镇手稿",
+      "category": "side",
+      "description": "铁匠格鲁姆需要黑岩堡深处的龙血矿石，以打造能伤及恶龙的武器。",
+      "objective": "在黑岩堡找到龙血矿石并交给格鲁姆（需求：铁砧镇手稿 x3，铁砧镇矿石 x2）",
+      "giver_npc_id": "npc_005",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "铁砧镇手稿": 3,
+        "铁砧镇矿石": 2
+      },
+      "reward_items": {
+        "龙血淬火剑": 1
+      },
+      "reward_hint": "一把专为屠龙打造的神兵（奖励：龙血淬火剑 x1）"
+    },
+    {
+      "quest_id": "quest_side_03",
+      "title": "失落的符文",
+      "category": "side",
+      "description": "猎人托林的妹妹在迷雾森林失踪，她曾带着一块古代符文石板。",
+      "objective": "在迷雾森林深处找到托林的妹妹并取回符文石板（需求：水晶湖矿石 x2，水晶湖徽记 x1）",
+      "giver_npc_id": "npc_002",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "水晶湖矿石": 2,
+        "水晶湖徽记": 1
+      },
+      "reward_items": {
+        "精灵符文石板": 1
+      },
+      "reward_hint": "解开古代封印的关键（奖励：精灵符文石板 x1）"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 20.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 40.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 40.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 60.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 60.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_006",
+      "x": 85.0,
+      "y": 50.0
+    }
+  ]
+}

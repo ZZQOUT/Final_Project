@@ -15,34 +15,6 @@ from rpg_story.persistence.store import generate_session_id, save_state, append_
 from rpg_story.world.consistency import validate_world, find_anachronisms
 from rpg_story.world.sanitize import sanitize_world_payload, summarize_changes
 
-ITEM_ALIAS_TO_ZH: dict[str, str] = {
-    "healing_herb": "疗伤草",
-    "hardwood": "硬木",
-    "ancient_shard": "远古碎片",
-    "iron_rivet": "铁铆钉",
-    "crest_fragment": "徽印碎片",
-    "ration": "口粮",
-    "cloth_strip": "布条",
-    "strange_trinket": "奇异小物",
-    "dragon_scale": "龙鳞",
-    "moon_herb": "月光草",
-    "moonlight_herb": "月光草",
-    "ancient_ore": "古铁矿",
-    "royal_leaf": "王庭药叶",
-    "field_sample": "探险样本",
-    "sacred_amulet": "神圣护符",
-    "dragon_scale_shield": "龙鳞盾",
-    "royal_writ": "王国军令",
-    "oath_signet": "古誓纹章",
-    "phoenix_feather": "凤凰羽",
-    "ancient_runeblade": "远古符文刃",
-    "dragonheart_amulet": "龙心护符",
-    "dragon_heart_amulet": "龙心护符",
-    "side_reward_1": "支线凭证1",
-    "side_reward_2": "支线凭证2",
-    "side_reward_3": "支线凭证3",
-}
-
 def _schema_hint() -> str:
     return (
         "WorldSpec JSON with fields: world_id, title, world_bible, locations, npcs, "
@@ -89,7 +61,14 @@ def generate_world_spec(cfg: AppConfig, llm: BaseLLMClient, world_prompt: str) -
         "Generate one concrete main quest (main_quest) with a clear objective aligned to the user prompt's genre. "
         "Generate 1-3 side_quests tied to existing NPCs (e.g. recruit allies, gather supplies), "
         "and each side quest should define reward_items. "
+        "Collectible (side quest required) item types across the generated world should be at least 5 when possible. "
+        "Different locations should emphasize different collectible items instead of repeating the same set. "
+        "Use concrete, in-world item names. Avoid placeholder names such as '<location>样本', '<location>线索', "
+        "'*_sample', '*_clue', '*_material', '*_token'. "
+        "NPC names must be proper names, not placeholders like '居民1'/'村民1'/'Resident 1'. "
+        "NPC profession must fit their starting_location and setting tone. "
         "Main quest required_items should depend on side quest reward_items (main line unlocked via side quests). "
+        "Main quest required_items MUST come from side quest reward_items, not directly collectible materials. "
         "Provide map_layout with relative x/y coordinates for each location (0..100). "
         "Populate world_bible.do_not_mention with terms inconsistent for THIS world. "
         "If tech_level is medieval, include modern tech (smartphone, internet, credit card, etc.). "
@@ -108,6 +87,8 @@ def generate_world_spec(cfg: AppConfig, llm: BaseLLMClient, world_prompt: str) -
             summary = _summarize_banned_matches(anachronism_matches)
             raise ValueError(f"anachronism detected: {summary}")
         world = _enforce_world_language(world, llm, response_format, target_language)
+        if _needs_semantic_polish(world):
+            world = _polish_world_semantics(world, llm, response_format, target_language)
         world = _ensure_story_structures(world, target_language=target_language)
         return world
     except Exception as exc:
@@ -163,6 +144,8 @@ def generate_world_spec(cfg: AppConfig, llm: BaseLLMClient, world_prompt: str) -
                 f"{summary}. keywords: {keywords}. sanitization: {change_summary}"
             )
         world = _enforce_world_language(world, llm, response_format, target_language)
+        if _needs_semantic_polish(world):
+            world = _polish_world_semantics(world, llm, response_format, target_language)
         world = _ensure_story_structures(world, target_language=target_language)
         return world
 
@@ -309,6 +292,72 @@ def _enforce_world_language(
     return fixed_world
 
 
+_NPC_PLACEHOLDER_ZH = re.compile(r"(居民|村民|市民|角色)\s*\d+$")
+_NPC_PLACEHOLDER_EN = re.compile(r"(resident|villager|citizen|character)\s*\d+$", re.IGNORECASE)
+_ITEM_PLACEHOLDER_ZH = re.compile(r"(样本|线索|材料|物资)\s*\d*$")
+_ITEM_PLACEHOLDER_EN = re.compile(r"(sample|clue|material|token)\s*\d*$", re.IGNORECASE)
+
+
+def _needs_semantic_polish(world: WorldSpec) -> bool:
+    loc_kinds = {loc.location_id: str(loc.kind or "").lower() for loc in world.locations}
+    for npc in world.npcs:
+        name = str(npc.name or "").strip()
+        if _NPC_PLACEHOLDER_ZH.search(name) or _NPC_PLACEHOLDER_EN.search(name):
+            return True
+        prof = str(npc.profession or "").strip().lower()
+        kind = loc_kinds.get(npc.starting_location, "")
+        if kind in {"castle", "dungeon", "ruin"} and prof in {"村长", "village chief"}:
+            return True
+    item_names: list[str] = []
+    if world.main_quest:
+        item_names.extend(str(k) for k in (world.main_quest.required_items or {}).keys())
+        item_names.extend(str(k) for k in (world.main_quest.reward_items or {}).keys())
+    for quest in world.side_quests:
+        item_names.extend(str(k) for k in (quest.required_items or {}).keys())
+        item_names.extend(str(k) for k in (quest.reward_items or {}).keys())
+    for item in item_names:
+        text = str(item or "").strip()
+        if not text:
+            continue
+        if _ITEM_PLACEHOLDER_ZH.search(text) or _ITEM_PLACEHOLDER_EN.search(text):
+            return True
+    return False
+
+
+def _polish_world_semantics(
+    world: WorldSpec,
+    llm: BaseLLMClient,
+    response_format: dict,
+    target_language: str,
+) -> WorldSpec:
+    target_name = _language_name(target_language)
+    rewrite_system = (
+        "You are a world-semantic polishing tool. Return ONLY valid JSON. "
+        "Improve semantic quality while preserving structure."
+    )
+    rewrite_user = (
+        f"Polish this WorldSpec in {target_name}.\n"
+        "Requirements:\n"
+        "1) Keep ALL ids and graph structure unchanged: world_id, location_id, npc_id, quest_id, connected_to, "
+        "starting_location, suggested_location, map_layout coordinates, and all numeric fields.\n"
+        "2) NPC names must be proper names (no placeholders like 居民1 / 村民1 / Resident 1 / Character 2).\n"
+        "3) NPC profession must fit the NPC's starting location and setting tone.\n"
+        "4) Quest required_items/reward_items names must be concrete in-world nouns; avoid placeholders like "
+        "<location>样本 / <location>线索 / *_sample / *_clue / *_material / *_token.\n"
+        "5) Keep quest logic and dependencies intact (do not break main->side dependency).\n"
+        "6) Keep narrative language consistent with world_bible.narrative_language.\n\n"
+        f"Original JSON: {json.dumps(world.model_dump(), ensure_ascii=False)}"
+    )
+    fixed = llm.generate_json(rewrite_system, rewrite_user, response_format=response_format)
+    sanitized, _ = sanitize_world_payload(fixed)
+    if not isinstance(sanitized, dict):
+        raise ValueError("semantic polishing failed: payload is not an object")
+    polished = WorldSpec.model_validate(sanitized)
+    if _needs_semantic_polish(polished):
+        raise ValueError("semantic polishing failed: placeholders still remain")
+    return polished
+
+
 def initialize_game_state(world: WorldSpec, session_id: str, created_at: Optional[str] = None) -> GameState:
     created_at = created_at or datetime.now(timezone.utc).isoformat()
     world = _ensure_story_structures(world)
@@ -412,11 +461,11 @@ def _ensure_story_structures(world: WorldSpec, target_language: str | None = Non
         language = "zh" if _is_chinese_world(updated) else "en"
     updated.world_bible.narrative_language = language
     prefer_chinese = language == "zh"
-    theme = _infer_world_theme(updated)
-    updated.npcs = _normalize_npc_professions_by_theme(updated, theme=theme, prefer_chinese=prefer_chinese)
-    updated.npcs = _ensure_npc_density(updated, prefer_chinese=prefer_chinese, theme=theme)
-    updated.npcs = _ensure_unique_npc_names(updated.npcs, prefer_chinese=prefer_chinese)
-    updated.side_quests = _normalize_side_quests(updated, prefer_chinese=prefer_chinese, theme=theme)
+    updated.npcs = _normalize_npc_professions(updated, prefer_chinese=prefer_chinese)
+    updated.npcs = _ensure_npc_density(updated, prefer_chinese=prefer_chinese)
+    updated.npcs = _ensure_unique_npc_names(updated, updated.npcs, prefer_chinese=prefer_chinese)
+    updated.side_quests = _normalize_side_quests(updated, prefer_chinese=prefer_chinese)
+    updated.side_quests = _enforce_side_quest_item_structure(updated, updated.side_quests, prefer_chinese=prefer_chinese)
     main_required = _aggregate_side_rewards(updated.side_quests)
     if not updated.main_quest:
         updated.main_quest = QuestSpec(
@@ -484,276 +533,6 @@ def _is_chinese_world(world: WorldSpec) -> bool:
 def _contains_cjk(text: str) -> bool:
     return bool(re.search(r"[\u4e00-\u9fff]", text or ""))
 
-
-THEME_KEYWORDS_ZH: Dict[str, List[str]] = {
-    "campus": ["校园", "学院", "大学", "高中", "教室", "图书馆", "宿舍", "社团", "学生会", "恋爱", "告白"],
-    "sci_fi": ["太空", "星舰", "机甲", "人工智能", "赛博", "外星", "量子", "空间站"],
-    "modern": ["都市", "公司", "办公室", "地铁", "公寓", "商场", "咖啡馆"],
-    "fantasy": ["王国", "骑士", "巨龙", "魔法", "神殿", "地牢", "冒险者", "勇者"],
-}
-
-THEME_KEYWORDS_EN: Dict[str, List[str]] = {
-    "campus": ["campus", "school", "college", "university", "classroom", "library", "dorm", "club", "romance"],
-    "sci_fi": ["spaceship", "space station", "mecha", "android", "cyber", "quantum", "alien", "galaxy"],
-    "modern": ["city", "office", "apartment", "subway", "mall", "cafe", "corporate"],
-    "fantasy": ["kingdom", "dragon", "magic", "temple", "dungeon", "adventurer", "knight"],
-}
-
-TOKEN_TO_ZH: Dict[str, str] = {
-    "star": "星",
-    "iron": "铁",
-    "ore": "矿",
-    "dragon": "龙",
-    "scale": "鳞",
-    "fragment": "碎片",
-    "letter": "信",
-    "love": "情书",
-    "flower": "花",
-    "bouquet": "花束",
-    "badge": "徽章",
-    "ticket": "票",
-    "book": "书",
-    "library": "图书",
-    "notebook": "笔记本",
-    "note": "笔记",
-    "report": "报告",
-    "camera": "相机",
-    "photo": "照片",
-    "coffee": "咖啡",
-    "milk": "牛奶",
-    "tea": "茶",
-    "coupon": "券",
-    "key": "钥匙",
-    "card": "卡",
-    "sticker": "贴纸",
-    "gift": "礼物",
-    "ring": "戒指",
-    "bracelet": "手链",
-    "amulet": "护符",
-    "chip": "芯片",
-    "battery": "电池",
-    "module": "模块",
-    "data": "数据",
-    "sample": "样本",
-}
-
-ZH_SURNAMES: List[str] = [
-    "林", "陈", "周", "赵", "刘", "黄", "吴", "徐", "孙", "马", "何", "郭", "罗", "朱", "梁", "谢",
-    "宋", "郑", "唐", "韩",
-]
-
-ZH_GIVEN: List[str] = [
-    "晨曦", "子涵", "若宁", "思远", "景行", "以安", "知夏", "清越", "亦辰", "嘉言",
-    "书遥", "可心", "雨桐", "安然", "沐阳", "宛宁", "泽川", "予墨", "舒然", "星河",
-]
-
-EN_FIRST: List[str] = [
-    "Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Avery", "Quinn", "Cameron", "Parker",
-    "Jamie", "Rowan", "Skyler", "Drew", "Reese", "Robin", "Elliot", "Harper", "Hayden", "Blake",
-]
-
-EN_LAST: List[str] = [
-    "Lin", "Chen", "Morris", "Reed", "Bennett", "Walker", "Carter", "Hayes", "Perry", "Brooks",
-    "Turner", "Foster", "Campbell", "Ward", "Price", "Stone", "Bell", "Shaw", "Parker", "Russell",
-]
-
-
-def _infer_world_theme(world: WorldSpec) -> str:
-    text_parts = [world.title or "", world.starting_hook or "", world.initial_quest or "", world.world_bible.tone or ""]
-    for loc in world.locations:
-        text_parts.append(loc.name or "")
-        text_parts.append(loc.kind or "")
-        text_parts.extend(loc.tags or [])
-    for npc in world.npcs:
-        text_parts.append(npc.profession or "")
-        text_parts.extend(npc.goals or [])
-    joined = " ".join(str(part) for part in text_parts if part)
-    lowered = joined.lower()
-    for theme, keys in THEME_KEYWORDS_ZH.items():
-        if any(key in joined for key in keys):
-            return theme
-    for theme, keys in THEME_KEYWORDS_EN.items():
-        if any(key in lowered for key in keys):
-            return theme
-    tech = getattr(world.world_bible, "tech_level", "medieval") or "medieval"
-    if tech == "sci-fi":
-        return "sci_fi"
-    if tech == "modern":
-        return "modern"
-    return "fantasy"
-
-
-def _theme_reward_pool(theme: str, *, prefer_chinese: bool) -> list[str]:
-    if theme == "campus":
-        return ["晚会入场券", "告白花束", "纪念徽章", "手写情书"] if prefer_chinese else [
-            "prom_ticket",
-            "confession_bouquet",
-            "campus_badge",
-            "handwritten_letter",
-        ]
-    if theme == "sci_fi":
-        return ["相位芯片", "量子电池", "权限密钥", "舰桥通行证"] if prefer_chinese else [
-            "phase_chip",
-            "quantum_battery",
-            "access_key",
-            "bridge_pass",
-        ]
-    if theme == "modern":
-        return ["推荐信", "演出门票", "项目通行证", "城市徽章"] if prefer_chinese else [
-            "recommendation_letter",
-            "show_ticket",
-            "project_pass",
-            "city_badge",
-        ]
-    return ["神圣护符", "龙鳞盾", "王国军令", "古誓纹章"] if prefer_chinese else [
-        "sacred_amulet",
-        "dragon_scale_shield",
-        "royal_writ",
-        "oath_signet",
-    ]
-
-
-def _theme_side_titles(theme: str, *, prefer_chinese: bool) -> list[str]:
-    if theme == "campus":
-        return ["情书代笔", "文化节徽章", "花束的秘密"] if prefer_chinese else [
-            "Ghostwritten Letter",
-            "Festival Badge",
-            "Secret Bouquet",
-        ]
-    if theme == "sci_fi":
-        return ["修复中继站", "追踪失联信号", "舰桥权限申请"] if prefer_chinese else [
-            "Relay Repair",
-            "Lost Signal Hunt",
-            "Bridge Access",
-        ]
-    if theme == "modern":
-        return ["街区委托", "展会筹备", "夜间快递"] if prefer_chinese else [
-            "District Errand",
-            "Expo Setup",
-            "Night Delivery",
-        ]
-    return ["失落药草", "锻造前哨", "边境护送"] if prefer_chinese else [
-        "Lost Herbs",
-        "Forge Outpost",
-        "Border Escort",
-    ]
-
-
-def _location_keyword_bucket(loc: Any) -> str:
-    text = " ".join(
-        [
-            str(getattr(loc, "kind", "") or ""),
-            str(getattr(loc, "name", "") or ""),
-            " ".join(getattr(loc, "tags", []) or []),
-        ]
-    ).lower()
-    if any(key in text for key in ["library", "图书", "书馆"]):
-        return "library"
-    if any(key in text for key in ["class", "classroom", "教室", "课堂"]):
-        return "classroom"
-    if any(key in text for key in ["dorm", "宿舍"]):
-        return "dorm"
-    if any(key in text for key in ["cafeteria", "canteen", "食堂", "餐厅", "咖啡"]):
-        return "canteen"
-    if any(key in text for key in ["club", "社团", "活动室"]):
-        return "club"
-    if any(key in text for key in ["garden", "park", "花园", "操场", "广场"]):
-        return "square"
-    if any(key in text for key in ["lab", "实验", "研究", "station", "控制室"]):
-        return "lab"
-    if any(key in text for key in ["town", "village", "城", "镇", "村"]):
-        return "town"
-    if any(key in text for key in ["forest", "woods", "林"]):
-        return "forest"
-    if any(key in text for key in ["dungeon", "ruin", "遗迹", "地牢"]):
-        return "dungeon"
-    if any(key in text for key in ["shop", "market", "商店", "集市"]):
-        return "shop"
-    return "generic"
-
-
-def _deterministic_index(seed: str, size: int) -> int:
-    if size <= 0:
-        return 0
-    return sum(ord(ch) for ch in seed) % size
-
-
-def _resource_candidates(theme: str, bucket: str, *, prefer_chinese: bool) -> list[dict[str, int]]:
-    if theme == "campus":
-        zh = {
-            "library": [{"参考书": 2, "借书卡": 1}, {"文献复印件": 2, "书签": 1}],
-            "classroom": [{"课堂笔记": 2, "作业纸": 2}, {"实验记录": 2, "演讲提纲": 1}],
-            "dorm": [{"宿舍钥匙": 1, "便签": 2}, {"合照": 1, "零食券": 2}],
-            "canteen": [{"奶茶券": 2, "点心": 1}, {"咖啡券": 2, "餐券": 1}],
-            "club": [{"社团徽章": 2, "活动手册": 1}, {"应援贴纸": 2, "节目单": 1}],
-            "square": [{"樱花": 3, "告白卡片": 1}, {"花束包装纸": 2, "丝带": 1}],
-            "generic": [{"校园传单": 2, "纪念贴纸": 2}, {"备忘录": 2, "钥匙扣": 1}],
-        }
-        en = {
-            "library": [{"reference_book": 2, "library_card": 1}, {"copied_notes": 2, "bookmark": 1}],
-            "classroom": [{"class_notes": 2, "worksheet": 2}, {"lab_report": 2, "speech_outline": 1}],
-            "dorm": [{"dorm_key": 1, "sticky_note": 2}, {"group_photo": 1, "snack_coupon": 2}],
-            "canteen": [{"milk_tea_coupon": 2, "pastry": 1}, {"coffee_coupon": 2, "meal_ticket": 1}],
-            "club": [{"club_badge": 2, "event_booklet": 1}, {"cheer_sticker": 2, "program_sheet": 1}],
-            "square": [{"cherry_blossom": 3, "confession_card": 1}, {"bouquet_wrap": 2, "ribbon": 1}],
-            "generic": [{"campus_flyer": 2, "souvenir_sticker": 2}, {"memo_note": 2, "keychain": 1}],
-        }
-        table = zh if prefer_chinese else en
-        return table.get(bucket, table["generic"])
-    if theme == "sci_fi":
-        zh = {
-            "lab": [{"相位芯片": 2, "校准模块": 1}, {"量子电池": 2, "冷却液": 1}],
-            "town": [{"数据终端钥匙": 1, "维修工具": 2}],
-            "generic": [{"合金零件": 2, "信号样本": 1}, {"能源晶片": 2, "权限卡": 1}],
-        }
-        en = {
-            "lab": [{"phase_chip": 2, "calibration_module": 1}, {"quantum_battery": 2, "coolant": 1}],
-            "town": [{"terminal_key": 1, "repair_tool": 2}],
-            "generic": [{"alloy_part": 2, "signal_sample": 1}, {"energy_chip": 2, "access_card": 1}],
-        }
-        table = zh if prefer_chinese else en
-        return table.get(bucket, table["generic"])
-    if theme == "modern":
-        zh = {
-            "town": [{"商圈通行证": 1, "宣传单": 2}, {"包裹单": 2, "街区地图": 1}],
-            "shop": [{"店铺印章": 2, "折扣券": 1}, {"收据": 2, "快递标签": 1}],
-            "square": [{"演出门票": 2, "应援贴纸": 1}],
-            "generic": [{"资料夹": 2, "工作证": 1}, {"采访录音": 1, "照片": 2}],
-        }
-        en = {
-            "town": [{"district_pass": 1, "flyer": 2}, {"parcel_form": 2, "street_map": 1}],
-            "shop": [{"store_stamp": 2, "discount_coupon": 1}, {"receipt": 2, "shipping_label": 1}],
-            "square": [{"show_ticket": 2, "cheer_sticker": 1}],
-            "generic": [{"folder": 2, "work_badge": 1}, {"interview_record": 1, "photo": 2}],
-        }
-        table = zh if prefer_chinese else en
-        return table.get(bucket, table["generic"])
-    zh = {
-        "forest": [{"月光草": 3}, {"疗伤草": 2, "硬木": 2}],
-        "dungeon": [{"古铁矿": 2}, {"远古碎片": 2, "铁铆钉": 1}],
-        "town": [{"口粮": 2}, {"布条": 2, "口粮": 1}],
-        "shop": [{"布条": 2}, {"奇异小物": 2}],
-        "generic": [{"探险样本": 2}, {"奇异小物": 2}],
-    }
-    en = {
-        "forest": [{"moon_herb": 3}, {"healing_herb": 2, "hardwood": 2}],
-        "dungeon": [{"ancient_ore": 2}, {"ancient_shard": 2, "iron_rivet": 1}],
-        "town": [{"ration": 2}, {"cloth_strip": 2, "ration": 1}],
-        "shop": [{"cloth_strip": 2}, {"strange_trinket": 2}],
-        "generic": [{"field_sample": 2}, {"strange_trinket": 2}],
-    }
-    table = zh if prefer_chinese else en
-    return table.get(bucket, table["generic"])
-
-
-def suggest_location_resource_template(world: WorldSpec, loc: Any, *, prefer_chinese: bool) -> dict[str, int]:
-    theme = _infer_world_theme(world)
-    bucket = _location_keyword_bucket(loc)
-    candidates = _resource_candidates(theme, bucket, prefer_chinese=prefer_chinese)
-    idx = _deterministic_index(f"{getattr(loc, 'location_id', '')}:{theme}", len(candidates))
-    return {str(k): max(1, int(v)) for k, v in candidates[idx].items()}
-
-
 def _normalize_item_token(value: str) -> str:
     token = re.sub(r"[\s\-]+", "_", str(value or "").strip().lower())
     token = re.sub(r"[^0-9a-z_\u4e00-\u9fff]", "", token)
@@ -761,35 +540,15 @@ def _normalize_item_token(value: str) -> str:
     return token.strip("_")
 
 
-def _token_to_zh_label(token: str) -> str | None:
-    parts = [part for part in str(token or "").split("_") if part]
-    if not parts:
-        return None
-    mapped = [TOKEN_TO_ZH.get(part) for part in parts]
-    if all(mapped):
-        joined = "".join(mapped)
-        # Keep some readable suffixes for common nouns.
-        if joined.endswith(("信", "票", "卡", "章", "钥匙", "芯片", "电池", "样本", "书")):
-            return joined
-        return joined + "物资"
-    return None
-
-
-def _localize_item_name(name: str, *, prefer_chinese: bool) -> str:
-    text = str(name or "").strip()
-    if not text:
-        return "任务物资" if prefer_chinese else "quest_item"
+def _derive_item_label_from_token(token: str, *, prefer_chinese: bool, index: int) -> str:
+    normalized = _normalize_item_token(token)
     if prefer_chinese:
-        if _contains_cjk(text):
-            return text
-        token = _normalize_item_token(text)
-        if token in ITEM_ALIAS_TO_ZH:
-            return ITEM_ALIAS_TO_ZH[token]
-        guess = _token_to_zh_label(token)
-        if guess:
-            return guess
-        return "任务物资"
-    return text
+        if _contains_cjk(normalized):
+            return normalized
+        return f"任务物资{index}"
+    if not normalized:
+        return f"quest_item_{index}"
+    return normalized
 
 
 def _localize_item_map(
@@ -799,8 +558,8 @@ def _localize_item_map(
 ) -> tuple[dict[str, int], dict[str, str]]:
     localized: dict[str, int] = {}
     renamed: dict[str, str] = {}
-    unknown_token_to_name: dict[str, str] = {}
-    unknown_index = 1
+    token_to_local: dict[str, str] = {}
+    serial = 1
 
     for raw_name, raw_count in (items or {}).items():
         try:
@@ -810,25 +569,18 @@ def _localize_item_map(
         if count <= 0:
             continue
 
-        name = str(raw_name or "").strip()
-        token = _normalize_item_token(name)
-        target = _localize_item_name(name, prefer_chinese=prefer_chinese)
-
-        if prefer_chinese and target == "任务物资":
-            if token in unknown_token_to_name:
-                target = unknown_token_to_name[token]
-            else:
-                candidate = "任务物资"
-                while candidate in localized:
-                    unknown_index += 1
-                    candidate = f"任务物资{unknown_index}"
-                unknown_token_to_name[token] = candidate
-                target = candidate
-                unknown_index += 1
+        source = str(raw_name or "").strip()
+        token = _normalize_item_token(source)
+        if token in token_to_local:
+            target = token_to_local[token]
+        else:
+            target = _derive_item_label_from_token(source, prefer_chinese=prefer_chinese, index=serial)
+            token_to_local[token] = target
+            serial += 1
 
         localized[target] = int(localized.get(target, 0)) + count
-        if name and name != target:
-            renamed[name] = target
+        if source and source != target:
+            renamed[source] = target
     return localized, renamed
 
 
@@ -857,9 +609,6 @@ def _replace_item_mentions(text: str, replacements: dict[str, str]) -> str:
             variants.add(token)
             variants.add(token.replace("_", " "))
             variants.add(token.replace("_", "-"))
-            title = " ".join(part.capitalize() for part in token.split("_") if part)
-            if title:
-                variants.add(title)
         for variant in sorted(variants, key=len, reverse=True):
             if not variant:
                 continue
@@ -867,52 +616,145 @@ def _replace_item_mentions(text: str, replacements: dict[str, str]) -> str:
     return updated
 
 
-def _normalize_side_quests(world: WorldSpec, *, prefer_chinese: bool, theme: str) -> list[QuestSpec]:
-    target_count = min(3, max(1, len(world.locations)))
+def _collect_item_pool_from_world(world: WorldSpec) -> list[str]:
+    pool: list[str] = []
+    for quest in world.side_quests:
+        for item in (quest.required_items or {}).keys():
+            name = str(item or "").strip()
+            if name:
+                pool.append(name)
+        for item in (quest.reward_items or {}).keys():
+            name = str(item or "").strip()
+            if name:
+                pool.append(name)
+    if world.main_quest:
+        for item in (world.main_quest.required_items or {}).keys():
+            name = str(item or "").strip()
+            if name:
+                pool.append(name)
+    seen = set()
+    deduped: list[str] = []
+    for name in pool:
+        if name in seen:
+            continue
+        seen.add(name)
+        deduped.append(name)
+    return deduped
+
+
+def _pick_items_from_pool(pool: list[str], *, seed: str, limit: int = 2) -> dict[str, int]:
+    if not pool:
+        return {}
+    start = sum(ord(ch) for ch in seed) % len(pool)
+    out: dict[str, int] = {}
+    for i in range(min(limit, len(pool))):
+        item = pool[(start + i) % len(pool)]
+        out[item] = 2 if i == 0 else 1
+    return out
+
+
+def _seed_item_from_location(loc: Any, *, prefer_chinese: bool, variant: int) -> str:
+    loc_name = str(getattr(loc, "name", "") or "").strip()
+    loc_kind = str(getattr(loc, "kind", "") or "").strip()
+    base = loc_name or loc_kind or ("地区" if prefer_chinese else "area")
+    if prefer_chinese:
+        clean = re.sub(r"\s+", "", base)
+        suffixes = ["遗物", "手稿", "矿石", "徽记"]
+        return f"{clean}{suffixes[variant % len(suffixes)]}"
+    token = _normalize_item_token(base) or "area"
+    suffixes = ["relic", "manuscript", "ore", "insignia"]
+    return f"{token}_{suffixes[variant % len(suffixes)]}"
+
+
+def suggest_location_resource_template(world: WorldSpec, loc: Any, *, prefer_chinese: bool) -> dict[str, int]:
+    loc_id = str(getattr(loc, "location_id", "") or "")
+    blocked_tokens = set()
+    if world.main_quest:
+        blocked_tokens.update(_normalize_item_token(name) for name in (world.main_quest.required_items or {}).keys())
+    for quest in world.side_quests:
+        blocked_tokens.update(_normalize_item_token(name) for name in (quest.reward_items or {}).keys())
+
+    required_items: dict[str, int] = {}
+    for quest in world.side_quests:
+        if quest.suggested_location and quest.suggested_location != loc_id:
+            continue
+        for item, count in (quest.required_items or {}).items():
+            required_items[str(item)] = max(required_items.get(str(item), 0), max(1, int(count)))
+
+    result: dict[str, int] = {}
+    for idx, (item, count) in enumerate(sorted(required_items.items())):
+        result[item] = min(6, max(1, int(count) + (idx % 2)))
+        if len(result) >= 3:
+            break
+
+    seed_variant = sum(ord(ch) for ch in (loc_id + str(getattr(loc, "kind", "") or ""))) % 11
+    while len(result) < 2:
+        candidate = _seed_item_from_location(loc, prefer_chinese=prefer_chinese, variant=seed_variant + len(result))
+        token = _normalize_item_token(candidate)
+        if token and token not in blocked_tokens and candidate not in result:
+            result[candidate] = 1
+        else:
+            seed_variant += 3
+            if seed_variant > 50:
+                break
+    if not result:
+        fallback = _default_required_items_for_location(loc, prefer_chinese=prefer_chinese, variant=seed_variant)
+        for item, count in fallback.items():
+            token = _normalize_item_token(item)
+            if token in blocked_tokens:
+                continue
+            result[item] = count
+            if len(result) >= 2:
+                break
+    return result
+
+
+def _normalize_side_quests(world: WorldSpec, *, prefer_chinese: bool) -> list[QuestSpec]:
+    # Keep generated side quest count whenever possible; only create one when absent.
+    target_count = min(3, max(1, len(world.side_quests)))
+    if len(world.locations) >= 3:
+        target_count = max(target_count, 3)
     locations = [loc for loc in world.locations if loc.location_id != world.starting_location] or list(world.locations)
     npcs = list(world.npcs)
-    rewards_pool = _theme_reward_pool(theme, prefer_chinese=prefer_chinese)
     normalized: list[QuestSpec] = []
     used_ids = set()
-    used_rewards = set()
 
-    def _pick_reward(idx: int) -> dict[str, int]:
-        for item in rewards_pool:
-            if item in used_rewards:
-                continue
-            used_rewards.add(item)
-            return {item: 1}
-        fallback = f"side_reward_{idx+1}" if not prefer_chinese else f"支线凭证{idx+1}"
-        return {fallback: 1}
+    def _pick_reward(idx: int, loc: Any) -> dict[str, int]:
+        item_name = _seed_item_from_location(loc, prefer_chinese=prefer_chinese, variant=idx + 7)
+        return {item_name: 1}
 
     for idx, quest in enumerate(world.side_quests):
         if len(normalized) >= target_count:
             break
         loc = locations[idx % len(locations)] if locations else None
         npc = npcs[idx % len(npcs)] if npcs else None
-        quest_id = quest.quest_id or f"side_{idx+1}"
+
+        quest_id = str(quest.quest_id or f"side_{idx+1}")
         if quest_id in used_ids:
             quest_id = f"{quest_id}_{idx+1}"
         used_ids.add(quest_id)
+
         required_items = dict(quest.required_items or {})
         if not required_items and loc:
-            required_items = _default_required_items_for_location(loc, prefer_chinese, theme=theme, variant=idx)
+            required_items = _default_required_items_for_location(loc, prefer_chinese=prefer_chinese, variant=idx)
         required_items, required_replacements = _localize_item_map(required_items, prefer_chinese=prefer_chinese)
+
         reward_items = dict(quest.reward_items or {})
         if not reward_items:
-            reward_items = _pick_reward(idx)
-        else:
-            for item in reward_items.keys():
-                used_rewards.add(item)
+            reward_items = _pick_reward(idx, loc)
         reward_items, reward_replacements = _localize_item_map(reward_items, prefer_chinese=prefer_chinese)
+
         text_replacements = dict(required_replacements)
         text_replacements.update(reward_replacements)
+
         objective_text = quest.objective or _default_side_objective(required_items, loc, prefer_chinese)
         description_text = quest.description or _default_side_description(loc, prefer_chinese)
         reward_hint_text = quest.reward_hint or _default_reward_hint(reward_items, prefer_chinese)
+
         objective_text = _replace_item_mentions(objective_text, text_replacements)
         description_text = _replace_item_mentions(description_text, text_replacements)
         reward_hint_text = _replace_item_mentions(reward_hint_text, text_replacements)
+
         objective_text = _ensure_side_objective_consistency(
             objective_text,
             required_items,
@@ -920,10 +762,11 @@ def _normalize_side_quests(world: WorldSpec, *, prefer_chinese: bool, theme: str
             prefer_chinese=prefer_chinese,
         )
         title_text = _ensure_side_title_consistency(
-            quest.title or (_default_side_title(idx, prefer_chinese, theme=theme)),
+            quest.title or _default_side_title(loc, idx, prefer_chinese),
             required_items,
             prefer_chinese=prefer_chinese,
         )
+
         normalized.append(
             QuestSpec(
                 quest_id=quest_id,
@@ -943,8 +786,8 @@ def _normalize_side_quests(world: WorldSpec, *, prefer_chinese: bool, theme: str
         idx = len(normalized)
         loc = locations[idx % len(locations)]
         npc = npcs[idx % len(npcs)] if npcs else None
-        required_items = _default_required_items_for_location(loc, prefer_chinese, theme=theme, variant=idx)
-        reward_items = _pick_reward(idx)
+        required_items = _default_required_items_for_location(loc, prefer_chinese=prefer_chinese, variant=idx)
+        reward_items = _pick_reward(idx, loc)
         required_items, _ = _localize_item_map(required_items, prefer_chinese=prefer_chinese)
         reward_items, _ = _localize_item_map(reward_items, prefer_chinese=prefer_chinese)
         quest_id = f"side_{loc.location_id}_{idx+1}"
@@ -954,7 +797,7 @@ def _normalize_side_quests(world: WorldSpec, *, prefer_chinese: bool, theme: str
         normalized.append(
             QuestSpec(
                 quest_id=quest_id,
-                title=_default_side_title(idx, prefer_chinese, theme=theme),
+                title=_default_side_title(loc, idx, prefer_chinese),
                 category="side",
                 description=_default_side_description(loc, prefer_chinese),
                 objective=_default_side_objective(required_items, loc, prefer_chinese),
@@ -968,36 +811,205 @@ def _normalize_side_quests(world: WorldSpec, *, prefer_chinese: bool, theme: str
     return normalized
 
 
+def _enforce_side_quest_item_structure(
+    world: WorldSpec,
+    side_quests: list[QuestSpec],
+    *,
+    prefer_chinese: bool,
+) -> list[QuestSpec]:
+    if not side_quests:
+        return side_quests
+    loc_map = {loc.location_id: loc for loc in world.locations}
+    normalized = [quest.model_copy(deep=True) for quest in side_quests]
+
+    # 1) Make required_items diversified and avoid near-identical side quest requirements.
+    used_required_tokens: set[str] = set()
+    for idx, quest in enumerate(normalized):
+        loc = loc_map.get(quest.suggested_location or "")
+        required = {str(k): max(1, int(v)) for k, v in (quest.required_items or {}).items() if int(v) > 0}
+        if not required and loc is not None:
+            required = _default_required_items_for_location(loc, prefer_chinese=prefer_chinese, variant=idx)
+
+        rebuilt: dict[str, int] = {}
+        for name, amount in required.items():
+            token = _normalize_item_token(name)
+            if token in used_required_tokens and loc is not None:
+                replacement = _next_unique_collectible_name(
+                    loc=loc,
+                    existing_tokens={_normalize_item_token(k) for k in rebuilt.keys()} | used_required_tokens,
+                    prefer_chinese=prefer_chinese,
+                    start_variant=idx + 23 + len(rebuilt),
+                )
+                if replacement:
+                    rebuilt[replacement] = max(1, int(amount))
+                    used_required_tokens.add(_normalize_item_token(replacement))
+                    continue
+            rebuilt[name] = max(1, int(amount))
+            used_required_tokens.add(token)
+        quest.required_items = rebuilt
+
+    # 2) Ensure total collectible types >= 5 when possible.
+    collectible_tokens = {_normalize_item_token(item) for q in normalized for item in q.required_items.keys()}
+    target_types = 5
+    if len(normalized) >= 2 and len(collectible_tokens) < target_types:
+        for idx, quest in enumerate(normalized):
+            if len(collectible_tokens) >= target_types:
+                break
+            loc = loc_map.get(quest.suggested_location or "")
+            if loc is None:
+                continue
+            extra_name = _next_unique_collectible_name(
+                loc=loc,
+                existing_tokens=collectible_tokens | {_normalize_item_token(k) for k in quest.required_items.keys()},
+                prefer_chinese=prefer_chinese,
+                start_variant=idx + 41,
+            )
+            if not extra_name:
+                continue
+            quest.required_items[extra_name] = 1
+            collectible_tokens.add(_normalize_item_token(extra_name))
+
+    # 3) Rewards must be unique and cannot be directly collectible.
+    reward_tokens: set[str] = set()
+    for idx, quest in enumerate(normalized):
+        loc = loc_map.get(quest.suggested_location or "")
+        reward_items = {str(k): max(1, int(v)) for k, v in (quest.reward_items or {}).items() if int(v) > 0}
+        if not reward_items and loc is not None:
+            reward_items = {_seed_reward_item_from_location(loc, prefer_chinese=prefer_chinese, variant=idx + 7): 1}
+        cleaned: dict[str, int] = {}
+        for name, amount in reward_items.items():
+            token = _normalize_item_token(name)
+            if token in collectible_tokens or token in reward_tokens:
+                replacement = _next_unique_reward_name(
+                    loc=loc,
+                    blocked_tokens=collectible_tokens | reward_tokens | {_normalize_item_token(k) for k in cleaned.keys()},
+                    prefer_chinese=prefer_chinese,
+                    start_variant=idx + 61 + len(cleaned),
+                )
+                if replacement:
+                    cleaned[replacement] = max(1, int(amount))
+                    reward_tokens.add(_normalize_item_token(replacement))
+                    continue
+            cleaned[name] = max(1, int(amount))
+            reward_tokens.add(token)
+        if not cleaned and loc is not None:
+            replacement = _next_unique_reward_name(
+                loc=loc,
+                blocked_tokens=collectible_tokens | reward_tokens,
+                prefer_chinese=prefer_chinese,
+                start_variant=idx + 71,
+            )
+            if replacement:
+                cleaned[replacement] = 1
+                reward_tokens.add(_normalize_item_token(replacement))
+        quest.reward_items = cleaned
+
+    # 4) Repair textual fields after item rewrites.
+    for idx, quest in enumerate(normalized):
+        loc = loc_map.get(quest.suggested_location or "")
+        quest.objective = _ensure_side_objective_consistency(
+            quest.objective,
+            quest.required_items,
+            loc,
+            prefer_chinese=prefer_chinese,
+        )
+        quest.title = _ensure_side_title_consistency(
+            quest.title or _default_side_title(loc, idx, prefer_chinese),
+            quest.required_items,
+            prefer_chinese=prefer_chinese,
+        )
+        quest.reward_hint = _ensure_reward_hint_consistency(quest.reward_hint, quest.reward_items, prefer_chinese)
+    return normalized
+
+
+def _seed_reward_item_from_location(loc: Any, *, prefer_chinese: bool, variant: int) -> str:
+    loc_name = str(getattr(loc, "name", "") or "").strip()
+    loc_kind = str(getattr(loc, "kind", "") or "").strip()
+    base = loc_name or loc_kind or ("地区" if prefer_chinese else "zone")
+    if prefer_chinese:
+        clean = re.sub(r"\s+", "", base)
+        suffixes = ["徽章", "凭证", "印记", "核心", "信物", "誓约"]
+        return f"{clean}{suffixes[variant % len(suffixes)]}"
+    token = _normalize_item_token(base) or "zone"
+    suffixes = ["badge", "token", "sigil", "core", "keepsake", "oath"]
+    return f"{token}_{suffixes[variant % len(suffixes)]}"
+
+
+def _next_unique_collectible_name(
+    *,
+    loc: Any,
+    existing_tokens: set[str],
+    prefer_chinese: bool,
+    start_variant: int,
+) -> str | None:
+    for step in range(20):
+        candidate = _seed_item_from_location(loc, prefer_chinese=prefer_chinese, variant=start_variant + step)
+        token = _normalize_item_token(candidate)
+        if token and token not in existing_tokens:
+            return candidate
+    return None
+
+
+def _next_unique_reward_name(
+    *,
+    loc: Any | None,
+    blocked_tokens: set[str],
+    prefer_chinese: bool,
+    start_variant: int,
+) -> str | None:
+    for step in range(20):
+        if loc is None:
+            candidate = ("终章凭证" if prefer_chinese else "finale_token") + str(start_variant + step)
+        else:
+            candidate = _seed_reward_item_from_location(loc, prefer_chinese=prefer_chinese, variant=start_variant + step)
+        token = _normalize_item_token(candidate)
+        if token and token not in blocked_tokens:
+            return candidate
+    return None
+
+
 def _default_required_items_for_location(
     loc: Any,
     prefer_chinese: bool,
     *,
-    theme: str,
     variant: int = 0,
 ) -> dict[str, int]:
-    bucket = _location_keyword_bucket(loc)
-    candidates = _resource_candidates(theme, bucket, prefer_chinese=prefer_chinese)
-    idx = _deterministic_index(f"{getattr(loc, 'location_id', '')}:{variant}:{theme}", len(candidates))
-    selected = candidates[idx]
-    return {str(name): max(1, int(count)) for name, count in selected.items()}
+    primary = _seed_item_from_location(loc, prefer_chinese=prefer_chinese, variant=variant)
+    secondary = _seed_item_from_location(loc, prefer_chinese=prefer_chinese, variant=variant + 1)
+    result = {primary: 2 + (variant % 2)}
+    if secondary != primary:
+        result[secondary] = 1 + (variant % 2)
+    return result
 
 
-def _default_side_title(idx: int, prefer_chinese: bool, *, theme: str) -> str:
-    names = _theme_side_titles(theme, prefer_chinese=prefer_chinese)
-    return names[idx % len(names)]
+def _default_side_title(loc: Any, idx: int, prefer_chinese: bool) -> str:
+    loc_name = str(getattr(loc, "name", "") or "").strip() or str(getattr(loc, "location_id", "") or f"loc_{idx+1}")
+    if prefer_chinese:
+        return f"{loc_name}委托"
+    return f"{loc_name} Request"
 
 
 def _default_side_description(loc: Any, prefer_chinese: bool) -> str:
+    loc_name = str(getattr(loc, "name", "") or "").strip() if loc is not None else ""
     if prefer_chinese:
-        return f"与任务 NPC 一同前往{loc.name}并完成材料采集。"
-    return f"Travel with the quest NPC to {loc.name} and gather the required materials."
+        if loc_name:
+            return f"前往{loc_name}并完成该地点委托所需的物资准备。"
+        return "前往目标地点并完成委托所需的物资准备。"
+    if loc_name:
+        return f"Travel to {loc_name} and prepare the materials required by this local request."
+    return "Travel to the target location and prepare the required materials."
 
 
 def _default_side_objective(required_items: dict[str, int], loc: Any, prefer_chinese: bool) -> str:
     req = "，".join([f"{name} x{count}" for name, count in required_items.items()])
+    loc_name = str(getattr(loc, "name", "") or "").strip() if loc is not None else ""
     if prefer_chinese:
-        return f"在{loc.name}与任务 NPC 同行时收集：{req}"
-    return f"Collect at {loc.name} while accompanied by the quest NPC: {req}"
+        if loc_name:
+            return f"在{loc_name}收集并交付：{req}"
+        return f"收集并交付：{req}"
+    if loc_name:
+        return f"Collect and deliver at {loc_name}: {req}"
+    return f"Collect and deliver: {req}"
 
 
 def _ensure_side_objective_consistency(
@@ -1033,11 +1045,11 @@ def _ensure_side_title_consistency(title: str, required_items: dict[str, int], *
     if mentions_any:
         return text
     if prefer_chinese:
-        if any(token in text for token in ("寻找", "收集", "采集", "获取")):
+        if any(token in text for token in ("寻找", "收集", "采集", "获取", "委托")):
             return f"收集{first_item}"
         return text
     lower = text.lower()
-    if any(token in lower for token in ("find", "collect", "gather", "obtain", "fetch")):
+    if any(token in lower for token in ("find", "collect", "gather", "obtain", "fetch", "request")):
         return f"Collect {first_item}"
     return text
 
@@ -1049,6 +1061,20 @@ def _default_reward_hint(reward_items: dict[str, int], prefer_chinese: bool) -> 
     return f"Reward on completion: {req}"
 
 
+def _ensure_reward_hint_consistency(reward_hint: str | None, reward_items: dict[str, int], prefer_chinese: bool) -> str:
+    text = str(reward_hint or "").strip()
+    if not reward_items:
+        return text
+    if not text:
+        return _default_reward_hint(reward_items, prefer_chinese)
+    names = [str(name) for name in reward_items.keys()]
+    if any(name in text for name in names if name):
+        return text
+    if prefer_chinese:
+        return f"{text}（奖励：{'，'.join([f'{k} x{v}' for k, v in reward_items.items()])}）"
+    return f"{text} (reward: {', '.join([f'{k} x{v}' for k, v in reward_items.items()])})"
+
+
 def _aggregate_side_rewards(side_quests: list[QuestSpec]) -> dict[str, int]:
     required: dict[str, int] = {}
     for quest in side_quests:
@@ -1057,211 +1083,115 @@ def _aggregate_side_rewards(side_quests: list[QuestSpec]) -> dict[str, int]:
     return required
 
 
-def _theme_profession_pool(theme: str, *, prefer_chinese: bool) -> list[str]:
-    if theme == "campus":
-        return ["学生", "班长", "图书管理员", "社团干部", "辅导员", "校医", "摄影社成员", "学生会干事"] if prefer_chinese else [
-            "Student",
-            "Class Rep",
-            "Librarian",
-            "Club Officer",
-            "Counselor",
-            "School Nurse",
-            "Photography Member",
-            "Student Council Member",
-        ]
-    if theme == "sci_fi":
-        return ["工程师", "导航员", "通讯官", "科研员", "安保员", "后勤官", "维修技师", "舰桥值班员"] if prefer_chinese else [
-            "Engineer",
-            "Navigator",
-            "Comms Officer",
-            "Researcher",
-            "Security Officer",
-            "Logistics Officer",
-            "Maintenance Tech",
-            "Bridge Watch",
-        ]
-    if theme == "modern":
-        return ["店员", "记者", "快递员", "策展人", "社区志愿者", "程序员", "摄影师", "策划"] if prefer_chinese else [
-            "Clerk",
-            "Reporter",
-            "Courier",
-            "Curator",
-            "Volunteer",
-            "Programmer",
-            "Photographer",
-            "Planner",
-        ]
-    return ["铁匠", "药师", "猎人", "商贩", "卫兵", "学者", "旅店老板", "向导"] if prefer_chinese else [
-        "Blacksmith",
-        "Herbalist",
-        "Hunter",
-        "Merchant",
-        "Guard",
-        "Scholar",
-        "Innkeeper",
-        "Guide",
-    ]
-
-
-def _fallback_name_candidates(prefer_chinese: bool) -> list[str]:
-    if prefer_chinese:
-        return [f"{surname}{given}" for surname in ZH_SURNAMES for given in ZH_GIVEN]
-    return [f"{first} {last}" for first in EN_FIRST for last in EN_LAST]
-
-
-def _make_name_allocator(used_names: set[str], *, prefer_chinese: bool):
-    candidates = _fallback_name_candidates(prefer_chinese)
-    index = 0
-    suffix = 1
-
-    def next_name() -> str:
-        nonlocal index, suffix
-        while index < len(candidates):
-            candidate = candidates[index]
-            index += 1
-            if candidate in used_names:
-                continue
-            used_names.add(candidate)
-            return candidate
-        while True:
-            candidate = f"角色{suffix}" if prefer_chinese else f"Character {suffix}"
-            suffix += 1
-            if candidate in used_names:
-                continue
-            used_names.add(candidate)
-            return candidate
-
-    return next_name
-
-
-def _normalize_npc_professions_by_theme(world: WorldSpec, *, theme: str, prefer_chinese: bool) -> list[NPCProfile]:
+def _normalize_npc_professions(world: WorldSpec, *, prefer_chinese: bool) -> list[NPCProfile]:
     npcs = [npc.model_copy(deep=True) for npc in world.npcs]
     if not npcs:
         return npcs
-    if theme not in {"campus", "modern", "sci_fi"}:
-        return npcs
-    if prefer_chinese:
-        if theme == "campus":
-            replacements = {"铁匠": "校工", "药师": "校医", "猎人": "社团外联", "卫兵": "保安", "商贩": "小卖部店员"}
-        elif theme == "modern":
-            replacements = {"铁匠": "维修师", "药师": "药店店员", "猎人": "调查员", "卫兵": "保安"}
-        else:
-            replacements = {"铁匠": "工程师", "药师": "医疗官", "猎人": "侦察员", "卫兵": "安保员"}
-    else:
-        if theme == "campus":
-            replacements = {
-                "blacksmith": "Campus Technician",
-                "herbalist": "School Nurse",
-                "hunter": "Club Runner",
-                "guard": "Security Staff",
-                "merchant": "Campus Store Clerk",
-            }
-        elif theme == "modern":
-            replacements = {
-                "blacksmith": "Mechanic",
-                "herbalist": "Pharmacy Clerk",
-                "hunter": "Investigator",
-                "guard": "Security Staff",
-            }
-        else:
-            replacements = {
-                "blacksmith": "Systems Engineer",
-                "herbalist": "Medical Officer",
-                "hunter": "Recon Specialist",
-                "guard": "Security Officer",
-            }
-
-    fixed: list[NPCProfile] = []
+    loc_map = {loc.location_id: loc for loc in world.locations}
     for npc in npcs:
-        profile = npc.model_copy(deep=True)
-        profession = str(profile.profession or "").strip()
-        if prefer_chinese:
-            if profession in replacements:
-                profile.profession = replacements[profession]
-        else:
-            key = profession.lower()
-            if key in replacements:
-                profile.profession = replacements[key]
-        fixed.append(profile)
-    return fixed
+        loc = loc_map.get(npc.starting_location)
+        cleaned = _clean_npc_profession(
+            str(npc.profession or "").strip(),
+            loc=loc,
+            npc_name=str(npc.name or "").strip(),
+            prefer_chinese=prefer_chinese,
+        )
+        if cleaned:
+            npc.profession = cleaned
+            continue
+        npc.profession = _profession_from_location(loc, prefer_chinese=prefer_chinese)
+    return npcs
 
 
-def _theme_professions_for_location(theme: str, bucket: str, *, prefer_chinese: bool) -> list[str]:
-    if theme == "campus":
-        zh = {
-            "library": ["图书管理员", "学生", "文学社成员"],
-            "classroom": ["学生", "班长", "助教"],
-            "dorm": ["学生", "宿管", "室友"],
-            "canteen": ["后勤老师", "学生", "社团干部"],
-            "club": ["社团干部", "学生会干事", "学生"],
-            "square": ["学生", "摄影社成员", "学生会干事"],
-            "generic": ["学生", "辅导员", "学生会干事"],
-        }
-        en = {
-            "library": ["Librarian", "Student", "Literature Club Member"],
-            "classroom": ["Student", "Class Rep", "Teaching Assistant"],
-            "dorm": ["Student", "Dorm Warden", "Roommate"],
-            "canteen": ["Staff", "Student", "Club Officer"],
-            "club": ["Club Officer", "Student Council Member", "Student"],
-            "square": ["Student", "Photography Member", "Student Council Member"],
-            "generic": ["Student", "Counselor", "Student Council Member"],
-        }
-        table = zh if prefer_chinese else en
-        return table.get(bucket, table["generic"])
-    return _theme_profession_pool(theme, prefer_chinese=prefer_chinese)
-
-
-def _theme_trait_sets(theme: str, *, prefer_chinese: bool) -> list[tuple[list[str], list[str], float, float, float, int, str]]:
-    if theme == "campus":
+def _generic_trait_sets(*, prefer_chinese: bool) -> list[tuple[list[str], list[str], float, float, float, int, str]]:
+    if prefer_chinese:
         return [
-            (["开朗", "乐于助人"], ["帮助同学"], 0.82, 0.25, 0.45, 3, "热情直率"),
-            (["害羞", "谨慎"], ["保护隐私"], 0.38, 0.72, 0.2, -1, "吞吞吐吐"),
-            (["理性", "细致"], ["完成社团任务"], 0.58, 0.42, 0.35, 1, "冷静客观"),
-            (["自信", "竞争心强"], ["争取荣誉"], 0.62, 0.5, 0.55, 0, "锋利直接"),
-        ] if prefer_chinese else [
-            (["outgoing", "helpful"], ["support classmates"], 0.82, 0.25, 0.45, 3, "warm and direct"),
-            (["shy", "careful"], ["protect privacy"], 0.38, 0.72, 0.2, -1, "hesitant and guarded"),
-            (["rational", "meticulous"], ["finish club tasks"], 0.58, 0.42, 0.35, 1, "calm and objective"),
-            (["confident", "competitive"], ["win recognition"], 0.62, 0.5, 0.55, 0, "sharp and blunt"),
-        ]
-    if theme == "sci_fi":
-        return [
-            (["冷静", "专业"], ["维持系统稳定"], 0.78, 0.3, 0.58, 2, "简短高效"),
-            (["多疑", "严谨"], ["避免事故"], 0.34, 0.74, 0.25, -1, "程序化回复"),
-            (["果断", "勇敢"], ["应对危机"], 0.66, 0.4, 0.82, 1, "命令式"),
-            (["好奇", "创新"], ["突破瓶颈"], 0.55, 0.46, 0.7, 1, "兴奋急促"),
-        ] if prefer_chinese else [
-            (["calm", "professional"], ["keep systems stable"], 0.78, 0.3, 0.58, 2, "brief and efficient"),
-            (["skeptical", "rigorous"], ["prevent incidents"], 0.34, 0.74, 0.25, -1, "procedural replies"),
-            (["decisive", "brave"], ["handle crises"], 0.66, 0.4, 0.82, 1, "commanding"),
-            (["curious", "innovative"], ["break bottlenecks"], 0.55, 0.46, 0.7, 1, "excited and quick"),
-        ]
-    if theme == "modern":
-        return [
-            (["友善", "务实"], ["推进委托"], 0.76, 0.28, 0.48, 2, "直接明快"),
-            (["谨慎", "挑剔"], ["规避风险"], 0.36, 0.68, 0.3, -1, "冷淡克制"),
-            (["沉稳", "可靠"], ["维护秩序"], 0.6, 0.45, 0.5, 1, "礼貌专业"),
-            (["机敏", "野心"], ["扩大影响"], 0.58, 0.5, 0.65, 0, "自信强势"),
-        ] if prefer_chinese else [
-            (["friendly", "pragmatic"], ["advance errands"], 0.76, 0.28, 0.48, 2, "clear and upbeat"),
-            (["careful", "picky"], ["avoid risk"], 0.36, 0.68, 0.3, -1, "cold and restrained"),
-            (["steady", "reliable"], ["maintain order"], 0.6, 0.45, 0.5, 1, "polite and professional"),
-            (["quick", "ambitious"], ["expand influence"], 0.58, 0.5, 0.65, 0, "confident and pushy"),
+            (["友善", "乐于协作"], ["帮助来访者"], 0.82, 0.25, 0.45, 2, "真诚直接"),
+            (["谨慎", "保守"], ["避免风险"], 0.38, 0.7, 0.22, -1, "含蓄防备"),
+            (["理性", "稳定"], ["完成本地职责"], 0.58, 0.42, 0.4, 1, "简洁克制"),
+            (["果断", "强势"], ["维护规则"], 0.65, 0.5, 0.62, 0, "干脆坚定"),
         ]
     return [
-        (["热情", "果断"], ["协助旅人"], 0.85, 0.2, 0.6, 3, "直爽友好"),
-        (["谨慎", "多疑"], ["守护家园"], 0.35, 0.75, 0.3, -1, "冷淡保守"),
-        (["冷静", "理性"], ["收集情报"], 0.55, 0.45, 0.5, 1, "简洁克制"),
-        (["勇敢", "冲动"], ["猎杀威胁"], 0.7, 0.35, 0.8, 0, "急躁直接"),
-    ] if prefer_chinese else [
-        (["warm", "decisive"], ["assist travelers"], 0.85, 0.2, 0.6, 3, "friendly and direct"),
-        (["cautious", "suspicious"], ["protect the village"], 0.35, 0.75, 0.3, -1, "cold and guarded"),
-        (["calm", "rational"], ["gather intel"], 0.55, 0.45, 0.5, 1, "concise and restrained"),
-        (["brave", "impulsive"], ["hunt threats"], 0.7, 0.35, 0.8, 0, "impatient and blunt"),
+        (["friendly", "cooperative"], ["help visitors"], 0.82, 0.25, 0.45, 2, "honest and direct"),
+        (["careful", "conservative"], ["avoid risk"], 0.38, 0.7, 0.22, -1, "guarded and cautious"),
+        (["rational", "steady"], ["fulfill local duties"], 0.58, 0.42, 0.4, 1, "concise and restrained"),
+        (["decisive", "assertive"], ["maintain order"], 0.65, 0.5, 0.62, 0, "firm and efficient"),
     ]
 
 
-def _ensure_npc_density(world: WorldSpec, *, prefer_chinese: bool, theme: str) -> list[NPCProfile]:
+def _profession_seed_pool(world: WorldSpec, *, prefer_chinese: bool) -> list[str]:
+    seeds = [str(npc.profession or "").strip() for npc in world.npcs if str(npc.profession or "").strip()]
+    if seeds:
+        seen = set()
+        ordered = []
+        for item in seeds:
+            if item in seen:
+                continue
+            seen.add(item)
+            ordered.append(item)
+        return ordered
+    if prefer_chinese:
+        return ["居民", "工作人员"]
+    return ["Resident", "Staff"]
+
+
+def _profession_from_location(loc: Any, *, prefer_chinese: bool) -> str:
+    kind = str(getattr(loc, "kind", "") or "").strip().lower()
+    loc_name = str(getattr(loc, "name", "") or "").strip()
+    if prefer_chinese:
+        if kind in {"castle", "fort", "stronghold"}:
+            return "守卫"
+        if kind in {"forest", "woods"}:
+            return "巡林员"
+        if kind in {"town", "village", "city"}:
+            return "市民"
+        if kind in {"library"}:
+            return "馆员"
+        if kind in {"dungeon", "ruin"}:
+            return "探查员"
+        return "工作人员"
+    if kind in {"castle", "fort", "stronghold"}:
+        return "Guard"
+    if kind in {"forest", "woods"}:
+        return "Ranger"
+    if kind in {"town", "village", "city"}:
+        return "Citizen"
+    if kind in {"library"}:
+        return "Librarian"
+    if kind in {"dungeon", "ruin"}:
+        return "Scout"
+    return "Staff"
+
+
+def _clean_npc_profession(text: str, *, loc: Any, npc_name: str, prefer_chinese: bool) -> str:
+    raw = str(text or "").strip()
+    if not raw:
+        return ""
+    loc_name = str(getattr(loc, "name", "") or "").strip()
+    lowered = raw.lower()
+
+    if loc_name:
+        raw = raw.replace(loc_name, "").strip()
+        lowered = raw.lower()
+
+    raw = re.sub(r"\s+", " ", raw).strip(" -_·")
+    lowered = raw.lower()
+    if not raw:
+        return ""
+    if raw == npc_name:
+        return ""
+    if re.search(r"\d+$", raw):
+        return ""
+    if _NPC_PLACEHOLDER_ZH.search(raw) or _NPC_PLACEHOLDER_EN.search(raw):
+        return ""
+    if prefer_chinese and raw in {"人员", "角色"}:
+        return ""
+    if not prefer_chinese and lowered in {"person", "character"}:
+        return ""
+    return raw
+
+
+def _ensure_npc_density(world: WorldSpec, *, prefer_chinese: bool) -> list[NPCProfile]:
     locations = list(world.locations)
     npcs = [npc.model_copy(deep=True) for npc in world.npcs]
     if not locations:
@@ -1272,72 +1202,43 @@ def _ensure_npc_density(world: WorldSpec, *, prefer_chinese: bool, theme: str) -
         if npc.starting_location in by_loc:
             by_loc[npc.starting_location].append(npc)
         else:
-            # Fallback to starting location if invalid.
             npc.starting_location = world.starting_location
             by_loc.setdefault(world.starting_location, []).append(npc)
 
-    target_min = 2
+    target_min = 1
     target_max = 5
-    profession_pool = _theme_profession_pool(theme, prefer_chinese=prefer_chinese)
-    trait_sets = _theme_trait_sets(theme, prefer_chinese=prefer_chinese)
+    profession_pool = _profession_seed_pool(world, prefer_chinese=prefer_chinese)
+    trait_sets = _generic_trait_sets(prefer_chinese=prefer_chinese)
 
     used_ids = {npc.npc_id for npc in npcs}
-    used_names = {npc.name for npc in npcs}
-    generated_index = 1
-    next_name = _make_name_allocator(used_names, prefer_chinese=prefer_chinese)
+    serial_id = 1
 
     def next_id() -> str:
-        nonlocal generated_index
+        nonlocal serial_id
         while True:
-            candidate = f"npc_auto_{generated_index:03d}"
-            generated_index += 1
+            candidate = f"npc_auto_{serial_id:03d}"
+            serial_id += 1
             if candidate not in used_ids:
                 used_ids.add(candidate)
                 return candidate
 
-    # Re-balance excessive density first.
-    overflow: list[NPCProfile] = []
     for loc in locations:
         current = by_loc.get(loc.location_id, [])
         if len(current) <= target_max:
             continue
-        keep = current[:target_max]
-        extra = current[target_max:]
-        by_loc[loc.location_id] = keep
-        overflow.extend(extra)
-    if overflow:
-        for npc in overflow:
-            # Move extras to locations with available room.
-            candidates = sorted(
-                locations,
-                key=lambda l: len(by_loc.get(l.location_id, [])),
-            )
-            placed = False
-            for loc in candidates:
-                current = by_loc.get(loc.location_id, [])
-                if len(current) >= target_max:
-                    continue
-                npc.starting_location = loc.location_id
-                current.append(npc)
-                by_loc[loc.location_id] = current
-                placed = True
-                break
-            if not placed:
-                # If all full, keep original location.
-                loc_id = npc.starting_location
-                by_loc.setdefault(loc_id, []).append(npc)
+        # Keep original NPC placement to avoid role/location mismatch introduced by relocation.
+        by_loc[loc.location_id] = current[:target_max]
 
     for loc in locations:
         current = by_loc.get(loc.location_id, [])
         while len(current) < target_min:
             idx = len(npcs)
             traits, goals, obedience, stubborn, risk, disp, refusal = trait_sets[idx % len(trait_sets)]
-            bucket = _location_keyword_bucket(loc)
-            loc_prof_pool = _theme_professions_for_location(theme, bucket, prefer_chinese=prefer_chinese)
             profile = NPCProfile(
                 npc_id=next_id(),
-                name=next_name(),
-                profession=loc_prof_pool[idx % len(loc_prof_pool)] if loc_prof_pool else profession_pool[idx % len(profession_pool)],
+                name="",
+                profession=_profession_from_location(loc, prefer_chinese=prefer_chinese)
+                or profession_pool[idx % len(profession_pool)],
                 traits=list(traits),
                 goals=list(goals),
                 starting_location=loc.location_id,
@@ -1349,7 +1250,7 @@ def _ensure_npc_density(world: WorldSpec, *, prefer_chinese: bool, theme: str) -
             )
             npcs.append(profile)
             current.append(profile)
-    # Flatten by current starting_location order.
+
     result: list[NPCProfile] = []
     seen = set()
     for loc in locations:
@@ -1366,17 +1267,94 @@ def _ensure_npc_density(world: WorldSpec, *, prefer_chinese: bool, theme: str) -
     return result
 
 
-def _ensure_unique_npc_names(npcs: list[NPCProfile], *, prefer_chinese: bool) -> list[NPCProfile]:
+def _ensure_unique_npc_names(world: WorldSpec, npcs: list[NPCProfile], *, prefer_chinese: bool) -> list[NPCProfile]:
+    loc_map = {loc.location_id: loc for loc in world.locations}
     used: set[str] = set()
+    per_loc_counter: dict[str, int] = {}
     normalized: list[NPCProfile] = []
-    next_name = _make_name_allocator(used, prefer_chinese=prefer_chinese)
 
     for npc in npcs:
         profile = npc.model_copy(deep=True)
         current_name = str(profile.name or "").strip()
-        if current_name and current_name not in used:
+        loc = loc_map.get(profile.starting_location)
+        if (
+            current_name
+            and current_name not in used
+            and not _npc_name_needs_rewrite(
+                current_name,
+                profession=str(profile.profession or "").strip(),
+                loc=loc,
+                prefer_chinese=prefer_chinese,
+            )
+        ):
             used.add(current_name)
-        else:
-            profile.name = next_name()
+            normalized.append(profile)
+            continue
+
+        loc_name = str(getattr(loc, "name", "") or "").strip() or profile.starting_location or "loc"
+        role = str(profile.profession or "").strip() or (
+            "角色" if prefer_chinese else "Character"
+        )
+        base = _procedural_npc_name(
+            seed=f"{profile.npc_id}:{loc_name}:{role}:{len(used)}",
+            loc_name=loc_name,
+            profession=role,
+            prefer_chinese=prefer_chinese,
+        )
+        count = per_loc_counter.get(profile.starting_location, 0) + 1
+        candidate = base if base not in used else (f"{base}{count}" if prefer_chinese else f"{base} {count}")
+        while candidate in used:
+            count += 1
+            candidate = f"{base}{count}" if prefer_chinese else f"{base} {count}"
+        per_loc_counter[profile.starting_location] = count
+        profile.name = candidate
+        used.add(candidate)
         normalized.append(profile)
+
     return normalized
+
+
+def _npc_name_needs_rewrite(name: str, *, profession: str, loc: Any, prefer_chinese: bool) -> bool:
+    text = str(name or "").strip()
+    if not text:
+        return True
+    if _NPC_PLACEHOLDER_ZH.search(text) or _NPC_PLACEHOLDER_EN.search(text):
+        return True
+    loc_name = str(getattr(loc, "name", "") or "").strip()
+    prof = str(profession or "").strip()
+    if prof and text == prof:
+        return True
+    if loc_name and text.count(loc_name) >= 2:
+        return True
+    if prof and loc_name and text == f"{loc_name}{prof}":
+        return True
+    if prefer_chinese and any(token in text for token in ("工作人员", "居民", "市民")) and len(text) >= 6:
+        return True
+    if (not prefer_chinese) and any(token in text.lower() for token in ("staff", "resident", "citizen")) and len(text) >= 12:
+        return True
+    return False
+
+
+def _procedural_npc_name(*, seed: str, loc_name: str, profession: str, prefer_chinese: bool) -> str:
+    score = 0
+    for idx, ch in enumerate(seed):
+        score += (idx + 1) * ord(ch)
+    if prefer_chinese:
+        loc_chars = [ch for ch in str(loc_name or "") if _contains_cjk(ch)]
+        prof_chars = [ch for ch in str(profession or "") if _contains_cjk(ch)]
+        fallback = list("安若清宁泽岚川言")
+        pool = loc_chars + prof_chars + fallback
+        if not pool:
+            pool = fallback
+        first = pool[score % len(pool)]
+        second = pool[(score // 3 + 1) % len(pool)]
+        if first == second:
+            second = pool[(score // 5 + 2) % len(pool)]
+        return f"{first}{second}"
+    consonants = ["b", "d", "f", "g", "k", "l", "m", "n", "r", "s", "t", "v"]
+    vowels = ["a", "e", "i", "o", "u", "y"]
+    c1 = consonants[score % len(consonants)]
+    v1 = vowels[(score // 2) % len(vowels)]
+    c2 = consonants[(score // 5 + 3) % len(consonants)]
+    v2 = vowels[(score // 7 + 1) % len(vowels)]
+    return f"{c1}{v1}{c2}{v2}".capitalize()

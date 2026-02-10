@@ -78,6 +78,10 @@ class TurnPipeline:
         npc_recent_context = self._npc_recent_context(state, npc_id)
         inventory_context = self._inventory_brief(state)
         quest_context = self._quest_brief(state)
+        npc_quest_context = self._npc_quest_brief(state, npc_id)
+        map_context = self._map_brief(state.world)
+        location_collectibles = self._location_collectibles_brief(state)
+        allowed_items = self._allowed_world_items_brief(state)
         neighbors_context = self._neighbor_brief(state)
         memory_context = self._recent_memory_brief(state)
         schema_hint = (
@@ -100,8 +104,12 @@ class TurnPipeline:
             f"npc_coercion_history: {coercion_flag}\n"
             f"npc_recent_context: {npc_recent_context}\n"
             f"reachable_neighbors: {neighbors_context}\n"
+            f"world_map: {map_context}\n"
+            f"location_collectibles: {location_collectibles}\n"
             f"inventory: {inventory_context}\n"
             f"quest_journal: {quest_context}\n"
+            f"npc_assigned_quests: {npc_quest_context}\n"
+            f"allowed_world_items: {allowed_items}\n"
             f"recent_story_memory: {memory_context}\n"
             f"{world_constraints}\n"
             f"Language requirement: Output narration and npc_dialogue.text in {language_name} only.\n"
@@ -113,6 +121,11 @@ class TurnPipeline:
             "NPC behavior must stay consistent with this NPC's traits/goals/refusal style and current disposition. "
             "If asked about other NPCs or roles, only use names/professions from the NPC roster in WORLD BIBLE; "
             "if a role does not exist, say there is no such person in town. "
+            "When discussing quest materials/where to find items, only use item names that appear in allowed_world_items. "
+            "If npc_assigned_quests is not empty, this NPC can only request the required_items listed in npc_assigned_quests. "
+            "Do not claim another NPC's quest requirements as your own. "
+            "If asked for unknown items, explicitly say they do not exist in this world yet. "
+            "When giving directions, use only locations that exist in world_map and are reachable from reachable_neighbors if movement is immediate. "
             "When reacting to quests, prefer existing quest_id in quest_journal. "
             "Do NOT rewrite existing quest definition fields (title/objective/required_items/reward_items). "
             "Only update status/guidance for existing quests during normal chat turns. "
@@ -138,6 +151,7 @@ class TurnPipeline:
         output = self._ensure_npc_dialogue(output, npc_id)
         output = self._enforce_identity_claims(state, output, npc_id, response_format)
         output = self._enforce_world_roster(state, output, npc_id, response_format)
+        output = self._enforce_quest_grounding(state, player_text, output, npc_id, response_format)
         output = self._inject_forced_move_if_missing(state, player_text, npc_id, output)
         state_non_move = apply_turn_output(state, output, npc_id)
 
@@ -307,6 +321,120 @@ class TurnPipeline:
             return "{}"
         pairs = [f"{name}:{count}" for name, count in sorted(state.inventory.items())]
         return "{ " + ", ".join(pairs) + " }"
+
+    def _allowed_world_items(self, state: GameState) -> List[str]:
+        seen: Set[str] = set()
+        items: List[str] = []
+
+        def _push(name: str) -> None:
+            key = str(name or "").strip()
+            if not key or key in seen:
+                return
+            seen.add(key)
+            items.append(key)
+
+        if state.world.main_quest:
+            for k in (state.world.main_quest.required_items or {}).keys():
+                _push(str(k))
+            for k in (state.world.main_quest.reward_items or {}).keys():
+                _push(str(k))
+        for q in state.world.side_quests:
+            for k in (q.required_items or {}).keys():
+                _push(str(k))
+            for k in (q.reward_items or {}).keys():
+                _push(str(k))
+        for q in state.quest_journal.values():
+            for k in (q.required_items or {}).keys():
+                _push(str(k))
+            for k in (q.reward_items or {}).keys():
+                _push(str(k))
+        for k in state.inventory.keys():
+            _push(str(k))
+        for stock in state.location_resource_stock.values():
+            for k in (stock or {}).keys():
+                _push(str(k))
+        return items
+
+    def _allowed_world_items_brief(self, state: GameState) -> str:
+        items = self._allowed_world_items(state)
+        return json.dumps(items, ensure_ascii=False)
+
+    def _npc_assigned_quests(self, state: GameState, npc_id: str) -> list:
+        matched = []
+        for quest_id, quest in state.quest_journal.items():
+            if quest.giver_npc_id != npc_id:
+                continue
+            if quest.category != "side":
+                continue
+            if quest.status in {"completed", "failed"}:
+                continue
+            matched.append((quest_id, quest))
+        return matched
+
+    def _npc_quest_brief(self, state: GameState, npc_id: str) -> str:
+        matched = self._npc_assigned_quests(state, npc_id)
+        rows = []
+        for quest_id, quest in matched:
+            rows.append(
+                {
+                    "quest_id": quest_id,
+                    "title": quest.title,
+                    "status": quest.status,
+                    "objective": quest.objective,
+                    "giver_npc_id": quest.giver_npc_id,
+                    "suggested_location": self._quest_suggested_location(state, quest_id),
+                    "required_items": dict(quest.required_items or {}),
+                    "reward_items": dict(quest.reward_items or {}),
+                }
+            )
+        return json.dumps(rows, ensure_ascii=False)
+
+    def _quest_suggested_location(self, state: GameState, quest_id: str) -> str | None:
+        if state.world.main_quest and state.world.main_quest.quest_id == quest_id:
+            return state.world.main_quest.suggested_location
+        for quest in state.world.side_quests:
+            if quest.quest_id == quest_id:
+                return quest.suggested_location
+        return None
+
+    def _map_brief(self, world: WorldSpec) -> str:
+        rows: List[Dict[str, Any]] = []
+        for loc in world.locations:
+            rows.append(
+                {
+                    "location_id": loc.location_id,
+                    "name": loc.name,
+                    "kind": loc.kind,
+                    "connected_to": list(loc.connected_to or []),
+                }
+            )
+        return json.dumps(rows, ensure_ascii=False)
+
+    def _location_collectibles_brief(self, state: GameState) -> str:
+        by_loc: Dict[str, Dict[str, int]] = {}
+        for loc_id, stock in sorted(state.location_resource_stock.items()):
+            if not isinstance(stock, dict):
+                continue
+            normalized: Dict[str, int] = {}
+            for item_name, amount in stock.items():
+                count = int(amount)
+                if count > 0:
+                    normalized[str(item_name)] = count
+            if normalized:
+                by_loc[loc_id] = normalized
+        quest_hints: Dict[str, Dict[str, int]] = {}
+        for quest in state.world.side_quests:
+            loc_id = quest.suggested_location
+            if not loc_id:
+                continue
+            bucket = quest_hints.setdefault(loc_id, {})
+            for item, count in (quest.required_items or {}).items():
+                bucket[item] = max(int(bucket.get(item, 0)), int(count))
+        payload = {
+            "stock_by_location": by_loc,
+            "quest_item_hints_by_location": quest_hints,
+        }
+        return json.dumps(payload, ensure_ascii=False)
 
     def _quest_brief(self, state: GameState) -> str:
         if not state.quest_journal:
@@ -489,6 +617,86 @@ class TurnPipeline:
             raise ValueError(f"unknown NPC/role references remain: {sorted(still_offending)}")
         return fixed_output
 
+    def _enforce_quest_grounding(
+        self,
+        state: GameState,
+        player_text: str,
+        output: TurnOutput,
+        npc_id: str,
+        response_format: dict,
+    ) -> TurnOutput:
+        npc_lines = [line.text for line in output.npc_dialogue if line.npc_id == npc_id and line.text]
+        if output.narration:
+            npc_lines.append(output.narration)
+        if not npc_lines:
+            return output
+
+        all_items = self._allowed_world_items(state)
+        assigned = self._npc_assigned_quests(state, npc_id)
+        assigned_ids = {quest_id for quest_id, _ in assigned}
+        assigned_items: Set[str] = set()
+        for _qid, quest in assigned:
+            assigned_items.update(str(k) for k in (quest.required_items or {}).keys())
+        other_active_items: Set[str] = set()
+        for qid, quest in state.quest_journal.items():
+            if quest.category != "side":
+                continue
+            if quest.status in {"completed", "failed"}:
+                continue
+            if qid in assigned_ids:
+                continue
+            other_active_items.update(str(k) for k in (quest.required_items or {}).keys())
+
+        combined = " ".join(npc_lines)
+        has_material_cue = _contains_material_or_quest_cue(combined) or _contains_material_or_quest_cue(player_text)
+        mentions = _mentioned_items_in_text(npc_lines, all_items)
+        mentions_assigned = {item for item in mentions if item in assigned_items}
+        mentions_other = {item for item in mentions if item in other_active_items}
+        refuses_request = _contains_no_request_phrase(combined)
+
+        needs_rewrite = False
+        reason = ""
+        if assigned_items and has_material_cue and not refuses_request:
+            if not mentions_assigned:
+                needs_rewrite = True
+                reason = "npc talked about quest/materials without its assigned required items"
+            elif mentions_other:
+                needs_rewrite = True
+                reason = "npc mentioned items from another npc's quest"
+        if not needs_rewrite and has_material_cue and not mentions and assigned_items and not refuses_request:
+            needs_rewrite = True
+            reason = "npc mentioned unknown materials not present in world item list"
+        if not needs_rewrite:
+            return output
+
+        rewrite_system = (
+            "You are a JSON repair tool. Return ONLY valid JSON. "
+            "Repair quest-item grounding and keep narrative consistency."
+        )
+        language_name = "Chinese" if self._narrative_language(state.world) == "zh" else "English"
+        rewrite_user = (
+            f"Reason to repair: {reason}\n"
+            "Rules:\n"
+            "1) If this NPC has assigned side quests, any requested delivery/material items must come ONLY from those quests' required_items.\n"
+            "2) Never claim another NPC's quest requirements.\n"
+            "3) Never invent item names outside allowed_world_items.\n"
+            "4) If player asks for unknown/nonexistent material, explicitly say it does not exist in this world.\n"
+            "5) Keep quest definitions unchanged; only repair dialogue/narration wording.\n\n"
+            f"npc_id={npc_id}\n"
+            f"player_text={player_text}\n"
+            f"npc_assigned_quests={self._npc_quest_brief(state, npc_id)}\n"
+            f"quest_journal={self._quest_brief(state)}\n"
+            f"world_map={self._map_brief(state.world)}\n"
+            f"location_collectibles={self._location_collectibles_brief(state)}\n"
+            f"allowed_world_items={self._allowed_world_items_brief(state)}\n"
+            f"Keep player-visible text in {language_name}.\n\n"
+            f"Original JSON: {json.dumps(output.model_dump(), ensure_ascii=False)}"
+        )
+        fixed = self.llm_client.generate_json(rewrite_system, rewrite_user, response_format=response_format)
+        fixed_output = validate_turn_output(fixed)
+        fixed_output = self._ensure_npc_dialogue(fixed_output, npc_id)
+        return fixed_output
+
     def _enforce_no_first_mention(
         self,
         state: GameState,
@@ -656,3 +864,62 @@ def _localize_refusal_reason(reason: str, prefer_chinese: bool) -> str:
     if lowered.startswith("refused:"):
         return text.split(":", 1)[-1].strip()
     return text
+
+
+def _contains_material_or_quest_cue(text: str) -> bool:
+    lowered = str(text or "").lower()
+    cues = [
+        "任务",
+        "委托",
+        "需求",
+        "需要",
+        "材料",
+        "交付",
+        "提交",
+        "收集",
+        "带来",
+        "带够",
+        "quest",
+        "mission",
+        "material",
+        "ingredient",
+        "deliver",
+        "delivery",
+        "collect",
+        "gather",
+        "bring",
+        "required",
+    ]
+    return any(cue in lowered for cue in cues)
+
+
+def _contains_no_request_phrase(text: str) -> bool:
+    lowered = str(text or "").lower()
+    markers = [
+        "不需要",
+        "没有需要",
+        "不用交付",
+        "不必收集",
+        "no need",
+        "nothing to deliver",
+        "no materials needed",
+        "no requirements",
+    ]
+    return any(marker in lowered for marker in markers)
+
+
+def _mentioned_items_in_text(texts: List[str], item_names: List[str]) -> Set[str]:
+    mentions: Set[str] = set()
+    if not texts or not item_names:
+        return mentions
+    joined = "\n".join([str(t or "") for t in texts])
+    joined_lower = joined.lower()
+    unique_items = {str(name or "").strip() for name in item_names if str(name or "").strip()}
+    for item_name in sorted(unique_items, key=len, reverse=True):
+        if item_name.isascii():
+            if item_name.lower() in joined_lower:
+                mentions.add(item_name)
+            continue
+        if item_name in joined:
+            mentions.add(item_name)
+    return mentions

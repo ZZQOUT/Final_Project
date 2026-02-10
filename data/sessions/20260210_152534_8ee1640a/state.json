@@ -1,0 +1,470 @@
+{
+  "session_id": "20260210_152534_8ee1640a",
+  "created_at": "2026-02-10T15:26:29.016798+00:00",
+  "world": {
+    "world_id": "campus_love_01",
+    "title": "樱花校园恋曲",
+    "world_bible": {
+      "tech_level": "modern",
+      "narrative_language": "zh",
+      "magic_rules": "本世界无魔法，一切事件基于现实逻辑发生。",
+      "tone": "青春、温馨、略带羞涩的校园恋爱氛围，强调人际关系与成长。",
+      "anachronism_policy": null,
+      "taboos": [
+        "暴力",
+        "死亡",
+        "超自然现象"
+      ],
+      "do_not_mention": [],
+      "anachronism_blocklist": []
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "樱花大道",
+        "kind": "outdoor",
+        "description": "一条贯穿校园的林荫道，两旁种满樱花树。春天时花瓣纷飞，是情侣们最爱的散步地点。",
+        "connected_to": [
+          "loc_002",
+          "loc_003"
+        ],
+        "tags": [
+          "浪漫",
+          "社交",
+          "户外"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "图书馆",
+        "kind": "indoor",
+        "description": "安静整洁的现代图书馆，设有自习区和阅读角。常有学生在此温书或偷偷观察心仪的对象。",
+        "connected_to": [
+          "loc_001",
+          "loc_004"
+        ],
+        "tags": [
+          "学习",
+          "安静",
+          "室内"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "社团活动中心",
+        "kind": "indoor",
+        "description": "热闹非凡的社团聚集地，墙上贴满了招新海报和活动通知，充满青春活力。",
+        "connected_to": [
+          "loc_001",
+          "loc_005"
+        ],
+        "tags": [
+          "社交",
+          "活动",
+          "室内"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "教学楼A栋",
+        "kind": "indoor",
+        "description": "主要的教学楼之一，走廊上常有学生匆匆赶课，教室里回荡着老师的讲课声。",
+        "connected_to": [
+          "loc_002",
+          "loc_006"
+        ],
+        "tags": [
+          "学习",
+          "日常",
+          "室内"
+        ]
+      },
+      {
+        "location_id": "loc_005",
+        "name": "天台花园",
+        "kind": "outdoor",
+        "description": "位于社团活动中心楼顶的秘密花园，少有人知，是表白和谈心的绝佳地点。",
+        "connected_to": [
+          "loc_003"
+        ],
+        "tags": [
+          "私密",
+          "浪漫",
+          "户外"
+        ]
+      },
+      {
+        "location_id": "loc_006",
+        "name": "校门口咖啡厅",
+        "kind": "indoor",
+        "description": "校园外的温馨小咖啡厅，提供饮品和甜点，是放学后约会的好去处。",
+        "connected_to": [
+          "loc_004"
+        ],
+        "tags": [
+          "休闲",
+          "约会",
+          "室内"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_002",
+        "name": "陈浩",
+        "profession": "篮球社成员",
+        "traits": [
+          "阳光",
+          "自信",
+          "直率"
+        ],
+        "goals": [
+          "赢得校际比赛",
+          "向暗恋的人表白"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.6,
+        "stubbornness": 0.5,
+        "risk_tolerance": 0.9,
+        "disposition_to_player": 1,
+        "refusal_style": "现在不行，我得去训练了！不过你要是来看我打球，随时欢迎！"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "苏婉",
+        "profession": "图书管理员助理",
+        "traits": [
+          "认真",
+          "内向",
+          "细心"
+        ],
+        "goals": [
+          "整理完所有新书",
+          "找到志同道合的朋友"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.9,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.2,
+        "disposition_to_player": 0,
+        "refusal_style": "嘘——这里是图书馆，请保持安静。有什么事等出去再说好吗？"
+      },
+      {
+        "npc_id": "npc_001",
+        "name": "林小雨",
+        "profession": "文学社社长",
+        "traits": [
+          "温柔",
+          "害羞",
+          "善解人意"
+        ],
+        "goals": [
+          "完成社团招新",
+          "帮助他人表达心意"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.8,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 2,
+        "refusal_style": "抱歉，我现在有点忙，不过你可以稍后再来找我。"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "赵老师",
+        "profession": "语文教师",
+        "traits": [
+          "严厉",
+          "公正",
+          "关心学生"
+        ],
+        "goals": [
+          "提高班级成绩",
+          "引导学生正确处理感情"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.4,
+        "stubbornness": 0.8,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": -1,
+        "refusal_style": "现在不是谈这些的时候，先把作业交了再说！"
+      },
+      {
+        "npc_id": "npc_006",
+        "name": "张晨",
+        "profession": "园艺社成员",
+        "traits": [
+          "安静",
+          "固执",
+          "热爱自然"
+        ],
+        "goals": [
+          "维护天台花园",
+          "找到能一起赏花的人"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.5,
+        "stubbornness": 0.7,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": 0,
+        "refusal_style": "这里是我的秘密基地，不随便让人进来的……除非你有特别的理由。"
+      },
+      {
+        "npc_id": "npc_005",
+        "name": "李梦",
+        "profession": "咖啡厅兼职生",
+        "traits": [
+          "活泼",
+          "热心",
+          "爱八卦"
+        ],
+        "goals": [
+          "攒够旅行基金",
+          "撮合校园情侣"
+        ],
+        "starting_location": "loc_006",
+        "obedience_level": 0.7,
+        "stubbornness": 0.4,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 3,
+        "refusal_style": "哎呀，真不巧，我现在手头有点忙。不过你等我一下下就好！"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "新学期伊始，樱花盛开。你刚刚踏入校园，心中隐约期待一段特别的邂逅。就在这时，一张写有“想告白却不知如何开口？”的传单飘到你脚边。",
+    "initial_quest": "寻找传单的来源，并了解如何开始你的校园恋爱故事。",
+    "main_quest": {
+      "quest_id": "quest_main_01",
+      "title": "告白计划",
+      "category": "main",
+      "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+      "objective": "完成支线并收集关键道具：情书草稿 x1，手工巧克力 x1，樱花标本 x1",
+      "giver_npc_id": "npc_001",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "情书草稿": 1,
+        "手工巧克力": 1,
+        "樱花标本": 1
+      },
+      "reward_items": {},
+      "reward_hint": "成功告白后，将获得‘校园恋人的祝福’成就。"
+    },
+    "side_quests": [
+      {
+        "quest_id": "quest_side_01",
+        "title": "情书的灵感",
+        "category": "side",
+        "description": "林小雨愿意帮你写情书，但需要你先帮她整理社团资料。",
+        "objective": "在图书馆帮林小雨找到三本指定的文学书籍。（需求：手工巧克力 x2，樱花标本 x1）",
+        "giver_npc_id": "npc_001",
+        "suggested_location": "loc_002",
+        "required_items": {
+          "手工巧克力": 2,
+          "樱花标本": 1
+        },
+        "reward_items": {
+          "情书草稿": 1
+        },
+        "reward_hint": "林小雨亲手写的情书草稿，字迹娟秀，情感真挚。"
+      },
+      {
+        "quest_id": "quest_side_02",
+        "title": "甜蜜的心意",
+        "category": "side",
+        "description": "李梦会教你制作手工巧克力，但需要你帮忙试新品。",
+        "objective": "在咖啡厅品尝并评价三种新口味的甜点。（需求：情书草稿 x2，手工巧克力 x1）",
+        "giver_npc_id": "npc_005",
+        "suggested_location": "loc_006",
+        "required_items": {
+          "情书草稿": 2,
+          "手工巧克力": 1
+        },
+        "reward_items": {
+          "手工巧克力": 1
+        },
+        "reward_hint": "李梦特制的手工巧克力，包装精美，甜而不腻。"
+      },
+      {
+        "quest_id": "quest_side_03",
+        "title": "樱花的记忆",
+        "category": "side",
+        "description": "张晨愿意送你一片樱花标本，但希望你先帮他修剪花园的灌木。",
+        "objective": "在天台花园使用园艺剪修剪三处杂乱的灌木。（需求：樱花标本 x2，情书草稿 x1）",
+        "giver_npc_id": "npc_006",
+        "suggested_location": "loc_005",
+        "required_items": {
+          "樱花标本": 2,
+          "情书草稿": 1
+        },
+        "reward_items": {
+          "樱花标本": 1
+        },
+        "reward_hint": "用今年第一朵樱花制成的标本，夹在透明卡片中，永不凋零。"
+      }
+    ],
+    "map_layout": [
+      {
+        "location_id": "loc_001",
+        "x": 50.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_002",
+        "x": 30.0,
+        "y": 40.0
+      },
+      {
+        "location_id": "loc_003",
+        "x": 70.0,
+        "y": 40.0
+      },
+      {
+        "location_id": "loc_004",
+        "x": 30.0,
+        "y": 60.0
+      },
+      {
+        "location_id": "loc_005",
+        "x": 70.0,
+        "y": 20.0
+      },
+      {
+        "location_id": "loc_006",
+        "x": 30.0,
+        "y": 80.0
+      }
+    ]
+  },
+  "player_location": "loc_006",
+  "npc_locations": {
+    "npc_002": "loc_001",
+    "npc_003": "loc_002",
+    "npc_001": "loc_003",
+    "npc_004": "loc_004",
+    "npc_006": "loc_005",
+    "npc_005": "loc_006"
+  },
+  "flags": {},
+  "quests": {
+    "quest_main_01": "active",
+    "quest_side_01": "active",
+    "quest_side_02": "active",
+    "quest_side_03": "active"
+  },
+  "quest_journal": {
+    "quest_main_01": {
+      "quest_id": "quest_main_01",
+      "title": "告白计划",
+      "category": "main",
+      "status": "active",
+      "objective": "完成支线并收集关键道具：情书草稿 x1，手工巧克力 x1，樱花标本 x1",
+      "guidance": "主线准备进度：情书草稿 0/1，手工巧克力 0/1，樱花标本 0/1",
+      "giver_npc_id": "npc_001",
+      "required_items": {
+        "情书草稿": 1,
+        "手工巧克力": 1,
+        "樱花标本": 1
+      },
+      "collected_items": {
+        "情书草稿": 0,
+        "手工巧克力": 0,
+        "樱花标本": 0
+      },
+      "reward_items": {},
+      "reward_hint": "成功告白后，将获得‘校园恋人的祝福’成就。"
+    },
+    "quest_side_01": {
+      "quest_id": "quest_side_01",
+      "title": "情书的灵感",
+      "category": "side",
+      "status": "active",
+      "objective": "在图书馆帮林小雨找到三本指定的文学书籍。（需求：手工巧克力 x2，樱花标本 x1）",
+      "guidance": "交付进度：手工巧克力 已交付0/2（背包0），樱花标本 已交付0/1（背包0）",
+      "giver_npc_id": "npc_001",
+      "required_items": {
+        "手工巧克力": 2,
+        "樱花标本": 1
+      },
+      "collected_items": {
+        "手工巧克力": 0,
+        "樱花标本": 0
+      },
+      "reward_items": {
+        "情书草稿": 1
+      },
+      "reward_hint": "林小雨亲手写的情书草稿，字迹娟秀，情感真挚。"
+    },
+    "quest_side_02": {
+      "quest_id": "quest_side_02",
+      "title": "甜蜜的心意",
+      "category": "side",
+      "status": "active",
+      "objective": "在咖啡厅品尝并评价三种新口味的甜点。（需求：情书草稿 x2，手工巧克力 x1）",
+      "guidance": "交付进度：情书草稿 已交付0/2（背包0），手工巧克力 已交付0/1（背包0）",
+      "giver_npc_id": "npc_005",
+      "required_items": {
+        "情书草稿": 2,
+        "手工巧克力": 1
+      },
+      "collected_items": {
+        "情书草稿": 0,
+        "手工巧克力": 0
+      },
+      "reward_items": {
+        "手工巧克力": 1
+      },
+      "reward_hint": "李梦特制的手工巧克力，包装精美，甜而不腻。"
+    },
+    "quest_side_03": {
+      "quest_id": "quest_side_03",
+      "title": "樱花的记忆",
+      "category": "side",
+      "status": "active",
+      "objective": "在天台花园使用园艺剪修剪三处杂乱的灌木。（需求：樱花标本 x2，情书草稿 x1）",
+      "guidance": "交付进度：樱花标本 已交付0/2（背包0），情书草稿 已交付0/1（背包0）",
+      "giver_npc_id": "npc_006",
+      "required_items": {
+        "樱花标本": 2,
+        "情书草稿": 1
+      },
+      "collected_items": {
+        "樱花标本": 0,
+        "情书草稿": 0
+      },
+      "reward_items": {
+        "樱花标本": 1
+      },
+      "reward_hint": "用今年第一朵樱花制成的标本，夹在透明卡片中，永不凋零。"
+    }
+  },
+  "main_quest_id": "quest_main_01",
+  "inventory": {},
+  "location_resource_stock": {
+    "loc_001": {
+      "樱花标本": 2,
+      "情书草稿": 1
+    },
+    "loc_003": {
+      "手工巧克力": 2,
+      "樱花标本": 1
+    },
+    "loc_005": {
+      "情书草稿": 2,
+      "樱花标本": 3
+    },
+    "loc_002": {
+      "手工巧克力": 3,
+      "樱花标本": 2
+    },
+    "loc_004": {
+      "樱花标本": 2,
+      "情书草稿": 1
+    },
+    "loc_006": {
+      "情书草稿": 3,
+      "手工巧克力": 2
+    }
+  },
+  "recent_summaries": [],
+  "last_turn_id": 0
+}

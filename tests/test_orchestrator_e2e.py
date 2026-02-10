@@ -6,8 +6,9 @@ from datetime import datetime, timezone
 from rpg_story.config import load_config
 from rpg_story.engine.orchestrator import TurnPipeline
 from rpg_story.llm.client import MockLLMClient
-from rpg_story.models.world import WorldBibleRules, LocationSpec, NPCProfile, WorldSpec, GameState
+from rpg_story.models.world import WorldBibleRules, LocationSpec, NPCProfile, WorldSpec, GameState, QuestSpec
 from rpg_story.persistence.store import load_state, read_turn_logs
+from rpg_story.world.generator import initialize_game_state
 
 
 def make_world() -> WorldSpec:
@@ -50,6 +51,93 @@ def make_world() -> WorldSpec:
         starting_location="shop",
         starting_hook="A rumor spreads.",
         initial_quest="Deliver a message.",
+    )
+
+
+def make_world_with_quest_grounding() -> WorldSpec:
+    locations = [
+        LocationSpec(
+            location_id="town",
+            name="晨光村",
+            kind="town",
+            description="宁静的村庄。",
+            connected_to=["forest"],
+        ),
+        LocationSpec(
+            location_id="forest",
+            name="迷雾森林",
+            kind="forest",
+            description="潮湿而危险的森林。",
+            connected_to=["town"],
+        ),
+    ]
+    npcs = [
+        NPCProfile(
+            npc_id="npc_blacksmith",
+            name="托姆",
+            profession="铁匠",
+            traits=["谨慎"],
+            goals=["修复祖传铁砧"],
+            starting_location="town",
+            obedience_level=0.3,
+            stubbornness=0.8,
+            risk_tolerance=0.3,
+            disposition_to_player=1,
+            refusal_style="direct",
+        ),
+        NPCProfile(
+            npc_id="npc_scholar",
+            name="艾文",
+            profession="学者",
+            traits=["理性"],
+            goals=["研究星铁矿"],
+            starting_location="town",
+            obedience_level=0.4,
+            stubbornness=0.5,
+            risk_tolerance=0.4,
+            disposition_to_player=0,
+            refusal_style="polite",
+        ),
+    ]
+    side_quests = [
+        QuestSpec(
+            quest_id="side_anvil",
+            title="修复祖传铁砧",
+            category="side",
+            description="帮托姆收集材料修复铁砧。",
+            objective="带回月光草并交给托姆。",
+            giver_npc_id="npc_blacksmith",
+            suggested_location="forest",
+            required_items={"月光草": 2},
+            reward_items={"铁匠誓约": 1},
+        ),
+        QuestSpec(
+            quest_id="side_research",
+            title="研究样本",
+            category="side",
+            description="帮艾文研究矿石。",
+            objective="收集星铁矿并交给艾文。",
+            giver_npc_id="npc_scholar",
+            suggested_location="forest",
+            required_items={"星铁矿": 2},
+            reward_items={"研究笔记": 1},
+        ),
+    ]
+    return WorldSpec(
+        world_id="world_grounded",
+        title="Grounded World",
+        world_bible=WorldBibleRules(
+            tech_level="medieval",
+            narrative_language="zh",
+            magic_rules="low",
+            tone="grounded",
+        ),
+        locations=locations,
+        npcs=npcs,
+        starting_location="town",
+        starting_hook="村里需要修复古老铁砧。",
+        initial_quest="先完成支线收集材料。",
+        side_quests=side_quests,
     )
 
 
@@ -191,3 +279,45 @@ def test_turnoutput_quest_updates_list_normalized(tmp_path: Path):
 
     updated_state, output, _log = pipeline.run_turn(state, "Hello", "npc_1")
     assert output.world_updates.quest_updates == {}
+
+
+def test_orchestrator_repairs_npc_item_request_to_assigned_side_quest(tmp_path: Path):
+    cfg = load_config("configs/config.yaml")
+    sessions_root = tmp_path / "sessions"
+    world = make_world_with_quest_grounding()
+    state = initialize_game_state(world, session_id="sess_grounding")
+    state.player_location = "town"
+    state.npc_locations["npc_blacksmith"] = "town"
+    state.location_resource_stock = {"forest": {"月光草": 2, "星铁矿": 2}}
+
+    first_output = (
+        "{"
+        '"narration":"",'
+        '"npc_dialogue":[{"npc_id":"npc_blacksmith","text":"托姆：要修铁砧，得带两块星铁矿过来。"}],'
+        '"world_updates":{"player_location":"town","npc_moves":[],"flags_delta":{},"quest_updates":{}},'
+        '"memory_summary":"",'
+        '"safety":{"refuse":false,"reason":null}'
+        "}"
+    )
+    repaired_output = (
+        "{"
+        '"narration":"",'
+        '"npc_dialogue":[{"npc_id":"npc_blacksmith","text":"托姆：修复铁砧只需要月光草，两份就够。"}],'
+        '"world_updates":{"player_location":"town","npc_moves":[],"flags_delta":{},"quest_updates":{}},'
+        '"memory_summary":"",'
+        '"safety":{"refuse":false,"reason":null}'
+        "}"
+    )
+    llm = MockLLMClient([first_output, repaired_output])
+    pipeline = TurnPipeline(cfg=cfg, llm_client=llm, sessions_root=sessions_root)
+
+    _updated_state, output, _log = pipeline.run_turn(state, "你要啥材料", "npc_blacksmith")
+
+    assert llm.calls == 2
+    assert output.npc_dialogue
+    text = output.npc_dialogue[0].text
+    assert "月光草" in text
+    assert "星铁矿" not in text
+    assert llm.last_user_prompt is not None
+    assert "allowed_world_items" in llm.last_user_prompt
+    assert "npc_assigned_quests" in llm.last_user_prompt

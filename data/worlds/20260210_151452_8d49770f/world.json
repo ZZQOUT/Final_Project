@@ -1,0 +1,387 @@
+{
+  "world_id": "w_dq001",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "narrative_language": "zh",
+    "magic_rules": "魔法源自古代符文与自然元素，需通过咒语和法杖引导。只有经过训练的法师或持有魔法物品者才能使用。",
+    "tone": "史诗奇幻，充满冒险与牺牲精神，强调勇气、忠诚与命运。",
+    "anachronism_policy": null,
+    "taboos": [
+      "背叛王国",
+      "亵渎神殿",
+      "伤害无辜村民"
+    ],
+    "do_not_mention": [
+      "智能手机",
+      "互联网",
+      "信用卡",
+      "汽车",
+      "电脑",
+      "电力",
+      "现代武器"
+    ],
+    "anachronism_blocklist": [
+      "手机",
+      "网络",
+      "塑料",
+      "钢筋混凝土"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "晨光村",
+      "kind": "town",
+      "description": "一个宁静的小村庄，坐落在山谷之中，以晨曦初照时金光闪闪的麦田闻名。村民们淳朴善良，是勇者的故乡。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "和平",
+        "起始点",
+        "农田"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "迷雾森林",
+      "kind": "forest",
+      "description": "一片终年被浓雾笼罩的古老森林，传说中藏有精灵遗迹和危险的魔兽。路径错综复杂，常有旅人迷失其中。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "危险",
+        "神秘",
+        "探索"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "断桥驿站",
+      "kind": "bridge",
+      "description": "一座横跨深渊的古老石桥，如今部分坍塌，仅容一人小心通过。这里是通往王城的必经之路，常有商队在此歇脚。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "交通要道",
+        "险峻",
+        "贸易"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "幽影洞窟",
+      "kind": "dungeon",
+      "description": "隐藏在迷雾森林深处的地下洞穴，曾是古代矮人矿场，如今被亡灵占据。洞内机关重重，藏有强大宝物。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "地下",
+        "战斗",
+        "宝藏"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "银辉王城",
+      "kind": "castle",
+      "description": "王国的首都，高耸的白色城墙闪耀着银光。城内有王宫、骑士团驻地和大法师塔，是政治与魔法的中心。",
+      "connected_to": [
+        "loc_003",
+        "loc_006"
+      ],
+      "tags": [
+        "权力",
+        "安全",
+        "魔法"
+      ]
+    },
+    {
+      "location_id": "loc_006",
+      "name": "龙脊山脉",
+      "kind": "mountain",
+      "description": "王国北方的险峻山脉，山顶终年积雪。传说恶龙‘暗焰’栖息于最高峰的火山口，守护着上古神器。",
+      "connected_to": [
+        "loc_005"
+      ],
+      "tags": [
+        "终极挑战",
+        "寒冷",
+        "飞行限制"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "艾拉",
+      "profession": "村医",
+      "traits": [
+        "温柔",
+        "细心",
+        "富有同情心"
+      ],
+      "goals": [
+        "治愈所有病人",
+        "保护村庄安全"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 3,
+      "refusal_style": "抱歉，我现在必须照顾病人，但如果你需要药草，我可以给你一些。"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "托姆",
+      "profession": "铁匠",
+      "traits": [
+        "固执",
+        "技艺精湛",
+        "沉默寡言"
+      ],
+      "goals": [
+        "打造最强武器",
+        "修复祖传铁砧"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.4,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 1,
+      "refusal_style": "哼，没材料我可不干。你去找些精铁矿来再说。"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "莉娜",
+      "profession": "向导",
+      "traits": [
+        "机智",
+        "可靠",
+        "熟悉地形"
+      ],
+      "goals": [
+        "带领旅人安全穿越森林",
+        "收集稀有植物"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.85,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.7,
+      "disposition_to_player": 2,
+      "refusal_style": "这片森林太危险了，没有报酬我可不带你走。"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "老巴特",
+      "profession": "驿站老板",
+      "traits": [
+        "热情",
+        "健谈",
+        "消息灵通"
+      ],
+      "goals": [
+        "扩建驿站",
+        "结交更多朋友"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.8,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 3,
+      "refusal_style": "哎呀，这会儿正忙，不过喝杯酒聊聊天倒是可以！"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "格鲁克",
+      "profession": "盗贼",
+      "traits": [
+        "狡猾",
+        "自私",
+        "身手敏捷"
+      ],
+      "goals": [
+        "偷取洞窟中的宝物",
+        "躲避守卫"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.2,
+      "stubbornness": 0.9,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": -2,
+      "refusal_style": "想让我帮忙？先分我一半战利品再说！"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "塞琳娜",
+      "profession": "宫廷法师",
+      "traits": [
+        "高傲",
+        "博学",
+        "责任感强"
+      ],
+      "goals": [
+        "研究古代魔法",
+        "保护王国免受黑暗侵蚀"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.6,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 2,
+      "refusal_style": "凡人，若无足够理由，休想让我浪费魔力。"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "雷恩爵士",
+      "profession": "皇家骑士",
+      "traits": [
+        "忠诚",
+        "勇敢",
+        "纪律严明"
+      ],
+      "goals": [
+        "铲除恶龙",
+        "保卫王室"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.95,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 4,
+      "refusal_style": "作为骑士，我必须确保你的准备充分。带上必要的装备再来吧。"
+    },
+    {
+      "npc_id": "npc_008",
+      "name": "伊戈尔",
+      "profession": "山民猎人",
+      "traits": [
+        "孤僻",
+        "坚韧",
+        "经验丰富"
+      ],
+      "goals": [
+        "猎杀雪山猛兽",
+        "守护登山者"
+      ],
+      "starting_location": "loc_006",
+      "obedience_level": 0.5,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": 1,
+      "refusal_style": "那条龙不是你能对付的。等你找到龙鳞护符再来找我。"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "你自幼在晨光村长大，近日王国传来噩耗：恶龙‘暗焰’苏醒，已摧毁三座边境村庄。国王号召勇者讨伐恶龙，而你体内流淌着古老勇者血脉。",
+  "initial_quest": "前往银辉王城觐见国王，接受勇者试炼。",
+  "main_quest": {
+    "quest_id": "quest_main_001",
+    "title": "屠龙勇士",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+    "objective": "完成支线并收集关键道具：矮人秘银盾 x1，精灵祝福之剑 x1，龙鳞护符 x1",
+    "giver_npc_id": "npc_007",
+    "suggested_location": "loc_006",
+    "required_items": {
+      "矮人秘银盾": 1,
+      "精灵祝福之剑": 1,
+      "龙鳞护符": 1
+    },
+    "reward_items": {},
+    "reward_hint": "获得王国最高荣誉，并成为新任守护骑士。"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_001",
+      "title": "修复祖传铁砧",
+      "category": "side",
+      "description": "铁匠托姆的祖传铁砧损坏，无法打造高级武器。他需要精铁矿和火蜥蜴鳞片来修复。",
+      "objective": "从迷雾森林采集3份火蜥蜴鳞片，并在幽影洞窟找到1块精铁矿。（需求：精灵祝福之剑 x2，龙鳞护符 x1）",
+      "giver_npc_id": "npc_002",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "精灵祝福之剑": 2,
+        "龙鳞护符": 1
+      },
+      "reward_items": {
+        "矮人秘银盾": 1
+      },
+      "reward_hint": "托姆将为你打造一面能抵御龙焰的秘银盾。"
+    },
+    {
+      "quest_id": "quest_side_002",
+      "title": "精灵的遗愿",
+      "category": "side",
+      "description": "向导莉娜发现一处精灵祭坛，但缺少关键物品激活。她相信这能召唤出传说中的祝福之剑。",
+      "objective": "在幽影洞窟深处找到精灵水晶，并将其安置于迷雾森林的祭坛上。（需求：矮人秘银盾 x2，精灵祝福之剑 x1）",
+      "giver_npc_id": "npc_003",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "矮人秘银盾": 2,
+        "精灵祝福之剑": 1
+      },
+      "reward_items": {
+        "精灵祝福之剑": 1
+      },
+      "reward_hint": "祭坛将赐予你一把蕴含自然之力的神剑。"
+    },
+    {
+      "quest_id": "quest_side_003",
+      "title": "山民的信任",
+      "category": "side",
+      "description": "猎人伊戈尔不愿协助外人，除非你证明自己值得信赖。他要求你带回一件能抵御龙威的护符。",
+      "objective": "从宫廷法师塞琳娜处学习制作龙鳞护符的方法，并收集材料完成制作。",
+      "giver_npc_id": "npc_008",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "龙鳞护符": 2,
+        "矮人秘银盾": 1
+      },
+      "reward_items": {
+        "龙鳞护符": 1
+      },
+      "reward_hint": "伊戈尔将为你指引通往龙巢的隐秘小径。"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 20.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 40.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 40.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 60.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 60.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_006",
+      "x": 85.0,
+      "y": 50.0
+    }
+  ]
+}
