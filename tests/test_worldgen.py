@@ -276,6 +276,55 @@ def bad_npc_identity_world_json() -> str:
     )
 
 
+def campus_refined_world_json() -> str:
+    return (
+        "{"
+        '"world_id":"world_campus_001",'
+        '"title":"青岚大学恋爱物语",'
+        '"world_bible":{"tech_level":"modern","narrative_language":"zh","magic_rules":"无","tone":"青春校园"},'
+        '"locations":['
+        ' {"location_id":"loc_001","name":"教学楼","kind":"classroom","description":"午后阳光照进走廊。","connected_to":["loc_002","loc_003"],"tags":["校园"]},'
+        ' {"location_id":"loc_002","name":"图书馆","kind":"library","description":"安静的自习区。","connected_to":["loc_001","loc_004"],"tags":["学习"]},'
+        ' {"location_id":"loc_003","name":"宿舍区","kind":"dorm","description":"夜晚灯光温暖。","connected_to":["loc_001"],"tags":["生活"]},'
+        ' {"location_id":"loc_004","name":"樱花广场","kind":"square","description":"表白热点。","connected_to":["loc_002"],"tags":["恋爱","活动"]}'
+        '],'
+        '"npcs":['
+        ' {"npc_id":"npc_001","name":"赵阳","profession":"图书管理员","traits":["温和"],"goals":["帮助学生"],"starting_location":"loc_002",'
+        '  "obedience_level":0.6,"stubbornness":0.3,"risk_tolerance":0.3,"disposition_to_player":1,"refusal_style":"礼貌"}'
+        '],'
+        '"starting_location":"loc_001",'
+        '"starting_hook":"你在校园里遇见了让你心动的人。",'
+        '"initial_quest":"准备校园文化节并完成告白。",'
+        '"main_quest":{'
+        ' "quest_id":"main_world_campus_001","title":"主线终章","category":"main","description":"先完成支线并拿到关键道具。",'
+        ' "objective":"完成支线并收集关键道具：轻音部入场券 x1，手写推荐信 x1，告白彩排许可 x1",'
+        ' "giver_npc_id":"npc_001","suggested_location":"loc_001",'
+        ' "required_items":{"轻音部入场券":1,"手写推荐信":1,"告白彩排许可":1},'
+        ' "reward_items":{},"reward_hint":"推进主线剧情。"},'
+        '"side_quests":['
+        ' {"quest_id":"side_music","title":"轻音部的灵感","category":"side","description":"帮助轻音部准备新曲。",'
+        '  "objective":"在教学楼和社团活动中心收集：练习谱页 x2，社团报名表 x1",'
+        '  "giver_npc_id":"npc_001","suggested_location":"loc_001",'
+        '  "required_items":{"练习谱页":2,"社团报名表":1},"reward_items":{"轻音部入场券":1},"reward_hint":"完成后可获得：轻音部入场券 x1"},'
+        ' {"quest_id":"side_library","title":"遗失的书签","category":"side","description":"补齐图书馆活动资料。",'
+        '  "objective":"在图书馆整理：借阅卡片 x2，活动海报 x1",'
+        '  "giver_npc_id":"npc_001","suggested_location":"loc_002",'
+        '  "required_items":{"借阅卡片":2,"活动海报":1},"reward_items":{"手写推荐信":1},"reward_hint":"完成后可获得：手写推荐信 x1"},'
+        ' {"quest_id":"side_rooftop","title":"天台的蓝玫瑰","category":"side","description":"准备告白彩排。",'
+        '  "objective":"在樱花广场与宿舍区收集：花束包装纸 x2，便签卡片 x1",'
+        '  "giver_npc_id":"npc_001","suggested_location":"loc_004",'
+        '  "required_items":{"花束包装纸":2,"便签卡片":1},"reward_items":{"告白彩排许可":1},"reward_hint":"完成后可获得：告白彩排许可 x1"}'
+        '],'
+        '"map_layout":['
+        ' {"location_id":"loc_001","x":50.0,"y":20.0},'
+        ' {"location_id":"loc_002","x":20.0,"y":45.0},'
+        ' {"location_id":"loc_003","x":80.0,"y":45.0},'
+        ' {"location_id":"loc_004","x":50.0,"y":78.0}'
+        "]"
+        "}"
+    )
+
+
 def _has_ascii_letters(text: str) -> bool:
     return bool(re.search(r"[A-Za-z]", text or ""))
 
@@ -604,3 +653,14 @@ def test_bad_npc_identity_is_rewritten_to_non_duplicate_name_and_profession() ->
     assert bad_npc.name != bad_npc.profession
     assert "龙脊山脉龙脊山脉" not in bad_npc.name
     assert "龙脊山脉" not in bad_npc.profession
+
+
+def test_campus_side_items_are_refined_by_prompt_pass() -> None:
+    cfg = load_config("configs/config.yaml")
+    llm = MockLLMClient([campus_world_json(), campus_refined_world_json()])
+    world = generate_world_spec(cfg, llm, "请生成校园恋爱主题世界")
+
+    required_items = [name for quest in world.side_quests for name in quest.required_items.keys()]
+    assert required_items
+    assert all(marker not in item for item in required_items for marker in ["遗物", "矿石", "手稿"])
+    assert any(item in required_items for item in ["社团报名表", "借阅卡片", "花束包装纸"])

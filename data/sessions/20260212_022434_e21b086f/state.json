@@ -1,0 +1,524 @@
+{
+  "session_id": "20260212_022434_e21b086f",
+  "created_at": "2026-02-12T02:26:02.041490+00:00",
+  "world": {
+    "world_id": "w_dq001",
+    "title": "勇者斗恶龙",
+    "world_bible": {
+      "tech_level": "medieval",
+      "narrative_language": "zh",
+      "magic_rules": "魔法源自古代符文与自然元素，需通过吟唱或法杖引导。只有经过训练的法师才能安全使用。",
+      "tone": "史诗奇幻，充满冒险与牺牲精神，强调勇气、忠诚与命运。",
+      "anachronism_policy": "严格禁止现代科技词汇和概念出现。",
+      "taboos": [
+        "背叛盟友",
+        "亵渎神殿",
+        "伤害无辜村民"
+      ],
+      "do_not_mention": [
+        "智能手机",
+        "互联网",
+        "信用卡",
+        "汽车",
+        "电力",
+        "枪械",
+        "塑料",
+        "电脑"
+      ],
+      "anachronism_blocklist": [
+        "手机",
+        "网络",
+        "银行",
+        "飞机",
+        "电视",
+        "火箭",
+        "机器人"
+      ]
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "晨光村",
+        "kind": "town",
+        "description": "位于王国边境的小村庄，以晨曦照耀时金黄的麦田闻名。村民淳朴，是勇者旅程的起点。",
+        "connected_to": [
+          "loc_002",
+          "loc_003"
+        ],
+        "tags": [
+          "和平",
+          "农田",
+          "起始点"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "迷雾森林",
+        "kind": "forest",
+        "description": "终年被浓雾笼罩的古老森林，传说中藏有精灵遗迹与危险魔物。",
+        "connected_to": [
+          "loc_001",
+          "loc_004"
+        ],
+        "tags": [
+          "神秘",
+          "危险",
+          "自然"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "铁炉镇",
+        "kind": "town",
+        "description": "以锻造闻名的山脚小镇，铁匠铺林立，是装备补给的重要据点。",
+        "connected_to": [
+          "loc_001",
+          "loc_005"
+        ],
+        "tags": [
+          "工业",
+          "锻造",
+          "贸易"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "月影神殿",
+        "kind": "castle",
+        "description": "坐落于森林深处的古老神殿，供奉月之女神，守护着神圣圣物。",
+        "connected_to": [
+          "loc_002"
+        ],
+        "tags": [
+          "神圣",
+          "试炼",
+          "魔法"
+        ]
+      },
+      {
+        "location_id": "loc_005",
+        "name": "黑岩矿洞",
+        "kind": "dungeon",
+        "description": "废弃的矿洞如今被哥布林占据，深处据说埋藏着远古矮人留下的秘宝。",
+        "connected_to": [
+          "loc_003"
+        ],
+        "tags": [
+          "地下",
+          "怪物",
+          "宝藏"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_001",
+        "name": "艾莉娅",
+        "profession": "村长",
+        "traits": [
+          "慈祥",
+          "智慧",
+          "果断"
+        ],
+        "goals": [
+          "保护村民安全",
+          "指引勇者踏上征途"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.8,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": 4,
+        "refusal_style": "温和劝说，但会坚持原则"
+      },
+      {
+        "npc_id": "npc_002",
+        "name": "托林",
+        "profession": "农夫",
+        "traits": [
+          "勤劳",
+          "固执",
+          "谨慎"
+        ],
+        "goals": [
+          "收成好年景",
+          "避免森林危险"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.4,
+        "stubbornness": 0.7,
+        "risk_tolerance": 0.1,
+        "disposition_to_player": 2,
+        "refusal_style": "摇头叹气，不愿多谈"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "莉瑞尔",
+        "profession": "精灵向导",
+        "traits": [
+          "敏捷",
+          "神秘",
+          "忠诚"
+        ],
+        "goals": [
+          "守护森林秘密",
+          "协助值得信赖的勇者"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.9,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 3,
+        "refusal_style": "沉默不语，转身离开"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "格鲁姆",
+        "profession": "哥布林斥候",
+        "traits": [
+          "狡猾",
+          "胆小",
+          "贪婪"
+        ],
+        "goals": [
+          "偷取财物",
+          "活命"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.5,
+        "stubbornness": 0.4,
+        "risk_tolerance": 0.2,
+        "disposition_to_player": -2,
+        "refusal_style": "龇牙咧嘴，威胁逃跑"
+      },
+      {
+        "npc_id": "npc_005",
+        "name": "巴洛克",
+        "profession": "铁匠大师",
+        "traits": [
+          "豪爽",
+          "技艺高超",
+          "爱酒"
+        ],
+        "goals": [
+          "打造传奇武器",
+          "帮助勇者"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.85,
+        "stubbornness": 0.25,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": 4,
+        "refusal_style": "哈哈大笑后递上一杯酒，婉拒请求"
+      },
+      {
+        "npc_id": "npc_006",
+        "name": "米娜",
+        "profession": "杂货商",
+        "traits": [
+          "精明",
+          "热心",
+          "话多"
+        ],
+        "goals": [
+          "扩大生意",
+          "结交英雄"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.7,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 3,
+        "refusal_style": "抱怨几句后还是会帮忙"
+      },
+      {
+        "npc_id": "npc_007",
+        "name": "塞莱斯特",
+        "profession": "神殿祭司",
+        "traits": [
+          "虔诚",
+          "冷静",
+          "洞察力强"
+        ],
+        "goals": [
+          "守护月影圣杯",
+          "净化邪恶"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.6,
+        "stubbornness": 0.6,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": 2,
+        "refusal_style": "引用神谕，暗示时机未到"
+      },
+      {
+        "npc_id": "npc_008",
+        "name": "达格",
+        "profession": "矿工幽灵",
+        "traits": [
+          "悲伤",
+          "执着",
+          "徘徊"
+        ],
+        "goals": [
+          "找回失落的矿镐",
+          "安息"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.5,
+        "stubbornness": 0.8,
+        "risk_tolerance": 0.1,
+        "disposition_to_player": 1,
+        "refusal_style": "低声呜咽，拒绝交流"
+      },
+      {
+        "npc_id": "npc_009",
+        "name": "克罗格",
+        "profession": "哥布林首领",
+        "traits": [
+          "残暴",
+          "傲慢",
+          "狡诈"
+        ],
+        "goals": [
+          "统治矿洞",
+          "掠夺宝物"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.1,
+        "stubbornness": 0.9,
+        "risk_tolerance": 0.7,
+        "disposition_to_player": -5,
+        "refusal_style": "狂笑并召唤手下攻击"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "你从昏迷中醒来，发现自己躺在晨光村的草垛上。村长艾莉娅告诉你，恶龙‘暗焰’已摧毁王都，国王临终前预言唯有你能拯救王国。但你必须先集齐三件圣物，才能挑战恶龙。",
+    "initial_quest": "前往村长艾莉娅处，听取关于勇者使命的详细说明，并领取第一份任务。",
+    "main_quest": {
+      "quest_id": "quest_main_001",
+      "title": "屠龙救世",
+      "category": "main",
+      "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+      "objective": "完成支线并收集关键道具：月影圣杯 x1，龙鳞战斧 x1，矮人秘钥 x1",
+      "giver_npc_id": "npc_001",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "月影圣杯": 1,
+        "龙鳞战斧": 1,
+        "矮人秘钥": 1
+      },
+      "reward_items": {},
+      "reward_hint": "王国的和平与人民的自由"
+    },
+    "side_quests": [
+      {
+        "quest_id": "quest_side_001",
+        "title": "神殿的试炼",
+        "category": "side",
+        "description": "神殿祭司塞莱斯特要求你通过三重试炼，以证明你配得上持有月影圣杯。",
+        "objective": "完成神殿三重试炼并取得月影圣杯（需求：迷雾森林遗物 x2，迷雾森林手稿 x1）",
+        "giver_npc_id": "npc_007",
+        "suggested_location": "loc_004",
+        "required_items": {
+          "迷雾森林遗物": 2,
+          "迷雾森林手稿": 1
+        },
+        "reward_items": {
+          "月影圣杯": 1
+        },
+        "reward_hint": "神圣的月影圣杯，能净化一切黑暗"
+      },
+      {
+        "quest_id": "quest_side_002",
+        "title": "收集铁炉镇手稿",
+        "category": "side",
+        "description": "铁匠大师巴洛克需要龙鳞碎片来锻造传说中的龙鳞战斧，但他不敢亲自去矿洞。",
+        "objective": "从黑岩矿洞深处取得龙鳞碎片（需求：铁炉镇手稿 x3，铁炉镇矿石 x2）",
+        "giver_npc_id": "npc_005",
+        "suggested_location": "loc_005",
+        "required_items": {
+          "铁炉镇手稿": 3,
+          "铁炉镇矿石": 2
+        },
+        "reward_items": {
+          "龙鳞战斧": 1
+        },
+        "reward_hint": "由龙鳞锻造的战斧，可斩断黑龙的鳞甲（奖励：龙鳞战斧 x1）"
+      },
+      {
+        "quest_id": "quest_side_003",
+        "title": "矿工的遗愿",
+        "category": "side",
+        "description": "矿工幽灵达格希望你帮他找回被哥布林抢走的祖传矿镐，以换取矮人秘钥的线索。",
+        "objective": "从哥布林首领克罗格手中夺回祖传矿镐（需求：月影神殿矿石 x2，月影神殿徽记 x1）",
+        "giver_npc_id": "npc_008",
+        "suggested_location": "loc_005",
+        "required_items": {
+          "月影神殿矿石": 2,
+          "月影神殿徽记": 1
+        },
+        "reward_items": {
+          "矮人秘钥": 1
+        },
+        "reward_hint": "开启黑龙巢穴密门的古老钥匙（奖励：矮人秘钥 x1）"
+      }
+    ],
+    "map_layout": [
+      {
+        "location_id": "loc_001",
+        "x": 20.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_002",
+        "x": 40.0,
+        "y": 30.0
+      },
+      {
+        "location_id": "loc_003",
+        "x": 40.0,
+        "y": 70.0
+      },
+      {
+        "location_id": "loc_004",
+        "x": 65.0,
+        "y": 20.0
+      },
+      {
+        "location_id": "loc_005",
+        "x": 65.0,
+        "y": 70.0
+      }
+    ]
+  },
+  "player_location": "loc_005",
+  "npc_locations": {
+    "npc_001": "loc_001",
+    "npc_002": "loc_001",
+    "npc_003": "loc_002",
+    "npc_004": "loc_002",
+    "npc_005": "loc_003",
+    "npc_006": "loc_003",
+    "npc_007": "loc_004",
+    "npc_008": "loc_005",
+    "npc_009": "loc_005"
+  },
+  "flags": {},
+  "quests": {
+    "quest_main_001": "active",
+    "quest_side_001": "active",
+    "quest_side_002": "active",
+    "quest_side_003": "active"
+  },
+  "quest_journal": {
+    "quest_main_001": {
+      "quest_id": "quest_main_001",
+      "title": "屠龙救世",
+      "category": "main",
+      "status": "active",
+      "objective": "完成支线并收集关键道具：月影圣杯 x1，龙鳞战斧 x1，矮人秘钥 x1",
+      "guidance": "主线准备进度：月影圣杯 0/1，龙鳞战斧 0/1，矮人秘钥 0/1",
+      "giver_npc_id": "npc_001",
+      "required_items": {
+        "月影圣杯": 1,
+        "龙鳞战斧": 1,
+        "矮人秘钥": 1
+      },
+      "collected_items": {
+        "月影圣杯": 0,
+        "龙鳞战斧": 0,
+        "矮人秘钥": 0
+      },
+      "reward_items": {},
+      "reward_hint": "王国的和平与人民的自由"
+    },
+    "quest_side_001": {
+      "quest_id": "quest_side_001",
+      "title": "神殿的试炼",
+      "category": "side",
+      "status": "active",
+      "objective": "完成神殿三重试炼并取得月影圣杯（需求：迷雾森林遗物 x2，迷雾森林手稿 x1）",
+      "guidance": "交付进度：迷雾森林遗物 已交付0/2（背包0），迷雾森林手稿 已交付0/1（背包0）",
+      "giver_npc_id": "npc_007",
+      "required_items": {
+        "迷雾森林遗物": 2,
+        "迷雾森林手稿": 1
+      },
+      "collected_items": {
+        "迷雾森林遗物": 0,
+        "迷雾森林手稿": 0
+      },
+      "reward_items": {
+        "月影圣杯": 1
+      },
+      "reward_hint": "神圣的月影圣杯，能净化一切黑暗"
+    },
+    "quest_side_002": {
+      "quest_id": "quest_side_002",
+      "title": "收集铁炉镇手稿",
+      "category": "side",
+      "status": "active",
+      "objective": "从黑岩矿洞深处取得龙鳞碎片（需求：铁炉镇手稿 x3，铁炉镇矿石 x2）",
+      "guidance": "交付进度：铁炉镇手稿 已交付0/3（背包0），铁炉镇矿石 已交付0/2（背包0）",
+      "giver_npc_id": "npc_005",
+      "required_items": {
+        "铁炉镇手稿": 3,
+        "铁炉镇矿石": 2
+      },
+      "collected_items": {
+        "铁炉镇手稿": 0,
+        "铁炉镇矿石": 0
+      },
+      "reward_items": {
+        "龙鳞战斧": 1
+      },
+      "reward_hint": "由龙鳞锻造的战斧，可斩断黑龙的鳞甲（奖励：龙鳞战斧 x1）"
+    },
+    "quest_side_003": {
+      "quest_id": "quest_side_003",
+      "title": "矿工的遗愿",
+      "category": "side",
+      "status": "active",
+      "objective": "从哥布林首领克罗格手中夺回祖传矿镐（需求：月影神殿矿石 x2，月影神殿徽记 x1）",
+      "guidance": "交付进度：月影神殿矿石 已交付0/2（背包0），月影神殿徽记 已交付0/1（背包0）",
+      "giver_npc_id": "npc_008",
+      "required_items": {
+        "月影神殿矿石": 2,
+        "月影神殿徽记": 1
+      },
+      "collected_items": {
+        "月影神殿矿石": 0,
+        "月影神殿徽记": 0
+      },
+      "reward_items": {
+        "矮人秘钥": 1
+      },
+      "reward_hint": "开启黑龙巢穴密门的古老钥匙（奖励：矮人秘钥 x1）"
+    }
+  },
+  "main_quest_id": "quest_main_001",
+  "inventory": {},
+  "location_resource_stock": {
+    "loc_001": {
+      "晨光村矿石": 1,
+      "晨光村徽记": 1
+    },
+    "loc_003": {
+      "铁炉镇遗物": 1,
+      "铁炉镇手稿": 1
+    },
+    "loc_005": {
+      "月影神殿徽记": 2,
+      "月影神殿矿石": 3,
+      "铁炉镇手稿": 4,
+      "铁炉镇矿石": 3
+    },
+    "loc_002": {
+      "迷雾森林遗物": 1,
+      "迷雾森林手稿": 1
+    }
+  },
+  "recent_summaries": [],
+  "last_turn_id": 0
+}

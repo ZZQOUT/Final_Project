@@ -90,6 +90,13 @@ def generate_world_spec(cfg: AppConfig, llm: BaseLLMClient, world_prompt: str) -
         if _needs_semantic_polish(world):
             world = _polish_world_semantics(world, llm, response_format, target_language)
         world = _ensure_story_structures(world, target_language=target_language)
+        world = _refine_side_quest_items_with_llm(
+            world,
+            llm,
+            response_format=response_format,
+            target_language=target_language,
+        )
+        world = _ensure_story_structures(world, target_language=target_language)
         return world
     except Exception as exc:
         # single rewrite attempt
@@ -146,6 +153,13 @@ def generate_world_spec(cfg: AppConfig, llm: BaseLLMClient, world_prompt: str) -
         world = _enforce_world_language(world, llm, response_format, target_language)
         if _needs_semantic_polish(world):
             world = _polish_world_semantics(world, llm, response_format, target_language)
+        world = _ensure_story_structures(world, target_language=target_language)
+        world = _refine_side_quest_items_with_llm(
+            world,
+            llm,
+            response_format=response_format,
+            target_language=target_language,
+        )
         world = _ensure_story_structures(world, target_language=target_language)
         return world
 
@@ -356,6 +370,96 @@ def _polish_world_semantics(
     if _needs_semantic_polish(polished):
         raise ValueError("semantic polishing failed: placeholders still remain")
     return polished
+
+
+def _needs_side_item_theme_refinement(world: WorldSpec) -> bool:
+    if not world.side_quests:
+        return False
+    collectible_tokens: list[str] = []
+    reward_tokens: list[str] = []
+    for quest in world.side_quests:
+        collectible_tokens.extend([_normalize_item_token(str(k)) for k in (quest.required_items or {}).keys()])
+        reward_tokens.extend([_normalize_item_token(str(k)) for k in (quest.reward_items or {}).keys()])
+    collectible_tokens = [token for token in collectible_tokens if token]
+    reward_tokens = [token for token in reward_tokens if token]
+    if len(set(collectible_tokens)) < min(5, max(2, len(collectible_tokens))):
+        return True
+
+    generic_markers = {
+        "sample",
+        "samples",
+        "clue",
+        "clues",
+        "material",
+        "materials",
+        "token",
+        "ore",
+        "relic",
+        "manuscript",
+        "样本",
+        "线索",
+        "材料",
+        "矿石",
+        "遗物",
+        "手稿",
+    }
+    marker_hits = 0
+    total_items = 0
+    for quest in world.side_quests:
+        for item in (quest.required_items or {}).keys():
+            total_items += 1
+            token = _normalize_item_token(str(item))
+            if any(marker in token for marker in generic_markers):
+                marker_hits += 1
+    if total_items and marker_hits / total_items >= 0.5:
+        return True
+
+    if set(_normalize_item_token(x) for x in collectible_tokens) & set(_normalize_item_token(x) for x in reward_tokens):
+        return True
+    return False
+
+
+def _refine_side_quest_items_with_llm(
+    world: WorldSpec,
+    llm: BaseLLMClient,
+    *,
+    response_format: dict,
+    target_language: str,
+) -> WorldSpec:
+    if not _needs_side_item_theme_refinement(world):
+        return world
+    language = target_language if target_language in {"zh", "en"} else (world.world_bible.narrative_language or "en")
+    target_name = _language_name(language)
+    rewrite_system = (
+        "You are a world quest-item refinement tool. Return ONLY valid JSON. "
+        "Keep structure and IDs unchanged."
+    )
+    rewrite_user = (
+        f"Refine this WorldSpec in {target_name} so side quest items match the world theme and setting.\n"
+        "Strict rules:\n"
+        "1) Keep unchanged: world_id, all location_id, npc_id, quest_id, connected_to, starting_location, suggested_location, "
+        "map_layout coordinates, and all personality numeric fields.\n"
+        "2) You may rewrite ONLY these semantic fields: side_quests[*].required_items/reward_items/title/description/objective/reward_hint "
+        "and main_quest title/description/objective/required_items/reward_hint if needed for consistency.\n"
+        "3) Required items of side quests must be collectible materials that fit each location and the overall genre/tone.\n"
+        "4) Reward items of side quests should be distinct key rewards, not the same as collectible materials.\n"
+        "5) Main quest required_items must be derived from side quest reward_items (union), not from collectible materials.\n"
+        "6) Avoid generic template items like '<location>样本/<location>线索/*_sample/*_clue/*_material'.\n"
+        "7) Keep language consistent with world_bible.narrative_language.\n"
+        "8) Keep item naming natural for the generated world theme (e.g., campus worlds use campus-life items, "
+        "not fantasy mining relics unless the world explicitly includes that theme).\n\n"
+        f"Original JSON: {json.dumps(world.model_dump(), ensure_ascii=False)}"
+    )
+    try:
+        fixed = llm.generate_json(rewrite_system, rewrite_user, response_format=response_format)
+        sanitized, _ = sanitize_world_payload(fixed)
+        if not isinstance(sanitized, dict):
+            return world
+        refined = WorldSpec.model_validate(sanitized)
+        refined.world_bible.narrative_language = language
+        return refined
+    except Exception:
+        return world
 
 
 def initialize_game_state(world: WorldSpec, session_id: str, created_at: Optional[str] = None) -> GameState:
