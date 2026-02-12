@@ -59,12 +59,16 @@ def generate_world_spec(cfg: AppConfig, llm: BaseLLMClient, world_prompt: str) -
         "Use numeric types (not strings) for all numeric fields. No extra keys. "
         "Set world_bible.tech_level based on the prompt. "
         "Generate one concrete main quest (main_quest) with a clear objective aligned to the user prompt's genre. "
-        "Generate 1-3 side_quests tied to existing NPCs (e.g. recruit allies, gather supplies), "
+        "Generate exactly 3 side_quests tied to existing NPCs whenever the map has 3+ meaningful locations "
+        "(or at least 2 side_quests for smaller maps), "
         "and each side quest should define reward_items. "
+        "At generation time (first pass), side_quest required_items must already be world-theme aligned and location-specific. "
+        "Do not output generic placeholders expecting later repair. "
         "Collectible (side quest required) item types across the generated world should be at least 5 when possible. "
         "Different locations should emphasize different collectible items instead of repeating the same set. "
+        "Each side quest should require 2-3 concrete items that are plausible in that quest's location and social context. "
         "Use concrete, in-world item names. Avoid placeholder names such as '<location>样本', '<location>线索', "
-        "'*_sample', '*_clue', '*_material', '*_token'. "
+        "'*_sample', '*_clue', '*_material', '*_token', and avoid repetitive patterns like '<location>遗物'/'<location>矿石' unless the world explicitly centers on archaeology/mining. "
         "NPC names must be proper names, not placeholders like '居民1'/'村民1'/'Resident 1'. "
         "NPC profession must fit their starting_location and setting tone. "
         "Main quest required_items should depend on side quest reward_items (main line unlocked via side quests). "
@@ -89,13 +93,6 @@ def generate_world_spec(cfg: AppConfig, llm: BaseLLMClient, world_prompt: str) -
         world = _enforce_world_language(world, llm, response_format, target_language)
         if _needs_semantic_polish(world):
             world = _polish_world_semantics(world, llm, response_format, target_language)
-        world = _ensure_story_structures(world, target_language=target_language)
-        world = _refine_side_quest_items_with_llm(
-            world,
-            llm,
-            response_format=response_format,
-            target_language=target_language,
-        )
         world = _ensure_story_structures(world, target_language=target_language)
         return world
     except Exception as exc:
@@ -153,13 +150,6 @@ def generate_world_spec(cfg: AppConfig, llm: BaseLLMClient, world_prompt: str) -
         world = _enforce_world_language(world, llm, response_format, target_language)
         if _needs_semantic_polish(world):
             world = _polish_world_semantics(world, llm, response_format, target_language)
-        world = _ensure_story_structures(world, target_language=target_language)
-        world = _refine_side_quest_items_with_llm(
-            world,
-            llm,
-            response_format=response_format,
-            target_language=target_language,
-        )
         world = _ensure_story_structures(world, target_language=target_language)
         return world
 
@@ -372,96 +362,6 @@ def _polish_world_semantics(
     return polished
 
 
-def _needs_side_item_theme_refinement(world: WorldSpec) -> bool:
-    if not world.side_quests:
-        return False
-    collectible_tokens: list[str] = []
-    reward_tokens: list[str] = []
-    for quest in world.side_quests:
-        collectible_tokens.extend([_normalize_item_token(str(k)) for k in (quest.required_items or {}).keys()])
-        reward_tokens.extend([_normalize_item_token(str(k)) for k in (quest.reward_items or {}).keys()])
-    collectible_tokens = [token for token in collectible_tokens if token]
-    reward_tokens = [token for token in reward_tokens if token]
-    if len(set(collectible_tokens)) < min(5, max(2, len(collectible_tokens))):
-        return True
-
-    generic_markers = {
-        "sample",
-        "samples",
-        "clue",
-        "clues",
-        "material",
-        "materials",
-        "token",
-        "ore",
-        "relic",
-        "manuscript",
-        "样本",
-        "线索",
-        "材料",
-        "矿石",
-        "遗物",
-        "手稿",
-    }
-    marker_hits = 0
-    total_items = 0
-    for quest in world.side_quests:
-        for item in (quest.required_items or {}).keys():
-            total_items += 1
-            token = _normalize_item_token(str(item))
-            if any(marker in token for marker in generic_markers):
-                marker_hits += 1
-    if total_items and marker_hits / total_items >= 0.5:
-        return True
-
-    if set(_normalize_item_token(x) for x in collectible_tokens) & set(_normalize_item_token(x) for x in reward_tokens):
-        return True
-    return False
-
-
-def _refine_side_quest_items_with_llm(
-    world: WorldSpec,
-    llm: BaseLLMClient,
-    *,
-    response_format: dict,
-    target_language: str,
-) -> WorldSpec:
-    if not _needs_side_item_theme_refinement(world):
-        return world
-    language = target_language if target_language in {"zh", "en"} else (world.world_bible.narrative_language or "en")
-    target_name = _language_name(language)
-    rewrite_system = (
-        "You are a world quest-item refinement tool. Return ONLY valid JSON. "
-        "Keep structure and IDs unchanged."
-    )
-    rewrite_user = (
-        f"Refine this WorldSpec in {target_name} so side quest items match the world theme and setting.\n"
-        "Strict rules:\n"
-        "1) Keep unchanged: world_id, all location_id, npc_id, quest_id, connected_to, starting_location, suggested_location, "
-        "map_layout coordinates, and all personality numeric fields.\n"
-        "2) You may rewrite ONLY these semantic fields: side_quests[*].required_items/reward_items/title/description/objective/reward_hint "
-        "and main_quest title/description/objective/required_items/reward_hint if needed for consistency.\n"
-        "3) Required items of side quests must be collectible materials that fit each location and the overall genre/tone.\n"
-        "4) Reward items of side quests should be distinct key rewards, not the same as collectible materials.\n"
-        "5) Main quest required_items must be derived from side quest reward_items (union), not from collectible materials.\n"
-        "6) Avoid generic template items like '<location>样本/<location>线索/*_sample/*_clue/*_material'.\n"
-        "7) Keep language consistent with world_bible.narrative_language.\n"
-        "8) Keep item naming natural for the generated world theme (e.g., campus worlds use campus-life items, "
-        "not fantasy mining relics unless the world explicitly includes that theme).\n\n"
-        f"Original JSON: {json.dumps(world.model_dump(), ensure_ascii=False)}"
-    )
-    try:
-        fixed = llm.generate_json(rewrite_system, rewrite_user, response_format=response_format)
-        sanitized, _ = sanitize_world_payload(fixed)
-        if not isinstance(sanitized, dict):
-            return world
-        refined = WorldSpec.model_validate(sanitized)
-        refined.world_bible.narrative_language = language
-        return refined
-    except Exception:
-        return world
-
-
 def initialize_game_state(world: WorldSpec, session_id: str, created_at: Optional[str] = None) -> GameState:
     created_at = created_at or datetime.now(timezone.utc).isoformat()
     world = _ensure_story_structures(world)
@@ -569,7 +469,6 @@ def _ensure_story_structures(world: WorldSpec, target_language: str | None = Non
     updated.npcs = _ensure_npc_density(updated, prefer_chinese=prefer_chinese)
     updated.npcs = _ensure_unique_npc_names(updated, updated.npcs, prefer_chinese=prefer_chinese)
     updated.side_quests = _normalize_side_quests(updated, prefer_chinese=prefer_chinese)
-    updated.side_quests = _enforce_side_quest_item_structure(updated, updated.side_quests, prefer_chinese=prefer_chinese)
     main_required = _aggregate_side_rewards(updated.side_quests)
     if not updated.main_quest:
         updated.main_quest = QuestSpec(
@@ -915,163 +814,6 @@ def _normalize_side_quests(world: WorldSpec, *, prefer_chinese: bool) -> list[Qu
     return normalized
 
 
-def _enforce_side_quest_item_structure(
-    world: WorldSpec,
-    side_quests: list[QuestSpec],
-    *,
-    prefer_chinese: bool,
-) -> list[QuestSpec]:
-    if not side_quests:
-        return side_quests
-    loc_map = {loc.location_id: loc for loc in world.locations}
-    normalized = [quest.model_copy(deep=True) for quest in side_quests]
-
-    # 1) Make required_items diversified and avoid near-identical side quest requirements.
-    used_required_tokens: set[str] = set()
-    for idx, quest in enumerate(normalized):
-        loc = loc_map.get(quest.suggested_location or "")
-        required = {str(k): max(1, int(v)) for k, v in (quest.required_items or {}).items() if int(v) > 0}
-        if not required and loc is not None:
-            required = _default_required_items_for_location(loc, prefer_chinese=prefer_chinese, variant=idx)
-
-        rebuilt: dict[str, int] = {}
-        for name, amount in required.items():
-            token = _normalize_item_token(name)
-            if token in used_required_tokens and loc is not None:
-                replacement = _next_unique_collectible_name(
-                    loc=loc,
-                    existing_tokens={_normalize_item_token(k) for k in rebuilt.keys()} | used_required_tokens,
-                    prefer_chinese=prefer_chinese,
-                    start_variant=idx + 23 + len(rebuilt),
-                )
-                if replacement:
-                    rebuilt[replacement] = max(1, int(amount))
-                    used_required_tokens.add(_normalize_item_token(replacement))
-                    continue
-            rebuilt[name] = max(1, int(amount))
-            used_required_tokens.add(token)
-        quest.required_items = rebuilt
-
-    # 2) Ensure total collectible types >= 5 when possible.
-    collectible_tokens = {_normalize_item_token(item) for q in normalized for item in q.required_items.keys()}
-    target_types = 5
-    if len(normalized) >= 2 and len(collectible_tokens) < target_types:
-        for idx, quest in enumerate(normalized):
-            if len(collectible_tokens) >= target_types:
-                break
-            loc = loc_map.get(quest.suggested_location or "")
-            if loc is None:
-                continue
-            extra_name = _next_unique_collectible_name(
-                loc=loc,
-                existing_tokens=collectible_tokens | {_normalize_item_token(k) for k in quest.required_items.keys()},
-                prefer_chinese=prefer_chinese,
-                start_variant=idx + 41,
-            )
-            if not extra_name:
-                continue
-            quest.required_items[extra_name] = 1
-            collectible_tokens.add(_normalize_item_token(extra_name))
-
-    # 3) Rewards must be unique and cannot be directly collectible.
-    reward_tokens: set[str] = set()
-    for idx, quest in enumerate(normalized):
-        loc = loc_map.get(quest.suggested_location or "")
-        reward_items = {str(k): max(1, int(v)) for k, v in (quest.reward_items or {}).items() if int(v) > 0}
-        if not reward_items and loc is not None:
-            reward_items = {_seed_reward_item_from_location(loc, prefer_chinese=prefer_chinese, variant=idx + 7): 1}
-        cleaned: dict[str, int] = {}
-        for name, amount in reward_items.items():
-            token = _normalize_item_token(name)
-            if token in collectible_tokens or token in reward_tokens:
-                replacement = _next_unique_reward_name(
-                    loc=loc,
-                    blocked_tokens=collectible_tokens | reward_tokens | {_normalize_item_token(k) for k in cleaned.keys()},
-                    prefer_chinese=prefer_chinese,
-                    start_variant=idx + 61 + len(cleaned),
-                )
-                if replacement:
-                    cleaned[replacement] = max(1, int(amount))
-                    reward_tokens.add(_normalize_item_token(replacement))
-                    continue
-            cleaned[name] = max(1, int(amount))
-            reward_tokens.add(token)
-        if not cleaned and loc is not None:
-            replacement = _next_unique_reward_name(
-                loc=loc,
-                blocked_tokens=collectible_tokens | reward_tokens,
-                prefer_chinese=prefer_chinese,
-                start_variant=idx + 71,
-            )
-            if replacement:
-                cleaned[replacement] = 1
-                reward_tokens.add(_normalize_item_token(replacement))
-        quest.reward_items = cleaned
-
-    # 4) Repair textual fields after item rewrites.
-    for idx, quest in enumerate(normalized):
-        loc = loc_map.get(quest.suggested_location or "")
-        quest.objective = _ensure_side_objective_consistency(
-            quest.objective,
-            quest.required_items,
-            loc,
-            prefer_chinese=prefer_chinese,
-        )
-        quest.title = _ensure_side_title_consistency(
-            quest.title or _default_side_title(loc, idx, prefer_chinese),
-            quest.required_items,
-            prefer_chinese=prefer_chinese,
-        )
-        quest.reward_hint = _ensure_reward_hint_consistency(quest.reward_hint, quest.reward_items, prefer_chinese)
-    return normalized
-
-
-def _seed_reward_item_from_location(loc: Any, *, prefer_chinese: bool, variant: int) -> str:
-    loc_name = str(getattr(loc, "name", "") or "").strip()
-    loc_kind = str(getattr(loc, "kind", "") or "").strip()
-    base = loc_name or loc_kind or ("地区" if prefer_chinese else "zone")
-    if prefer_chinese:
-        clean = re.sub(r"\s+", "", base)
-        suffixes = ["徽章", "凭证", "印记", "核心", "信物", "誓约"]
-        return f"{clean}{suffixes[variant % len(suffixes)]}"
-    token = _normalize_item_token(base) or "zone"
-    suffixes = ["badge", "token", "sigil", "core", "keepsake", "oath"]
-    return f"{token}_{suffixes[variant % len(suffixes)]}"
-
-
-def _next_unique_collectible_name(
-    *,
-    loc: Any,
-    existing_tokens: set[str],
-    prefer_chinese: bool,
-    start_variant: int,
-) -> str | None:
-    for step in range(20):
-        candidate = _seed_item_from_location(loc, prefer_chinese=prefer_chinese, variant=start_variant + step)
-        token = _normalize_item_token(candidate)
-        if token and token not in existing_tokens:
-            return candidate
-    return None
-
-
-def _next_unique_reward_name(
-    *,
-    loc: Any | None,
-    blocked_tokens: set[str],
-    prefer_chinese: bool,
-    start_variant: int,
-) -> str | None:
-    for step in range(20):
-        if loc is None:
-            candidate = ("终章凭证" if prefer_chinese else "finale_token") + str(start_variant + step)
-        else:
-            candidate = _seed_reward_item_from_location(loc, prefer_chinese=prefer_chinese, variant=start_variant + step)
-        token = _normalize_item_token(candidate)
-        if token and token not in blocked_tokens:
-            return candidate
-    return None
-
-
 def _default_required_items_for_location(
     loc: Any,
     prefer_chinese: bool,
@@ -1163,20 +905,6 @@ def _default_reward_hint(reward_items: dict[str, int], prefer_chinese: bool) -> 
     if prefer_chinese:
         return f"完成后可获得：{req}"
     return f"Reward on completion: {req}"
-
-
-def _ensure_reward_hint_consistency(reward_hint: str | None, reward_items: dict[str, int], prefer_chinese: bool) -> str:
-    text = str(reward_hint or "").strip()
-    if not reward_items:
-        return text
-    if not text:
-        return _default_reward_hint(reward_items, prefer_chinese)
-    names = [str(name) for name in reward_items.keys()]
-    if any(name in text for name in names if name):
-        return text
-    if prefer_chinese:
-        return f"{text}（奖励：{'，'.join([f'{k} x{v}' for k, v in reward_items.items()])}）"
-    return f"{text} (reward: {', '.join([f'{k} x{v}' for k, v in reward_items.items()])})"
 
 
 def _aggregate_side_rewards(side_quests: list[QuestSpec]) -> dict[str, int]:

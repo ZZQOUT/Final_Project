@@ -655,12 +655,13 @@ def test_bad_npc_identity_is_rewritten_to_non_duplicate_name_and_profession() ->
     assert "龙脊山脉" not in bad_npc.profession
 
 
-def test_campus_side_items_are_refined_by_prompt_pass() -> None:
+def test_campus_side_items_are_generated_theme_aligned_in_first_pass() -> None:
     cfg = load_config("configs/config.yaml")
-    llm = MockLLMClient([campus_world_json(), campus_refined_world_json()])
+    llm = MockLLMClient([campus_refined_world_json()])
     world = generate_world_spec(cfg, llm, "请生成校园恋爱主题世界")
 
     required_items = [name for quest in world.side_quests for name in quest.required_items.keys()]
     assert required_items
     assert all(marker not in item for item in required_items for marker in ["遗物", "矿石", "手稿"])
     assert any(item in required_items for item in ["社团报名表", "借阅卡片", "花束包装纸"])
+    assert llm.calls == 1

@@ -1,0 +1,334 @@
+{
+  "world_id": "world_001",
+  "title": "樱花校园的恋爱物语",
+  "world_bible": {
+    "tech_level": "modern",
+    "narrative_language": "zh",
+    "magic_rules": "无魔法，基于现实世界设定。",
+    "tone": "轻松、温馨、略带青春感伤的校园恋爱氛围。",
+    "anachronism_policy": null,
+    "taboos": [
+      "暴力行为",
+      "超自然力量",
+      "政治敏感话题"
+    ],
+    "do_not_mention": [],
+    "anachronism_blocklist": []
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "樱花学园主教学楼",
+      "kind": "school",
+      "description": "这是一座充满青春气息的五层教学楼，走廊上贴满了社团招新海报，教室里传来朗朗读书声。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "indoors",
+        "classroom",
+        "hallway"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "樱花庭院",
+      "kind": "garden",
+      "description": "春季盛开的樱花树下是学生约会和午休的热门地点，长椅上常有情侣低语。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "outdoors",
+        "romantic",
+        "scenic"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "学园图书馆",
+      "kind": "library",
+      "description": "安静整洁的图书馆，藏书丰富，是学霸和文学社成员的聚集地。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "indoors",
+        "quiet",
+        "study"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "天台花园",
+      "kind": "rooftop",
+      "description": "被学生偷偷改造为秘密花园的天台，视野开阔，是表白圣地。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "outdoors",
+        "secret",
+        "romantic"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "文艺社活动室",
+      "kind": "clubroom",
+      "description": "堆满手工艺品、画具和剧本的文艺社专属空间，墙上贴满了演出照片。",
+      "connected_to": [
+        "loc_003"
+      ],
+      "tags": [
+        "indoors",
+        "creative",
+        "cluttered"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "佐藤美咲",
+      "profession": "学生会主席",
+      "traits": [
+        "认真负责",
+        "有点傲娇",
+        "擅长组织"
+      ],
+      "goals": [
+        "成功举办校园祭",
+        "提升学生会影响力"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.7,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 2,
+      "refusal_style": "用学生会规章拒绝，但会提供替代方案。"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "小林直树",
+      "profession": "普通学生",
+      "traits": [
+        "随和友善",
+        "消息灵通",
+        "喜欢帮忙"
+      ],
+      "goals": [
+        "交到更多朋友",
+        "参与各种活动"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 4,
+      "refusal_style": "总是乐于助人，几乎不会拒绝。"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "田中一郎",
+      "profession": "园艺部成员",
+      "traits": [
+        "沉默寡言",
+        "热爱植物",
+        "观察力强"
+      ],
+      "goals": [
+        "培育稀有樱花品种",
+        "保护校园绿化"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.5,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 0,
+      "refusal_style": "摇头不语，继续照料花草，除非你带来他需要的种子。"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "高桥健太",
+      "profession": "图书管理员助理",
+      "traits": [
+        "内向害羞",
+        "知识渊博",
+        "喜欢古典文学"
+      ],
+      "goals": [
+        "找到失传的校园诗集",
+        "帮助同学提高阅读兴趣"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.8,
+      "stubbornness": 0.4,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 1,
+      "refusal_style": "低头小声解释原因，但若理由充分会帮忙。"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "渡边老师",
+      "profession": "国文教师",
+      "traits": [
+        "严谨古板",
+        "重视传统",
+        "内心温柔"
+      ],
+      "goals": [
+        "推广古典文学",
+        "指导学生写作"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.4,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.1,
+      "disposition_to_player": 1,
+      "refusal_style": "引用校规或古文教训，但若展示诚意会软化态度。"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "山本由纪",
+      "profession": "天台常客",
+      "traits": [
+        "浪漫主义",
+        "爱写日记",
+        "容易感伤"
+      ],
+      "goals": [
+        "找到理想的告白对象",
+        "记录最美的日落"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.6,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 2,
+      "refusal_style": "叹气后说‘现在不是时候’，但会暗示下次机会。"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "铃木花子",
+      "profession": "文艺社社长",
+      "traits": [
+        "热情奔放",
+        "创意十足",
+        "有点神经质"
+      ],
+      "goals": [
+        "在校园祭上演原创话剧",
+        "收集独特道具"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.9,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 3,
+      "refusal_style": "立刻答应，但可能提出奇怪的附加条件。"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "开学第一天，你在樱花学园迷了路，正巧遇到学生会主席佐藤美咲。她递给你一张校园地图，但上面似乎缺少了几个关键地点的标记。她说：‘如果你能帮我完成一些任务，或许能补全这张地图。’",
+  "initial_quest": "向佐藤美咲报到并领取校园地图。",
+  "main_quest": {
+    "quest_id": "quest_main_001",
+    "title": "校园祭的完美告白",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+    "objective": "完成支线并收集关键道具：樱花诗集手抄本 x1，文艺社纪念徽章 x1，园艺部特制花束 x1",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_004",
+    "required_items": {
+      "樱花诗集手抄本": 1,
+      "文艺社纪念徽章": 1,
+      "园艺部特制花束": 1
+    },
+    "reward_items": {},
+    "reward_hint": "成功告白后，将获得‘校园传说情侣’称号和永久天台使用权。"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_001",
+      "title": "收集泛黄的借书卡",
+      "category": "side",
+      "description": "图书管理员助理高桥健太正在寻找一本记载校园樱花传说的旧诗集，据说它被夹在某本古典文学书中。",
+      "objective": "在图书馆找到《春之歌》诗集，并归还给高桥健太。（需求：泛黄的借书卡 x1，古典文学索引表 x1）",
+      "giver_npc_id": "npc_002",
+      "suggested_location": "loc_003",
+      "required_items": {
+        "泛黄的借书卡": 1,
+        "古典文学索引表": 1
+      },
+      "reward_items": {
+        "樱花诗集手抄本": 1
+      },
+      "reward_hint": "手抄本上记录了告白时最动人的诗句。"
+    },
+    {
+      "quest_id": "quest_side_002",
+      "title": "文艺社的紧急求助",
+      "category": "side",
+      "description": "文艺社社长铃木花子急需几件特殊道具来完成校园祭话剧的布景，但时间紧迫。",
+      "objective": "帮铃木花子收集制作纪念徽章的材料。（需求：闪亮的金属片 x2，彩色丝带 x3）",
+      "giver_npc_id": "npc_003",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "闪亮的金属片": 2,
+        "彩色丝带": 3
+      },
+      "reward_items": {
+        "文艺社纪念徽章": 1
+      },
+      "reward_hint": "徽章是进入文艺社专属后台的凭证。"
+    },
+    {
+      "quest_id": "quest_side_003",
+      "title": "园艺部的秘密花束",
+      "category": "side",
+      "description": "园艺部成员田中一郎培育了一种只在黄昏绽放的樱花，他想用花瓣制作一束特别的花送给暗恋的人，但需要你的帮助采集。",
+      "objective": "在樱花庭院黄昏时分采集三朵‘暮光樱花’，交给田中一郎。",
+      "giver_npc_id": "npc_004",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "暮光樱花": 3,
+        "园艺剪刀": 1
+      },
+      "reward_items": {
+        "园艺部特制花束": 1
+      },
+      "reward_hint": "花束的香气能让人心情平静，适合告白时使用。"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 50.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 70.0,
+      "y": 40.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 30.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 80.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 20.0,
+      "y": 60.0
+    }
+  ]
+}
