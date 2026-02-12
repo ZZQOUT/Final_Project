@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 import re
+import json
 
 from rpg_story.config import load_config
 from rpg_story.llm.client import MockLLMClient
@@ -665,3 +666,28 @@ def test_campus_side_items_are_generated_theme_aligned_in_first_pass() -> None:
     assert all(marker not in item for item in required_items for marker in ["遗物", "矿石", "手稿"])
     assert any(item in required_items for item in ["社团报名表", "借阅卡片", "花束包装纸"])
     assert llm.calls == 1
+
+
+def test_ambient_location_resources_use_world_item_pool_not_fabricated_location_tokens() -> None:
+    cfg = load_config("configs/config.yaml")
+    llm = MockLLMClient([campus_refined_world_json()])
+    world = generate_world_spec(cfg, llm, "请生成校园恋爱主题世界")
+
+    raw = json.loads(campus_refined_world_json())
+    raw["locations"].append(
+        {
+            "location_id": "loc_999",
+            "name": "后山步道",
+            "kind": "trail",
+            "description": "傍晚散步的地方。",
+            "connected_to": ["loc_003"],
+            "tags": ["校园"],
+        }
+    )
+    world_with_extra = WorldSpec.model_validate(raw)
+    extra_loc = next(loc for loc in world_with_extra.locations if loc.location_id == "loc_999")
+    stock = suggest_location_resource_template(world_with_extra, extra_loc, prefer_chinese=True)
+
+    assert stock
+    assert all("后山步道" not in name for name in stock.keys())
+    assert all(marker not in name for name in stock.keys() for marker in ["遗物", "矿石", "手稿", "样本", "线索"])

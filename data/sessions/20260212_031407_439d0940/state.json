@@ -1,0 +1,515 @@
+{
+  "session_id": "20260212_031407_439d0940",
+  "created_at": "2026-02-12T03:15:03.438700+00:00",
+  "world": {
+    "world_id": "sakura_hearts_01",
+    "title": "樱花与心跳",
+    "world_bible": {
+      "tech_level": "modern",
+      "narrative_language": "zh",
+      "magic_rules": "本世界无魔法，一切基于现实校园生活。",
+      "tone": "轻松、温馨、略带青春悸动的校园恋爱氛围。",
+      "anachronism_policy": null,
+      "taboos": [
+        "暴力行为",
+        "超自然现象",
+        "政治议题"
+      ],
+      "do_not_mention": [],
+      "anachronism_blocklist": []
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "樱花高中教学楼",
+        "kind": "school",
+        "description": "充满青春气息的高中教学楼，走廊上贴满了社团招新海报，教室里传来朗朗读书声。",
+        "connected_to": [
+          "loc_002",
+          "loc_003"
+        ],
+        "tags": [
+          "indoors",
+          "school",
+          "daytime"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "校园天台",
+        "kind": "rooftop",
+        "description": "视野开阔的天台，是情侣们偷偷约会的秘密基地，风中飘着淡淡的樱花香。",
+        "connected_to": [
+          "loc_001"
+        ],
+        "tags": [
+          "outdoors",
+          "romantic",
+          "quiet"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "旧校舍图书室",
+        "kind": "library",
+        "description": "位于旧校舍的安静图书室，书架高耸，阳光透过彩绘玻璃窗洒在地板上。",
+        "connected_to": [
+          "loc_001",
+          "loc_004"
+        ],
+        "tags": [
+          "indoors",
+          "quiet",
+          "study"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "学园祭筹备室",
+        "kind": "event_room",
+        "description": "堆满装饰材料和道具的筹备室，墙上贴满了学园祭流程图，空气中弥漫着胶水和纸张的味道。",
+        "connected_to": [
+          "loc_003",
+          "loc_005"
+        ],
+        "tags": [
+          "indoors",
+          "busy",
+          "creative"
+        ]
+      },
+      {
+        "location_id": "loc_005",
+        "name": "樱花坡道",
+        "kind": "path",
+        "description": "连接学校与小镇的坡道，两旁种满了樱花树，春天时花瓣如雨般飘落。",
+        "connected_to": [
+          "loc_004",
+          "loc_006"
+        ],
+        "tags": [
+          "outdoors",
+          "scenic",
+          "romantic"
+        ]
+      },
+      {
+        "location_id": "loc_006",
+        "name": "青木家",
+        "kind": "house",
+        "description": "阳菜的家，整洁温馨的日式住宅，门口挂着风铃，玄关处摆着她的室内拖鞋。",
+        "connected_to": [
+          "loc_005"
+        ],
+        "tags": [
+          "indoors",
+          "home",
+          "private"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_001",
+        "name": "青木阳菜",
+        "profession": "高中生",
+        "traits": [
+          "温柔",
+          "害羞",
+          "热爱文学"
+        ],
+        "goals": [
+          "完成学园祭话剧剧本",
+          "和你一起看樱花"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.8,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 4,
+        "refusal_style": "低头小声说‘下次再……好吗？’"
+      },
+      {
+        "npc_id": "npc_002",
+        "name": "佐藤健太",
+        "profession": "学生会主席",
+        "traits": [
+          "认真",
+          "守时",
+          "有点古板"
+        ],
+        "goals": [
+          "确保学园祭顺利进行",
+          "维持校园秩序"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.6,
+        "stubbornness": 0.7,
+        "risk_tolerance": 0.2,
+        "disposition_to_player": 1,
+        "refusal_style": "双手叉腰，严肃地说‘这不符合规定！’"
+      },
+      {
+        "npc_id": "npc_auto_001",
+        "name": "宁清",
+        "profession": "工作人员",
+        "traits": [
+          "理性",
+          "稳定"
+        ],
+        "goals": [
+          "完成本地职责"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.58,
+        "stubbornness": 0.42,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 1,
+        "refusal_style": "简洁克制"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "铃木美咲",
+        "profession": "图书委员",
+        "traits": [
+          "安静",
+          "细心",
+          "记忆力超群"
+        ],
+        "goals": [
+          "整理完所有旧书",
+          "找到遗失的诗集"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.9,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": 2,
+        "refusal_style": "轻轻摇头，用书挡住半张脸"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "田中一郎",
+        "profession": "美术社社长",
+        "traits": [
+          "热情",
+          "创意十足",
+          "有点邋遢"
+        ],
+        "goals": [
+          "为学园祭制作巨型布景",
+          "收集特殊颜料"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.85,
+        "stubbornness": 0.5,
+        "risk_tolerance": 0.7,
+        "disposition_to_player": 3,
+        "refusal_style": "夸张地挥舞画笔喊‘灵感不能被束缚！’"
+      },
+      {
+        "npc_id": "npc_005",
+        "name": "小林由纪",
+        "profession": "花店老板的女儿",
+        "traits": [
+          "活泼",
+          "爱八卦",
+          "擅长插花"
+        ],
+        "goals": [
+          "帮同学传递情书",
+          "收集不同品种的樱花"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.75,
+        "stubbornness": 0.4,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 2,
+        "refusal_style": "眨眨眼说‘秘密可是要收费的哦～’"
+      },
+      {
+        "npc_id": "npc_006",
+        "name": "青木太太",
+        "profession": "家庭主妇",
+        "traits": [
+          "慈祥",
+          "爱操心",
+          "厨艺精湛"
+        ],
+        "goals": [
+          "给阳菜和你准备点心",
+          "打听你们的进展"
+        ],
+        "starting_location": "loc_006",
+        "obedience_level": 0.95,
+        "stubbornness": 0.1,
+        "risk_tolerance": 0.1,
+        "disposition_to_player": 5,
+        "refusal_style": "端出一盘刚烤好的饼干说‘先吃点东西再说吧’"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "午休铃声刚响，你正准备去找阳菜，却发现她站在教室门口，脸颊微红地递给你一张折叠的纸条。",
+    "initial_quest": "打开阳菜的纸条，里面写着‘放学后能来天台吗？我想和你说件事……’",
+    "main_quest": {
+      "quest_id": "quest_main_01",
+      "title": "学园祭的告白",
+      "category": "main",
+      "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+      "objective": "完成支线并收集关键道具：手写剧本终稿 x1，特制舞台颜料 x1，樱花主题花束 x1",
+      "giver_npc_id": "npc_001",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "手写剧本终稿": 1,
+        "特制舞台颜料": 1,
+        "樱花主题花束": 1
+      },
+      "reward_items": {},
+      "reward_hint": "演出成功后，阳菜会在樱花树下说出心里话"
+    },
+    "side_quests": [
+      {
+        "quest_id": "quest_side_01",
+        "title": "遗失的诗集",
+        "category": "side",
+        "description": "图书委员铃木美咲正在寻找一本对阳菜很重要的诗集，据说最后出现在旧校舍图书室。",
+        "objective": "帮美咲找回三本指定的旧书（需求：泛黄的抒情诗集 x1，书签夹着的樱花标本 x1，手写读书笔记 x1）",
+        "giver_npc_id": "npc_003",
+        "suggested_location": "loc_003",
+        "required_items": {
+          "泛黄的抒情诗集": 1,
+          "书签夹着的樱花标本": 1,
+          "手写读书笔记": 1
+        },
+        "reward_items": {
+          "手写剧本终稿": 1
+        },
+        "reward_hint": "阳菜根据诗集灵感完成了最终剧本"
+      },
+      {
+        "quest_id": "quest_side_02",
+        "title": "特制舞台颜料",
+        "category": "side",
+        "description": "美术社社长田中一郎需要特殊材料制作能在暗处发光的舞台颜料。",
+        "objective": "收集三种特殊材料调配颜料（需求：夜光贝壳粉 x1，蓝染植物汁液 x1，萤火虫干粉 x1）",
+        "giver_npc_id": "npc_004",
+        "suggested_location": "loc_004",
+        "required_items": {
+          "夜光贝壳粉": 1,
+          "蓝染植物汁液": 1,
+          "萤火虫干粉": 1
+        },
+        "reward_items": {
+          "特制舞台颜料": 1
+        },
+        "reward_hint": "这种颜料能让舞台上的樱花图案在暗场时发光"
+      },
+      {
+        "quest_id": "quest_side_03",
+        "title": "樱花花束",
+        "category": "side",
+        "description": "小林由纪知道阳菜想在演出后送你花束，但需要收集不同品种的樱花。",
+        "objective": "收集三种稀有樱花品种（需求：八重红枝垂樱 x1，关山樱 x1，普贤象樱 x1）",
+        "giver_npc_id": "npc_005",
+        "suggested_location": "loc_005",
+        "required_items": {
+          "八重红枝垂樱": 1,
+          "关山樱": 1,
+          "普贤象樱": 1
+        },
+        "reward_items": {
+          "樱花主题花束": 1
+        },
+        "reward_hint": "由纪用特殊手法保鲜，花束能保持三天不凋谢"
+      }
+    ],
+    "map_layout": [
+      {
+        "location_id": "loc_001",
+        "x": 50.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_002",
+        "x": 50.0,
+        "y": 30.0
+      },
+      {
+        "location_id": "loc_003",
+        "x": 30.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_004",
+        "x": 30.0,
+        "y": 70.0
+      },
+      {
+        "location_id": "loc_005",
+        "x": 50.0,
+        "y": 85.0
+      },
+      {
+        "location_id": "loc_006",
+        "x": 70.0,
+        "y": 90.0
+      }
+    ]
+  },
+  "player_location": "loc_006",
+  "npc_locations": {
+    "npc_001": "loc_001",
+    "npc_002": "loc_001",
+    "npc_auto_001": "loc_002",
+    "npc_003": "loc_003",
+    "npc_004": "loc_004",
+    "npc_005": "loc_005",
+    "npc_006": "loc_006"
+  },
+  "flags": {
+    "met_npc_001": true,
+    "met_npc_003": true
+  },
+  "quests": {
+    "quest_main_01": "active",
+    "quest_side_01": "completed",
+    "quest_side_02": "active",
+    "quest_side_03": "active"
+  },
+  "quest_journal": {
+    "quest_main_01": {
+      "quest_id": "quest_main_01",
+      "title": "学园祭的告白",
+      "category": "main",
+      "status": "active",
+      "objective": "完成支线并收集关键道具：手写剧本终稿 x1，特制舞台颜料 x1，樱花主题花束 x1",
+      "guidance": "主线准备进度：手写剧本终稿 1/1，特制舞台颜料 0/1，樱花主题花束 0/1",
+      "giver_npc_id": "npc_001",
+      "required_items": {
+        "手写剧本终稿": 1,
+        "特制舞台颜料": 1,
+        "樱花主题花束": 1
+      },
+      "collected_items": {
+        "手写剧本终稿": 1,
+        "特制舞台颜料": 0,
+        "樱花主题花束": 0
+      },
+      "reward_items": {},
+      "reward_hint": "演出成功后，阳菜会在樱花树下说出心里话"
+    },
+    "quest_side_01": {
+      "quest_id": "quest_side_01",
+      "title": "遗失的诗集",
+      "category": "side",
+      "status": "completed",
+      "objective": "帮美咲找回三本指定的旧书（需求：泛黄的抒情诗集 x1，书签夹着的樱花标本 x1，手写读书笔记 x1）",
+      "guidance": "支线已完成，奖励已发放。",
+      "giver_npc_id": "npc_003",
+      "required_items": {
+        "泛黄的抒情诗集": 1,
+        "书签夹着的樱花标本": 1,
+        "手写读书笔记": 1
+      },
+      "collected_items": {
+        "泛黄的抒情诗集": 1,
+        "书签夹着的樱花标本": 1,
+        "手写读书笔记": 1
+      },
+      "reward_items": {
+        "手写剧本终稿": 1
+      },
+      "reward_hint": "阳菜根据诗集灵感完成了最终剧本"
+    },
+    "quest_side_02": {
+      "quest_id": "quest_side_02",
+      "title": "特制舞台颜料",
+      "category": "side",
+      "status": "active",
+      "objective": "收集三种特殊材料调配颜料（需求：夜光贝壳粉 x1，蓝染植物汁液 x1，萤火虫干粉 x1）",
+      "guidance": "交付进度：夜光贝壳粉 已交付0/1（背包1），蓝染植物汁液 已交付0/1（背包0），萤火虫干粉 已交付0/1（背包0）",
+      "giver_npc_id": "npc_004",
+      "required_items": {
+        "夜光贝壳粉": 1,
+        "蓝染植物汁液": 1,
+        "萤火虫干粉": 1
+      },
+      "collected_items": {
+        "夜光贝壳粉": 0,
+        "蓝染植物汁液": 0,
+        "萤火虫干粉": 0
+      },
+      "reward_items": {
+        "特制舞台颜料": 1
+      },
+      "reward_hint": "这种颜料能让舞台上的樱花图案在暗场时发光"
+    },
+    "quest_side_03": {
+      "quest_id": "quest_side_03",
+      "title": "樱花花束",
+      "category": "side",
+      "status": "active",
+      "objective": "收集三种稀有樱花品种（需求：八重红枝垂樱 x1，关山樱 x1，普贤象樱 x1）",
+      "guidance": "交付进度：八重红枝垂樱 已交付0/1（背包0），关山樱 已交付0/1（背包0），普贤象樱 已交付0/1（背包0）",
+      "giver_npc_id": "npc_005",
+      "required_items": {
+        "八重红枝垂樱": 1,
+        "关山樱": 1,
+        "普贤象樱": 1
+      },
+      "collected_items": {
+        "八重红枝垂樱": 0,
+        "关山樱": 0,
+        "普贤象樱": 0
+      },
+      "reward_items": {
+        "樱花主题花束": 1
+      },
+      "reward_hint": "由纪用特殊手法保鲜，花束能保持三天不凋谢"
+    }
+  },
+  "main_quest_id": "quest_main_01",
+  "inventory": {
+    "夜光贝壳粉": 1,
+    "手写剧本终稿": 1
+  },
+  "location_resource_stock": {
+    "loc_001": {
+      "八重红枝垂樱": 2,
+      "关山樱": 1,
+      "普贤象樱": 1
+    },
+    "loc_003": {
+      "书签夹着的樱花标本": 1,
+      "手写读书笔记": 1,
+      "泛黄的抒情诗集": 1,
+      "夜光贝壳粉": 0
+    },
+    "loc_004": {
+      "夜光贝壳粉": 2,
+      "萤火虫干粉": 2,
+      "蓝染植物汁液": 2,
+      "八重红枝垂樱": 2
+    },
+    "loc_005": {
+      "八重红枝垂樱": 2,
+      "关山樱": 2,
+      "普贤象樱": 2,
+      "泛黄的抒情诗集": 1
+    },
+    "loc_006": {
+      "书签夹着的樱花标本": 2,
+      "手写读书笔记": 1,
+      "夜光贝壳粉": 1
+    }
+  },
+  "recent_summaries": [
+    "青木阳菜在教室门口递给你一张纸条，邀请你放学后去天台。",
+    "阳菜确认你答应放学后去天台，显得既期待又害羞。",
+    "你提议现在去图书馆，但阳菜表示她还有事要处理，包括帮图书委员铃木美咲找诗集，并且没忘记放学后在天台等你的约定。",
+    "你催促阳菜现在就走，但她仍犹豫着，因为既要帮图书委员铃木美咲找诗集，又不想错过和你在天台的约定。",
+    "你问阳菜是否在拒绝你，她连忙否认，解释自己只是不想失信于人，既想完成对图书委员铃木美咲的承诺，又不愿错过和你在天台的约定。",
+    "你来到旧校舍图书室，图书委员铃木美咲正在整理高处的书籍，并向你确认是否前来协助寻找遗失的诗集。"
+  ],
+  "last_turn_id": 9
+}

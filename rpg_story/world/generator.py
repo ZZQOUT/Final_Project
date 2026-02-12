@@ -67,6 +67,9 @@ def generate_world_spec(cfg: AppConfig, llm: BaseLLMClient, world_prompt: str) -
         "Collectible (side quest required) item types across the generated world should be at least 5 when possible. "
         "Different locations should emphasize different collectible items instead of repeating the same set. "
         "Each side quest should require 2-3 concrete items that are plausible in that quest's location and social context. "
+        "All collectible item names across the world must follow the same world theme and language, "
+        "including optional ambient/local resources not directly required by quests. "
+        "Do not produce out-of-theme filler collectibles. "
         "Use concrete, in-world item names. Avoid placeholder names such as '<location>样本', '<location>线索', "
         "'*_sample', '*_clue', '*_material', '*_token', and avoid repetitive patterns like '<location>遗物'/'<location>矿石' unless the world explicitly centers on archaeology/mining. "
         "NPC names must be proper names, not placeholders like '居民1'/'村民1'/'Resident 1'. "
@@ -671,6 +674,7 @@ def _seed_item_from_location(loc: Any, *, prefer_chinese: bool, variant: int) ->
 
 def suggest_location_resource_template(world: WorldSpec, loc: Any, *, prefer_chinese: bool) -> dict[str, int]:
     loc_id = str(getattr(loc, "location_id", "") or "")
+    loc_kind = str(getattr(loc, "kind", "") or "")
     blocked_tokens = set()
     if world.main_quest:
         blocked_tokens.update(_normalize_item_token(name) for name in (world.main_quest.required_items or {}).keys())
@@ -690,25 +694,24 @@ def suggest_location_resource_template(world: WorldSpec, loc: Any, *, prefer_chi
         if len(result) >= 3:
             break
 
-    seed_variant = sum(ord(ch) for ch in (loc_id + str(getattr(loc, "kind", "") or ""))) % 11
-    while len(result) < 2:
-        candidate = _seed_item_from_location(loc, prefer_chinese=prefer_chinese, variant=seed_variant + len(result))
-        token = _normalize_item_token(candidate)
-        if token and token not in blocked_tokens and candidate not in result:
-            result[candidate] = 1
-        else:
-            seed_variant += 3
-            if seed_variant > 50:
-                break
+    world_pool = []
+    for item in _collect_item_pool_from_world(world):
+        token = _normalize_item_token(item)
+        if not token or token in blocked_tokens:
+            continue
+        world_pool.append(item)
+    pooled = _pick_items_from_pool(world_pool, seed=f"{loc_id}:{loc_kind}:ambient", limit=4)
+    for item, count in pooled.items():
+        if item in result:
+            continue
+        result[item] = max(1, min(3, int(count)))
+        if len(result) >= 3:
+            break
+
     if not result:
-        fallback = _default_required_items_for_location(loc, prefer_chinese=prefer_chinese, variant=seed_variant)
-        for item, count in fallback.items():
-            token = _normalize_item_token(item)
-            if token in blocked_tokens:
-                continue
-            result[item] = count
-            if len(result) >= 2:
-                break
+        # If the world provides no valid item pool, show no ambient resources
+        # instead of injecting out-of-theme placeholders.
+        return {}
     return result
 
 
