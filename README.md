@@ -206,4 +206,4 @@ This project targets **LLM-based NPC dialogue gameplay with consistency and cont
 - integration of dialogue, quests, map, and inventory,
 - replayable finale summary and archive.
 
-It aligns with the thesis goal of moving from hardcoded content to **model-generated content under engine constraints**.
+It aligns with thesis goal of moving from hardcoded content to **model-generated content under engine constraints**.
