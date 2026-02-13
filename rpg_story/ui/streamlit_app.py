@@ -88,6 +88,27 @@ def _prefer_chinese_ui(world: WorldSpec) -> bool:
     return _contains_cjk(text)
 
 
+def _resolve_ui_language(world: WorldSpec | None = None) -> str:
+    language = str(st.session_state.get("ui_language", "auto")).lower()
+    if language in {"zh", "en"}:
+        return language
+    if world is not None:
+        return "zh" if _prefer_chinese_ui(world) else "en"
+    return "zh"
+
+
+def _ui_prefer_chinese(world: WorldSpec | None = None) -> bool:
+    return _resolve_ui_language(world) == "zh"
+
+
+def _toggle_ui_language(world: WorldSpec | None = None) -> None:
+    st.session_state.ui_language = "en" if _ui_prefer_chinese(world) else "zh"
+
+
+def _ui_text(prefer_chinese: bool, zh: str, en: str) -> str:
+    return zh if prefer_chinese else en
+
+
 def _display_item_name(item: str, prefer_chinese: bool) -> str:
     normalized = re.sub(r"[\s\-]+", "_", str(item or "").strip().lower())
     normalized = re.sub(r"_+", "_", normalized).strip("_")
@@ -233,7 +254,9 @@ def _svg_map(world: WorldSpec, state: GameState) -> str:
     )
 
 
-def _render_interactive_map(svg_markup: str, height: int = 520) -> None:
+def _render_interactive_map(svg_markup: str, prefer_chinese: bool, height: int = 520) -> None:
+    reset_label = _ui_text(prefer_chinese, "重置", "Reset")
+    hint_label = _ui_text(prefer_chinese, "滚轮缩放，按住拖拽移动地图", "Mouse wheel to zoom, drag to pan")
     html_block = f"""
 <style>
   .map-shell {{
@@ -283,8 +306,8 @@ def _render_interactive_map(svg_markup: str, height: int = 520) -> None:
   <div class="map-toolbar">
     <button id="zoom-in">+</button>
     <button id="zoom-out">-</button>
-    <button id="zoom-reset" style="width:auto;padding:0 8px;font-size:12px;">重置</button>
-    <span>滚轮缩放，按住拖拽移动地图</span>
+    <button id="zoom-reset" style="width:auto;padding:0 8px;font-size:12px;">{reset_label}</button>
+    <span>{hint_label}</span>
   </div>
   <div class="map-stage" id="map-stage">
     {svg_markup}
@@ -357,28 +380,43 @@ def _render_interactive_map(svg_markup: str, height: int = 520) -> None:
     components.html(html_block, height=height, scrolling=False)
 
 
-def _render_map_panel(world: WorldSpec, state: GameState, session_id: str, sessions_root: Path) -> None:
-    st.header("地图")
-    st.write(f"Session：{session_id}")
-    _render_interactive_map(_svg_map(world, state), height=520)
+def _render_map_panel(
+    world: WorldSpec,
+    state: GameState,
+    session_id: str,
+    sessions_root: Path,
+    prefer_chinese: bool,
+) -> None:
+    st.header(_ui_text(prefer_chinese, "地图", "Map"))
+    st.write(f"Session: {session_id}")
+    _render_interactive_map(_svg_map(world, state), prefer_chinese=prefer_chinese, height=520)
 
     current = world.get_location(state.player_location)
     if not current:
         return
-    st.markdown(f"**当前位置**：{current.name} ({current.kind})")
+    st.markdown(
+        _ui_text(
+            prefer_chinese,
+            f"**当前位置**：{current.name} ({current.kind})",
+            f"**Current Location**: {current.name} ({current.kind})",
+        )
+    )
     st.caption(current.description)
 
     neighbor_ids = [loc_id for loc_id in current.connected_to if world.get_location(loc_id)]
-    st.markdown("**可前往地点**")
+    st.markdown(_ui_text(prefer_chinese, "**可前往地点**", "**Available Destinations**"))
     if not neighbor_ids:
-        st.write("当前没有已连接地点。")
+        st.write(_ui_text(prefer_chinese, "当前没有已连接地点。", "No connected destinations from here."))
     else:
         cols = st.columns(max(1, min(3, len(neighbor_ids))))
         for idx, neighbor_id in enumerate(neighbor_ids):
             target = world.get_location(neighbor_id)
             label = target.name if target else neighbor_id
             with cols[idx % len(cols)]:
-                if st.button(f"前往 {label}", key=f"go_{session_id}_{state.last_turn_id}_{neighbor_id}"):
+                if st.button(
+                    _ui_text(prefer_chinese, f"前往 {label}", f"Go to {label}"),
+                    key=f"go_{session_id}_{state.last_turn_id}_{neighbor_id}",
+                ):
                     state.player_location = neighbor_id
                     save_state(session_id, state, sessions_root)
                     st.rerun()
@@ -464,7 +502,7 @@ def _inventory_delta_text(delta: dict[str, int], prefer_chinese: bool) -> str:
         sign = "+" if amount >= 0 else ""
         display = _display_item_name(name, prefer_chinese)
         parts.append(f"{display} {sign}{amount}")
-    return "，".join(parts)
+    return ("，" if prefer_chinese else ", ").join(parts)
 
 
 def _localized_reason(reason: str, prefer_chinese: bool) -> str:
@@ -491,10 +529,10 @@ def _localized_reason(reason: str, prefer_chinese: bool) -> str:
 def _remaining_stock_text(stock: dict[str, int], prefer_chinese: bool) -> str:
     remaining = [(name, int(count)) for name, count in stock.items() if int(count) > 0]
     if not remaining:
-        return "该地点资源已采尽"
+        return _ui_text(prefer_chinese, "该地点资源已采尽", "Resources at this location are depleted")
     remaining.sort(key=lambda pair: (pair[0]))
     parts = [f"{_display_item_name(name, prefer_chinese)} x{count}" for name, count in remaining]
-    return "，".join(parts)
+    return ("，" if prefer_chinese else ", ").join(parts)
 
 
 def _quest_notices(before: GameState, after: GameState, prefer_chinese: bool) -> list[str]:
@@ -545,15 +583,15 @@ def _state_diff_notices(
 
 
 def _render_quests(state: GameState, prefer_chinese: bool) -> None:
-    st.markdown("**任务日志**")
+    st.markdown(_ui_text(prefer_chinese, "**任务日志**", "**Quest Log**"))
     if not state.quest_journal:
-        st.write("暂无任务。")
+        st.write(_ui_text(prefer_chinese, "暂无任务。", "No quests yet."))
         return
 
     main = state.quest_journal.get(state.main_quest_id) if state.main_quest_id else None
     if main:
-        st.markdown(f"**主线**：{main.title} [{main.status}]")
-        st.write(main.objective or "暂无描述。")
+        st.markdown(_ui_text(prefer_chinese, f"**主线**：{main.title} [{main.status}]", f"**Main**: {main.title} [{main.status}]"))
+        st.write(main.objective or _ui_text(prefer_chinese, "暂无描述。", "No description."))
         if main.guidance:
             st.caption(main.guidance)
         if main.status != "completed":
@@ -563,7 +601,7 @@ def _render_quests(state: GameState, prefer_chinese: bool) -> None:
             for item, need in main.required_items.items():
                 have = main.collected_items.get(item, 0)
                 req.append(f"{_display_item_name(item, prefer_chinese)} {have}/{need}")
-            st.caption("主线需求：" + "，".join(req))
+            st.caption(_ui_text(prefer_chinese, "主线需求：", "Main requirements: ") + ("，" if prefer_chinese else ", ").join(req))
 
     side_items = [q for qid, q in state.quest_journal.items() if qid != state.main_quest_id]
     for quest in side_items:
@@ -575,12 +613,16 @@ def _render_quests(state: GameState, prefer_chinese: bool) -> None:
             for item, need in quest.required_items.items():
                 have = quest.collected_items.get(item, 0)
                 req.append(f"{_display_item_name(item, prefer_chinese)} {have}/{need}")
-            st.caption("需求：" + "，".join(req))
+            st.caption(_ui_text(prefer_chinese, "需求：", "Requirements: ") + ("，" if prefer_chinese else ", ").join(req))
 
 
-def _collect_chat_messages(world: WorldSpec, logs: list[dict], npc_id: str) -> list[tuple[str, str]]:
+def _collect_chat_messages(
+    world: WorldSpec,
+    logs: list[dict],
+    npc_id: str,
+    prefer_chinese: bool,
+) -> list[tuple[str, str]]:
     npc_name_map = {npc.npc_id: npc.name for npc in world.npcs}
-    prefer_chinese = _prefer_chinese_ui(world)
     messages: list[tuple[str, str]] = []
     for record in logs:
         if record.get("npc_id") != npc_id:
@@ -619,14 +661,20 @@ def _collect_chat_messages(world: WorldSpec, logs: list[dict], npc_id: str) -> l
     return messages
 
 
-def _render_chat_window(world: WorldSpec, logs: list[dict], npc_id: str | None, npc_name: str | None) -> None:
+def _render_chat_window(
+    world: WorldSpec,
+    logs: list[dict],
+    npc_id: str | None,
+    npc_name: str | None,
+    prefer_chinese: bool,
+) -> None:
     if not npc_id or not npc_name:
-        st.info("请选择一个 NPC 查看聊天记录。")
+        st.info(_ui_text(prefer_chinese, "请选择一个 NPC 查看聊天记录。", "Select an NPC to view chat history."))
         return
 
-    messages = _collect_chat_messages(world, logs, npc_id)
+    messages = _collect_chat_messages(world, logs, npc_id, prefer_chinese)
     if not messages:
-        st.info(f"与 {npc_name} 暂无对话记录。")
+        st.info(_ui_text(prefer_chinese, f"与 {npc_name} 暂无对话记录。", f"No chat history with {npc_name} yet."))
         return
 
     body_parts = []
@@ -1042,15 +1090,15 @@ def _build_final_report(
     }
 
 
-def _render_story_history_panel(sessions_root: Path) -> None:
+def _render_story_history_panel(sessions_root: Path, prefer_chinese: bool) -> None:
     st.markdown("---")
-    st.subheader("游玩历史总结")
+    st.subheader(_ui_text(prefer_chinese, "游玩历史总结", "Play History Recaps"))
     history = read_story_summaries(sessions_root, limit=30)
     if not history:
-        st.caption("暂无历史总结。")
+        st.caption(_ui_text(prefer_chinese, "暂无历史总结。", "No history recaps yet."))
         return
     for idx, rec in enumerate(history):
-        world_title = rec.get("world_title") or rec.get("world_id") or "Unknown World"
+        world_title = rec.get("world_title") or rec.get("world_id") or _ui_text(prefer_chinese, "未知世界", "Unknown World")
         timestamp = rec.get("timestamp") or rec.get("created_at") or ""
         title = f"{world_title} | {timestamp}" if timestamp else str(world_title)
         with st.expander(title, expanded=(idx == 0)):
@@ -1108,75 +1156,113 @@ if "summary_view" not in st.session_state:
     st.session_state.summary_view = False
 if "summary_record" not in st.session_state:
     st.session_state.summary_record = None
+if "ui_language" not in st.session_state:
+    st.session_state.ui_language = "auto"
 
-st.title("Adaptive RPG Storytelling")
+current_world_for_ui: WorldSpec | None = None
+if st.session_state.session_id:
+    try:
+        _preview_state = load_state(st.session_state.session_id, sessions_root)
+        current_world_for_ui = _load_world_for_session(cfg, st.session_state.session_id, _preview_state.world)
+    except Exception:
+        current_world_for_ui = None
+ui_prefer_chinese = _ui_prefer_chinese(current_world_for_ui)
+
+st.title(_ui_text(ui_prefer_chinese, "自适应 RPG 叙事", "Adaptive RPG Storytelling"))
 
 with st.sidebar:
-    st.header("连接状态")
-    st.write(f"API Key 已设置：{'是' if has_api_key else '否'}")
-    st.write(f"模型：{cfg.llm.model}")
-    st.write(f"Base URL：{cfg.llm.base_url}")
-    if st.button("从磁盘重新加载"):
+    st.header(_ui_text(ui_prefer_chinese, "连接状态", "Connection"))
+    st.write(
+        _ui_text(
+            ui_prefer_chinese,
+            f"API Key 已设置：{'是' if has_api_key else '否'}",
+            f"API key configured: {'yes' if has_api_key else 'no'}",
+        )
+    )
+    st.write(_ui_text(ui_prefer_chinese, f"模型：{cfg.llm.model}", f"Model: {cfg.llm.model}"))
+    st.write(f"Base URL: {cfg.llm.base_url}")
+    st.caption(
+        _ui_text(
+            ui_prefer_chinese,
+            f"当前界面语言：{'中文' if _resolve_ui_language(current_world_for_ui) == 'zh' else 'English'}",
+            f"UI language: {'Chinese' if _resolve_ui_language(current_world_for_ui) == 'zh' else 'English'}",
+        )
+    )
+    if st.button(_ui_text(ui_prefer_chinese, "切换到 English", "Switch to 中文"), key="toggle_ui_language_btn"):
+        _toggle_ui_language(current_world_for_ui)
+        st.rerun()
+    if st.button(_ui_text(ui_prefer_chinese, "从磁盘重新加载", "Reload from disk")):
         st.rerun()
 
 if not st.session_state.session_id:
     st.session_state.summary_view = False
     st.session_state.summary_record = None
-    st.header("创建世界")
+    prefer_chinese = _ui_prefer_chinese()
+    st.header(_ui_text(prefer_chinese, "创建世界", "Create World"))
     world_prompt = st.text_area(
-        "世界设定（World Prompt）",
-        placeholder="例如：中世纪王国、巨龙威胁、边境小镇。",
+        _ui_text(prefer_chinese, "世界设定（World Prompt）", "World Prompt"),
+        placeholder=_ui_text(
+            prefer_chinese,
+            "例如：中世纪王国、巨龙威胁、边境小镇。",
+            "Example: a medieval kingdom threatened by dragons and a frontier town.",
+        ),
         height=120,
     )
     col_a, col_b = st.columns([1, 1])
     with col_a:
-        if st.button("Create World"):
+        if st.button(_ui_text(prefer_chinese, "创建世界", "Create World")):
             if not world_prompt.strip():
-                st.error("请输入世界设定。")
+                st.error(_ui_text(prefer_chinese, "请输入世界设定。", "Please enter a world prompt."))
             elif not has_api_key:
-                st.error(f"未检测到 API Key（{api_key_env}）。")
+                st.error(
+                    _ui_text(
+                        prefer_chinese,
+                        f"未检测到 API Key（{api_key_env}）。",
+                        f"API key not found ({api_key_env}).",
+                    )
+                )
             else:
                 progress = st.progress(0)
                 status = st.empty()
                 try:
-                    status.info("正在初始化模型连接...")
+                    status.info(_ui_text(prefer_chinese, "正在初始化模型连接...", "Initializing model client..."))
                     progress.progress(15)
                     llm = QwenOpenAICompatibleClient(cfg)
-                    status.info("正在生成世界，请稍候...")
+                    status.info(_ui_text(prefer_chinese, "正在生成世界，请稍候...", "Generating world, please wait..."))
                     progress.progress(35)
-                    with st.spinner("世界生成中..."):
+                    with st.spinner(_ui_text(prefer_chinese, "世界生成中...", "Generating world...")):
                         session_id = generate_session_id()
                         world = generate_world_spec(cfg, llm, world_prompt.strip())
                     progress.progress(75)
-                    status.info("正在初始化会话与存档...")
+                    status.info(_ui_text(prefer_chinese, "正在初始化会话与存档...", "Initializing session and save data..."))
                     state = initialize_game_state(world, session_id=session_id)
                     save_state(session_id, state, sessions_root)
                     _persist_world(cfg, session_id, world)
                     progress.progress(100)
-                    status.success("世界生成完成")
+                    status.success(_ui_text(prefer_chinese, "世界生成完成", "World generation completed"))
                     st.session_state.session_id = session_id
-                    st.success(f"世界已创建，session_id: {session_id}")
+                    st.success(_ui_text(prefer_chinese, f"世界已创建，session_id: {session_id}", f"World created, session_id: {session_id}"))
                     st.rerun()
                 except Exception as exc:
-                    st.error(f"世界生成失败：{exc}")
+                    st.error(_ui_text(prefer_chinese, f"世界生成失败：{exc}", f"World generation failed: {exc}"))
     with col_b:
-        load_id = st.text_input("加载 session_id")
-        if st.button("Load Session"):
+        load_id = st.text_input(_ui_text(prefer_chinese, "加载 session_id", "Load session_id"))
+        if st.button(_ui_text(prefer_chinese, "加载会话", "Load Session")):
             if load_id:
                 try:
                     _ = load_state(load_id, sessions_root)
                     st.session_state.session_id = load_id
-                    st.success(f"已加载 session {load_id}")
+                    st.success(_ui_text(prefer_chinese, f"已加载 session {load_id}", f"Loaded session {load_id}"))
                     st.rerun()
                 except Exception as exc:
-                    st.error(f"加载失败：{exc}")
-    _render_story_history_panel(sessions_root)
+                    st.error(_ui_text(prefer_chinese, f"加载失败：{exc}", f"Load failed: {exc}"))
+    _render_story_history_panel(sessions_root, prefer_chinese)
 else:
     session_id = st.session_state.session_id
     try:
         state = load_state(session_id, sessions_root)
     except Exception as exc:
-        st.error(f"无法加载会话：{exc}")
+        st.error(_ui_text(ui_prefer_chinese, f"无法加载会话：{exc}", f"Unable to load session: {exc}"))
         st.session_state.session_id = None
         st.stop()
 
@@ -1187,7 +1273,8 @@ else:
     if synced_state.model_dump() != state.model_dump():
         state = synced_state
         save_state(session_id, state, sessions_root)
-    prefer_chinese = _prefer_chinese_ui(world)
+    world_prefer_chinese = _prefer_chinese_ui(world)
+    prefer_chinese = _ui_prefer_chinese(world)
     trial_pending_key = f"final_trial_pending_{session_id}"
     if trial_pending_key not in st.session_state:
         st.session_state[trial_pending_key] = False
@@ -1196,13 +1283,13 @@ else:
         _render_story_summary_page(st.session_state.summary_record, prefer_chinese)
         col_back_a, col_back_b = st.columns([1, 1])
         with col_back_a:
-            if st.button("返回创建页"):
+            if st.button(_ui_text(prefer_chinese, "返回创建页", "Back to Create Page")):
                 st.session_state.session_id = None
                 st.session_state.summary_view = False
                 st.session_state.summary_record = None
                 st.rerun()
         with col_back_b:
-            if st.button("返回当前会话"):
+            if st.button(_ui_text(prefer_chinese, "返回当前会话", "Back to Current Session")):
                 st.session_state.summary_view = False
                 st.rerun()
         st.stop()
@@ -1212,25 +1299,25 @@ else:
     logs = read_turn_logs(session_id, sessions_root)
 
     with col_left:
-        _render_map_panel(world, state, session_id, sessions_root)
+        _render_map_panel(world, state, session_id, sessions_root, prefer_chinese)
 
-        st.subheader("当前 NPC")
+        st.subheader(_ui_text(prefer_chinese, "当前 NPC", "NPCs Here"))
         if npcs_here:
             for npc in npcs_here:
                 st.write(f"- {npc.name} ({npc.profession})")
         else:
-            st.write("无 NPC")
+            st.write(_ui_text(prefer_chinese, "无 NPC", "No NPCs"))
 
-        st.subheader("背包")
+        st.subheader(_ui_text(prefer_chinese, "背包", "Inventory"))
         if state.inventory:
             for item, count in sorted(state.inventory.items()):
                 st.write(f"- {_display_item_name(item, prefer_chinese)} x{count}")
         else:
-            st.write("背包为空")
+            st.write(_ui_text(prefer_chinese, "背包为空", "Inventory is empty"))
 
         current_loc = world.get_location(state.player_location)
         if current_loc:
-            stock_changed = _ensure_location_stock(state, current_loc, prefer_chinese)
+            stock_changed = _ensure_location_stock(state, current_loc, world_prefer_chinese)
             if stock_changed:
                 save_state(session_id, state, sessions_root)
             stock = state.location_resource_stock.get(current_loc.location_id, {})
@@ -1239,15 +1326,19 @@ else:
                 selectable.sort(key=lambda pair: (_display_item_name(pair[0], prefer_chinese), pair[1]))
                 item_names = [name for name, _ in selectable]
                 selected_item = st.selectbox(
-                    "选择要采集的物品",
+                    _ui_text(prefer_chinese, "选择要采集的物品", "Select item to collect"),
                     options=item_names,
-                    format_func=lambda key: f"{_display_item_name(key, prefer_chinese)}（剩余{stock.get(key, 0)}）",
+                    format_func=lambda key: _ui_text(
+                        prefer_chinese,
+                        f"{_display_item_name(key, prefer_chinese)}（剩余{stock.get(key, 0)}）",
+                        f"{_display_item_name(key, prefer_chinese)} (left {stock.get(key, 0)})",
+                    ),
                     key=f"collect_item_{session_id}_{current_loc.location_id}",
                 )
                 max_qty = max(1, int(stock.get(selected_item, 1)))
                 qty = int(
                     st.number_input(
-                        "采集数量",
+                        _ui_text(prefer_chinese, "采集数量", "Collect quantity"),
                         min_value=1,
                         max_value=max_qty,
                         value=1,
@@ -1255,13 +1346,13 @@ else:
                         key=f"collect_qty_{session_id}_{current_loc.location_id}",
                     )
                 )
-                if st.button("采集选中物品"):
+                if st.button(_ui_text(prefer_chinese, "采集选中物品", "Collect Selected Item")):
                     old_state = state.model_copy(deep=True)
                     delta, stock_after = _collect_location_resources(
-                        state, current_loc, prefer_chinese, selected_item, qty
+                        state, current_loc, world_prefer_chinese, selected_item, qty
                     )
                     if not delta:
-                        st.warning("该地点已没有可收集的资源。")
+                        st.warning(_ui_text(prefer_chinese, "该地点已没有可收集的资源。", "No collectible resources left here."))
                     else:
                         state = sync_quest_journal(state)
                         save_state(session_id, state, sessions_root)
@@ -1273,38 +1364,43 @@ else:
                             _inventory_delta_text(delta, prefer_chinese)
                         ]
                         if all(int(v) <= 0 for v in stock_after.values()):
-                            st.session_state.inventory_notice.append("该地点资源已采尽")
+                            st.session_state.inventory_notice.append(
+                                _ui_text(prefer_chinese, "该地点资源已采尽", "Resources at this location are depleted")
+                            )
                         st.rerun()
             else:
-                st.info("该地点已没有可收集的资源。")
-            st.caption("本地剩余资源：" + _remaining_stock_text(stock, prefer_chinese))
+                st.info(_ui_text(prefer_chinese, "该地点已没有可收集的资源。", "No collectible resources left here."))
+            st.caption(
+                _ui_text(prefer_chinese, "本地剩余资源：", "Local remaining resources: ")
+                + _remaining_stock_text(stock, prefer_chinese)
+            )
 
-        st.subheader("RAG 调试")
+        st.subheader(_ui_text(prefer_chinese, "RAG 调试", "RAG Debug"))
         if logs:
             last_rag = logs[-1].get("rag", {})
-            if st.checkbox("显示最近一次 RAG IDs"):
+            if st.checkbox(_ui_text(prefer_chinese, "显示最近一次 RAG IDs", "Show latest RAG IDs")):
                 st.write("always_include_ids:", last_rag.get("always_include_ids", []))
                 st.write("retrieved_ids:", last_rag.get("retrieved_ids", []))
         else:
-            st.write("暂无日志")
+            st.write(_ui_text(prefer_chinese, "暂无日志", "No logs yet"))
 
     with col_mid:
-        st.header("对话")
+        st.header(_ui_text(prefer_chinese, "对话", "Dialogue"))
         for msg in st.session_state.move_notice:
             if hasattr(st, "toast"):
-                st.toast(f"NPC 移动：{msg}")
-            st.info(f"NPC 移动：{msg}")
+                st.toast(_ui_text(prefer_chinese, f"NPC 移动：{msg}", f"NPC moved: {msg}"))
+            st.info(_ui_text(prefer_chinese, f"NPC 移动：{msg}", f"NPC moved: {msg}"))
         for msg in st.session_state.quest_notice:
             st.success(msg)
         for msg in st.session_state.inventory_notice:
-            st.info(f"背包更新：{msg}")
+            st.info(_ui_text(prefer_chinese, f"背包更新：{msg}", f"Inventory update: {msg}"))
         st.session_state.move_notice = []
         st.session_state.quest_notice = []
         st.session_state.inventory_notice = []
 
         loc = world.get_location(state.player_location)
         if loc:
-            st.markdown(f"**地点**：{loc.name}")
+            st.markdown(_ui_text(prefer_chinese, f"**地点**：{loc.name}", f"**Location**: {loc.name}"))
             st.write(loc.description)
 
         npc_options = {npc.npc_id: npc.name for npc in npcs_here}
@@ -1313,34 +1409,38 @@ else:
         if npc_options:
             npc_ids = list(npc_options.keys())
             selected_npc_id = st.selectbox(
-                "聊天对象",
+                _ui_text(prefer_chinese, "聊天对象", "Chat Target"),
                 options=npc_ids,
                 format_func=lambda npc_id: npc_options.get(npc_id, npc_id),
                 key=f"chat_target_{session_id}_{state.player_location}",
             )
             selected_npc_name = npc_options.get(selected_npc_id, selected_npc_id)
 
-        _render_chat_window(world, logs, selected_npc_id, selected_npc_name)
+        _render_chat_window(world, logs, selected_npc_id, selected_npc_name, prefer_chinese)
 
-        st.markdown("**交付任务物品**")
+        st.markdown(_ui_text(prefer_chinese, "**交付任务物品**", "**Deliver Quest Items**"))
         if not selected_npc_id or not selected_npc_name:
-            st.info("请选择要交付的 NPC。")
+            st.info(_ui_text(prefer_chinese, "请选择要交付的 NPC。", "Select an NPC to deliver items to."))
         elif not any(n.npc_id == selected_npc_id for n in npcs_here):
-            st.info("该 NPC 不在当前地点，无法交付。")
+            st.info(_ui_text(prefer_chinese, "该 NPC 不在当前地点，无法交付。", "This NPC is not here. Delivery is unavailable."))
         elif not state.inventory:
-            st.info("背包为空，暂无可交付物品。")
+            st.info(_ui_text(prefer_chinese, "背包为空，暂无可交付物品。", "Inventory is empty. Nothing to deliver."))
         else:
             deliver_items = sorted(state.inventory.keys(), key=lambda item: _display_item_name(item, prefer_chinese))
             deliver_item = st.selectbox(
-                "交付物品",
+                _ui_text(prefer_chinese, "交付物品", "Item to deliver"),
                 options=deliver_items,
-                format_func=lambda item: f"{_display_item_name(item, prefer_chinese)}（背包{state.inventory.get(item, 0)}）",
+                format_func=lambda item: _ui_text(
+                    prefer_chinese,
+                    f"{_display_item_name(item, prefer_chinese)}（背包{state.inventory.get(item, 0)}）",
+                    f"{_display_item_name(item, prefer_chinese)} (bag {state.inventory.get(item, 0)})",
+                ),
                 key=f"deliver_item_{session_id}",
             )
             max_deliver = max(1, int(state.inventory.get(deliver_item, 1)))
             deliver_qty = int(
                 st.number_input(
-                    "交付数量",
+                    _ui_text(prefer_chinese, "交付数量", "Deliver quantity"),
                     min_value=1,
                     max_value=max_deliver,
                     value=1,
@@ -1348,7 +1448,7 @@ else:
                     key=f"deliver_qty_{session_id}",
                 )
             )
-            if st.button("交付给当前 NPC"):
+            if st.button(_ui_text(prefer_chinese, "交付给当前 NPC", "Deliver to Current NPC")):
                 old_state = state.model_copy(deep=True)
                 new_state, delivery_notices, reward_delta, delivered_delta = deliver_items_to_npc(
                     state,
@@ -1357,7 +1457,13 @@ else:
                     {deliver_item: deliver_qty},
                 )
                 if not delivered_delta:
-                    st.warning("该 NPC 当前没有需要你交付的此类物品。")
+                    st.warning(
+                        _ui_text(
+                            prefer_chinese,
+                            "该 NPC 当前没有需要你交付的此类物品。",
+                            "This NPC currently does not need this item.",
+                        )
+                    )
                 else:
                     new_state = new_state.model_copy(deep=True)
                     new_state.last_turn_id = int(new_state.last_turn_id) + 1
@@ -1367,11 +1473,11 @@ else:
                         delivered_delta=delivered_delta,
                         reward_delta=reward_delta,
                         notices=delivery_notices,
-                        prefer_chinese=prefer_chinese,
+                        prefer_chinese=world_prefer_chinese,
                     )
                     player_delivery_text = (
-                        "我交付了：" if prefer_chinese else "I delivered: "
-                    ) + _inventory_delta_text(delivered_delta, prefer_chinese)
+                        "我交付了：" if world_prefer_chinese else "I delivered: "
+                    ) + _inventory_delta_text(delivered_delta, world_prefer_chinese)
                     _append_delivery_log(
                         session_id=session_id,
                         sessions_root=sessions_root,
@@ -1434,7 +1540,7 @@ else:
                                 world=world,
                                 state=updated_state,
                                 logs=logs_now,
-                                prefer_chinese=prefer_chinese,
+                                prefer_chinese=world_prefer_chinese,
                                 has_api_key=has_api_key,
                             )
                         summary_record = {
@@ -1447,7 +1553,7 @@ else:
                             "dialogue_summary": final_report.get("dialogue_summary", ""),
                             "plot_summary": final_report.get("plot_summary", ""),
                             "epilogue": final_report.get("epilogue", ""),
-                            "language": "zh" if prefer_chinese else "en",
+                            "language": "zh" if world_prefer_chinese else "en",
                         }
                         append_story_summary(summary_record, sessions_root)
                         st.session_state.summary_record = summary_record
@@ -1475,24 +1581,30 @@ else:
                         )
                 st.info(_main_trial_target_text(state, prefer_chinese))
 
-        player_text = st.text_input("你的输入")
-        if st.button("Send") and player_text:
+        player_text = st.text_input(_ui_text(prefer_chinese, "你的输入", "Your Input"))
+        if st.button(_ui_text(prefer_chinese, "发送", "Send")) and player_text:
             if not selected_npc_id or not selected_npc_name:
-                st.error("请先选择 NPC。")
+                st.error(_ui_text(prefer_chinese, "请先选择 NPC。", "Please select an NPC first."))
             elif not any(n.npc_id == selected_npc_id for n in npcs_here):
-                st.error("该 NPC 当前不在你所在地点，请先移动到对应地点。")
+                st.error(
+                    _ui_text(
+                        prefer_chinese,
+                        "该 NPC 当前不在你所在地点，请先移动到对应地点。",
+                        "This NPC is not at your current location. Move first.",
+                    )
+                )
             elif not has_api_key:
-                st.error(f"未检测到 API Key（{api_key_env}）。")
+                st.error(_ui_text(prefer_chinese, f"未检测到 API Key（{api_key_env}）。", f"API key not found ({api_key_env})."))
             else:
                 progress = st.progress(0)
                 status = st.empty()
                 try:
-                    status.info("正在请求模型生成对话...")
+                    status.info(_ui_text(prefer_chinese, "正在请求模型生成对话...", "Requesting model response..."))
                     progress.progress(20)
                     llm = QwenOpenAICompatibleClient(cfg)
                     pipeline = TurnPipeline(cfg=cfg, llm_client=llm, sessions_root=sessions_root)
                     before_state = state.model_copy(deep=True)
-                    with st.spinner("对话生成中..."):
+                    with st.spinner(_ui_text(prefer_chinese, "对话生成中...", "Generating dialogue...")):
                         updated_state, _output, _log = pipeline.run_turn(
                             state, player_text, selected_npc_id
                         )
@@ -1507,16 +1619,16 @@ else:
                     st.session_state.quest_notice = quest_lines
                     st.session_state.inventory_notice = inv_lines
                     progress.progress(100)
-                    status.success("对话生成完成")
+                    status.success(_ui_text(prefer_chinese, "对话生成完成", "Dialogue generated"))
                     st.rerun()
                 except Exception as exc:
-                    st.error(f"对话失败：{exc}")
+                    st.error(_ui_text(prefer_chinese, f"对话失败：{exc}", f"Dialogue failed: {exc}"))
 
     with col_right:
-        st.header("任务系统")
-        st.markdown("**故事背景**")
+        st.header(_ui_text(prefer_chinese, "任务系统", "Quest System"))
+        st.markdown(_ui_text(prefer_chinese, "**故事背景**", "**Story Background**"))
         st.write(world.starting_hook)
-        st.markdown("**主目标**")
+        st.markdown(_ui_text(prefer_chinese, "**主目标**", "**Main Objective**"))
         if state.main_quest_id and state.main_quest_id in state.quest_journal:
             st.write(state.quest_journal[state.main_quest_id].objective or world.initial_quest)
         else:
