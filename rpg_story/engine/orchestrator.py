@@ -147,11 +147,40 @@ class TurnPipeline:
         )
         data = self.llm_client.generate_json(system_prompt, user_prompt, response_format=response_format)
         output = validate_turn_output(data)
-        output = self._enforce_no_first_mention(state, player_text, output, response_format)
+        guard_warnings: list[dict] = []
+        output, warning = self._guarded_rewrite(
+            "anachronism",
+            output,
+            lambda value: self._enforce_no_first_mention(state, player_text, value, response_format),
+            state.world,
+        )
+        if warning:
+            guard_warnings.append(warning)
         output = self._ensure_npc_dialogue(output, npc_id)
-        output = self._enforce_identity_claims(state, output, npc_id, response_format)
-        output = self._enforce_world_roster(state, output, npc_id, response_format)
-        output = self._enforce_quest_grounding(state, player_text, output, npc_id, response_format)
+        output, warning = self._guarded_rewrite(
+            "identity",
+            output,
+            lambda value: self._enforce_identity_claims(state, value, npc_id, response_format),
+            state.world,
+        )
+        if warning:
+            guard_warnings.append(warning)
+        output, warning = self._guarded_rewrite(
+            "roster",
+            output,
+            lambda value: self._enforce_world_roster(state, value, npc_id, response_format),
+            state.world,
+        )
+        if warning:
+            guard_warnings.append(warning)
+        output, warning = self._guarded_rewrite(
+            "quest_grounding",
+            output,
+            lambda value: self._enforce_quest_grounding(state, player_text, value, npc_id, response_format),
+            state.world,
+        )
+        if warning:
+            guard_warnings.append(warning)
         output = self._inject_forced_move_if_missing(state, player_text, npc_id, output)
         state_non_move = apply_turn_output(state, output, npc_id)
 
@@ -216,6 +245,7 @@ class TurnPipeline:
             "move_applied_count": applied_count,
             "move_rejected_count": rejected_count,
             "move_refused_count": refused_count,
+            "guard_warnings": guard_warnings,
             "rag": rag_debug,
         }
 
@@ -224,6 +254,35 @@ class TurnPipeline:
         save_state(updated_state.session_id, updated_state, sessions_root)
 
         return updated_state, output, log_record
+
+    def _guarded_rewrite(
+        self,
+        guard_name: str,
+        output: TurnOutput,
+        rewrite_fn,
+        world: WorldSpec,
+    ) -> tuple[TurnOutput, dict | None]:
+        try:
+            return rewrite_fn(output), None
+        except Exception as exc:
+            warning = {
+                "guard": guard_name,
+                "error": str(exc),
+            }
+            return self._append_guard_warning(output, world, guard_name), warning
+
+    def _append_guard_warning(self, output: TurnOutput, world: WorldSpec, guard_name: str) -> TurnOutput:
+        updated = output.model_copy(deep=True)
+        prefer_chinese = self._narrative_language(world) == "zh"
+        if prefer_chinese:
+            note = f"系统提示：一致性校验（{guard_name}）修复失败，已降级处理并继续当前对话。"
+        else:
+            note = f"System note: consistency guard ({guard_name}) rewrite failed, fallback mode applied and dialogue continued."
+        if updated.narration:
+            updated.narration = updated.narration.rstrip() + " " + note
+        else:
+            updated.narration = note
+        return updated
 
     def _build_rag_context(
         self,

@@ -1,0 +1,511 @@
+{
+  "session_id": "20260221_051737_744d0664",
+  "created_at": "2026-02-21T05:19:13.968381+00:00",
+  "world": {
+    "world_id": "w_dq001",
+    "title": "勇者斗恶龙",
+    "world_bible": {
+      "tech_level": "medieval",
+      "narrative_language": "zh",
+      "magic_rules": "魔法源自古代符文与自然元素，需通过咒语和法杖引导。只有经过训练的法师或持有魔法遗物者才能施法。",
+      "tone": "史诗奇幻，充满冒险与牺牲，强调勇气、忠诚与命运。",
+      "anachronism_policy": null,
+      "taboos": [
+        "背叛王国",
+        "亵渎神殿",
+        "伤害无辜村民"
+      ],
+      "do_not_mention": [
+        "智能手机",
+        "互联网",
+        "汽车",
+        "电力",
+        "塑料",
+        "枪支",
+        "信用卡",
+        "电脑"
+      ],
+      "anachronism_blocklist": [
+        "智能手机",
+        "互联网",
+        "汽车",
+        "电力",
+        "塑料",
+        "枪支",
+        "信用卡",
+        "电脑"
+      ]
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "晨曦村",
+        "kind": "town",
+        "description": "坐落于群山环抱中的宁静村庄，以盛产草药和蜂蜜闻名。村中石屋错落，中央有一座古老喷泉，传说能治愈轻伤。",
+        "connected_to": [
+          "loc_002",
+          "loc_003"
+        ],
+        "tags": [
+          "和平",
+          "草药",
+          "起始点"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "迷雾森林",
+        "kind": "forest",
+        "description": "常年被浓雾笼罩的密林，栖息着狼群与毒藤怪。林中隐藏着精灵遗迹，据说藏有古代符文碎片。",
+        "connected_to": [
+          "loc_001",
+          "loc_004"
+        ],
+        "tags": [
+          "危险",
+          "神秘",
+          "遗迹"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "铁炉镇",
+        "kind": "town",
+        "description": "以锻造闻名的矿业小镇，镇中心有巨大的熔炉日夜不息。矮人铁匠在此打造精良武器。",
+        "connected_to": [
+          "loc_001",
+          "loc_005"
+        ],
+        "tags": [
+          "工业",
+          "锻造",
+          "矮人"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "幽影沼泽",
+        "kind": "dungeon",
+        "description": "腐臭弥漫的沼泽地，水下潜伏着巨型水蛭与亡灵。沼泽深处有一座被遗忘的祭坛，封印着邪恶魔物。",
+        "connected_to": [
+          "loc_002"
+        ],
+        "tags": [
+          "邪恶",
+          "亡灵",
+          "封印"
+        ]
+      },
+      {
+        "location_id": "loc_005",
+        "name": "龙脊山脉",
+        "kind": "castle",
+        "description": "高耸入云的险峻山脉，山顶盘踞着远古巨龙。山腰处有废弃的骑士堡垒，是通往龙巢的必经之路。",
+        "connected_to": [
+          "loc_003"
+        ],
+        "tags": [
+          "终极",
+          "龙",
+          "试炼"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_001",
+        "name": "艾莉娅",
+        "profession": "草药师",
+        "traits": [
+          "善良",
+          "细心",
+          "胆小"
+        ],
+        "goals": [
+          "收集稀有草药治疗村民",
+          "保护村庄免受怪物侵扰"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.9,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": 3,
+        "refusal_style": "抱歉，我不能离开村子太远，但我会给你最好的药水。"
+      },
+      {
+        "npc_id": "npc_002",
+        "name": "老巴顿",
+        "profession": "村长",
+        "traits": [
+          "稳重",
+          "保守",
+          "慈祥"
+        ],
+        "goals": [
+          "维持村庄秩序",
+          "寻找失踪的村民"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.7,
+        "stubbornness": 0.5,
+        "risk_tolerance": 0.2,
+        "disposition_to_player": 4,
+        "refusal_style": "孩子，安全第一。等你准备好再出发吧。"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "瑟琳",
+        "profession": "精灵游侠",
+        "traits": [
+          "敏捷",
+          "孤傲",
+          "守信"
+        ],
+        "goals": [
+          "守护森林遗迹",
+          "清除入侵者"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.5,
+        "stubbornness": 0.8,
+        "risk_tolerance": 0.7,
+        "disposition_to_player": 1,
+        "refusal_style": "凡人，莫要打扰这片圣地。除非你证明自己值得信任。"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "格鲁姆",
+        "profession": "向导",
+        "traits": [
+          "可靠",
+          "健谈",
+          "经验丰富"
+        ],
+        "goals": [
+          "带领旅人安全穿越森林",
+          "收集路费养家"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.85,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 3,
+        "refusal_style": "这片林子可不安全，但我可以带你一程，只要你付得起银币。"
+      },
+      {
+        "npc_id": "npc_005",
+        "name": "布洛克",
+        "profession": "矮人铁匠",
+        "traits": [
+          "固执",
+          "豪爽",
+          "技艺精湛"
+        ],
+        "goals": [
+          "打造传奇武器",
+          "寻找失落的锻造秘方"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.4,
+        "stubbornness": 0.9,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": 2,
+        "refusal_style": "哼！没材料就别来烦我。等你找到星铁矿再来谈生意！"
+      },
+      {
+        "npc_id": "npc_006",
+        "name": "玛拉",
+        "profession": "旅店老板娘",
+        "traits": [
+          "热情",
+          "八卦",
+          "乐于助人"
+        ],
+        "goals": [
+          "经营好旅店",
+          "打听各地消息"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.9,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 4,
+        "refusal_style": "哎呀，勇士你先歇歇脚，喝杯麦酒，我给你指条明路！"
+      },
+      {
+        "npc_id": "npc_007",
+        "name": "维克多",
+        "profession": "亡灵猎人",
+        "traits": [
+          "冷酷",
+          "执着",
+          "神秘"
+        ],
+        "goals": [
+          "净化沼泽亡灵",
+          "寻找失踪的妹妹"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.6,
+        "stubbornness": 0.7,
+        "risk_tolerance": 0.9,
+        "disposition_to_player": 0,
+        "refusal_style": "这里不是你该来的地方。走开，否则连你一起净化。"
+      },
+      {
+        "npc_id": "npc_008",
+        "name": "雷欧",
+        "profession": "退役骑士",
+        "traits": [
+          "忠诚",
+          "疲惫",
+          "正直"
+        ],
+        "goals": [
+          "守护通往龙巢的道路",
+          "赎罪"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.8,
+        "stubbornness": 0.6,
+        "risk_tolerance": 0.8,
+        "disposition_to_player": 3,
+        "refusal_style": "若你心怀正义，我愿为你打开通路。但请三思，前方是死亡之翼。"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "你从昏迷中醒来，发现自己躺在晨曦村的草药铺里。村长告诉你，恶龙近日频繁袭击周边村庄，而你是预言中能击败它的勇者。",
+    "initial_quest": "与村长老巴顿交谈，了解当前危机并接受初步任务。",
+    "main_quest": {
+      "quest_id": "quest_main_001",
+      "title": "屠龙勇士",
+      "category": "main",
+      "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+      "objective": "完成支线并收集关键道具：精灵符文护符 x1，矮人星铁剑 x1，净化圣水 x1",
+      "giver_npc_id": "npc_002",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "精灵符文护符": 1,
+        "矮人星铁剑": 1,
+        "净化圣水": 1
+      },
+      "reward_items": {},
+      "reward_hint": "王国将授予你无上荣耀与领地。"
+    },
+    "side_quests": [
+      {
+        "quest_id": "quest_side_001",
+        "title": "森林的低语",
+        "category": "side",
+        "description": "精灵游侠瑟琳请求你协助找回被狼群偷走的三件圣物：月光蘑菇、古树树脂和符文石片。",
+        "objective": "在迷雾森林中收集月光蘑菇、古树树脂和符文石片，交给瑟琳。",
+        "giver_npc_id": "npc_003",
+        "suggested_location": "loc_002",
+        "required_items": {
+          "月光蘑菇": 3,
+          "古树树脂": 2,
+          "符文石片": 1
+        },
+        "reward_items": {
+          "精灵符文护符": 1
+        },
+        "reward_hint": "一件能抵御魔法攻击的古老护符。"
+      },
+      {
+        "quest_id": "quest_side_002",
+        "title": "铁匠的试炼",
+        "category": "side",
+        "description": "矮人铁匠布洛克需要特殊材料打造神兵：星铁矿、火蜥蜴鳞片和熔岩核心。",
+        "objective": "在铁炉镇周边及龙脊山脉入口收集星铁矿、火蜥蜴鳞片和熔岩核心，交给布洛克。",
+        "giver_npc_id": "npc_005",
+        "suggested_location": "loc_003",
+        "required_items": {
+          "星铁矿": 2,
+          "火蜥蜴鳞片": 3,
+          "熔岩核心": 1
+        },
+        "reward_items": {
+          "矮人星铁剑": 1
+        },
+        "reward_hint": "一把由星铁打造的传奇之剑，锋利无比。"
+      },
+      {
+        "quest_id": "quest_side_003",
+        "title": "沼泽的救赎",
+        "category": "side",
+        "description": "亡灵猎人维克多希望净化沼泽祭坛，需要圣洁草、净水珍珠和亡者骨灰。",
+        "objective": "在幽影沼泽中取得圣洁草、净水珍珠和亡者骨灰，交给维克多。",
+        "giver_npc_id": "npc_007",
+        "suggested_location": "loc_004",
+        "required_items": {
+          "圣洁草": 4,
+          "净水珍珠": 1,
+          "亡者骨灰": 2
+        },
+        "reward_items": {
+          "净化圣水": 1
+        },
+        "reward_hint": "一瓶蕴含神圣之力的圣水，可驱散邪恶。"
+      }
+    ],
+    "map_layout": [
+      {
+        "location_id": "loc_001",
+        "x": 50.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_002",
+        "x": 30.0,
+        "y": 30.0
+      },
+      {
+        "location_id": "loc_003",
+        "x": 70.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_004",
+        "x": 20.0,
+        "y": 20.0
+      },
+      {
+        "location_id": "loc_005",
+        "x": 80.0,
+        "y": 20.0
+      }
+    ]
+  },
+  "player_location": "loc_005",
+  "npc_locations": {
+    "npc_001": "loc_001",
+    "npc_002": "loc_001",
+    "npc_003": "loc_002",
+    "npc_004": "loc_002",
+    "npc_005": "loc_003",
+    "npc_006": "loc_003",
+    "npc_007": "loc_004",
+    "npc_008": "loc_005"
+  },
+  "flags": {},
+  "quests": {
+    "quest_main_001": "active",
+    "quest_side_001": "active",
+    "quest_side_002": "active",
+    "quest_side_003": "active"
+  },
+  "quest_journal": {
+    "quest_main_001": {
+      "quest_id": "quest_main_001",
+      "title": "屠龙勇士",
+      "category": "main",
+      "status": "active",
+      "objective": "完成支线并收集关键道具：精灵符文护符 x1，矮人星铁剑 x1，净化圣水 x1",
+      "guidance": "主线准备进度：精灵符文护符 0/1，矮人星铁剑 0/1，净化圣水 0/1",
+      "giver_npc_id": "npc_002",
+      "required_items": {
+        "精灵符文护符": 1,
+        "矮人星铁剑": 1,
+        "净化圣水": 1
+      },
+      "collected_items": {
+        "精灵符文护符": 0,
+        "矮人星铁剑": 0,
+        "净化圣水": 0
+      },
+      "reward_items": {},
+      "reward_hint": "王国将授予你无上荣耀与领地。"
+    },
+    "quest_side_001": {
+      "quest_id": "quest_side_001",
+      "title": "森林的低语",
+      "category": "side",
+      "status": "active",
+      "objective": "在迷雾森林中收集月光蘑菇、古树树脂和符文石片，交给瑟琳。",
+      "guidance": "交付进度：月光蘑菇 已交付0/3（背包0），古树树脂 已交付0/2（背包0），符文石片 已交付0/1（背包0）",
+      "giver_npc_id": "npc_003",
+      "required_items": {
+        "月光蘑菇": 3,
+        "古树树脂": 2,
+        "符文石片": 1
+      },
+      "collected_items": {
+        "月光蘑菇": 0,
+        "古树树脂": 0,
+        "符文石片": 0
+      },
+      "reward_items": {
+        "精灵符文护符": 1
+      },
+      "reward_hint": "一件能抵御魔法攻击的古老护符。"
+    },
+    "quest_side_002": {
+      "quest_id": "quest_side_002",
+      "title": "铁匠的试炼",
+      "category": "side",
+      "status": "active",
+      "objective": "在铁炉镇周边及龙脊山脉入口收集星铁矿、火蜥蜴鳞片和熔岩核心，交给布洛克。",
+      "guidance": "交付进度：星铁矿 已交付0/2（背包0），火蜥蜴鳞片 已交付0/3（背包0），熔岩核心 已交付0/1（背包0）",
+      "giver_npc_id": "npc_005",
+      "required_items": {
+        "星铁矿": 2,
+        "火蜥蜴鳞片": 3,
+        "熔岩核心": 1
+      },
+      "collected_items": {
+        "星铁矿": 0,
+        "火蜥蜴鳞片": 0,
+        "熔岩核心": 0
+      },
+      "reward_items": {
+        "矮人星铁剑": 1
+      },
+      "reward_hint": "一把由星铁打造的传奇之剑，锋利无比。"
+    },
+    "quest_side_003": {
+      "quest_id": "quest_side_003",
+      "title": "沼泽的救赎",
+      "category": "side",
+      "status": "active",
+      "objective": "在幽影沼泽中取得圣洁草、净水珍珠和亡者骨灰，交给维克多。",
+      "guidance": "交付进度：圣洁草 已交付0/4（背包0），净水珍珠 已交付0/1（背包0），亡者骨灰 已交付0/2（背包0）",
+      "giver_npc_id": "npc_007",
+      "required_items": {
+        "圣洁草": 4,
+        "净水珍珠": 1,
+        "亡者骨灰": 2
+      },
+      "collected_items": {
+        "圣洁草": 0,
+        "净水珍珠": 0,
+        "亡者骨灰": 0
+      },
+      "reward_items": {
+        "净化圣水": 1
+      },
+      "reward_hint": "一瓶蕴含神圣之力的圣水，可驱散邪恶。"
+    }
+  },
+  "main_quest_id": "quest_main_001",
+  "inventory": {},
+  "location_resource_stock": {
+    "loc_001": {
+      "星铁矿": 2,
+      "火蜥蜴鳞片": 1,
+      "熔岩核心": 1
+    },
+    "loc_003": {
+      "星铁矿": 3,
+      "火蜥蜴鳞片": 4,
+      "熔岩核心": 2,
+      "圣洁草": 1
+    },
+    "loc_005": {
+      "净水珍珠": 2,
+      "亡者骨灰": 1,
+      "月光蘑菇": 1
+    }
+  },
+  "recent_summaries": [],
+  "last_turn_id": 0
+}
