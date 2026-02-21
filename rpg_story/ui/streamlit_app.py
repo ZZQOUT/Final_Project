@@ -9,6 +9,7 @@ import json
 import os
 import re
 import sys
+import time
 
 import streamlit as st
 import streamlit.components.v1 as components
@@ -134,6 +135,134 @@ def _persist_world(cfg, session_id: str, world: WorldSpec) -> None:
     world_dir.mkdir(parents=True, exist_ok=True)
     world_path = world_dir / "world.json"
     world_path.write_text(json.dumps(world.model_dump(), ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _metrics_path(session_id: str, sessions_root: Path) -> Path:
+    return Path(sessions_root) / session_id / "ui_metrics.json"
+
+
+def _load_ui_metrics(session_id: str, sessions_root: Path) -> dict:
+    default = {"world_generation_seconds": None, "dialogue_turns": []}
+    path = _metrics_path(session_id, sessions_root)
+    if not path.exists():
+        return default
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        return default
+    if not isinstance(raw, dict):
+        return default
+    world_generation_seconds = raw.get("world_generation_seconds")
+    if not isinstance(world_generation_seconds, (int, float)):
+        world_generation_seconds = None
+    dialogue_turns = raw.get("dialogue_turns")
+    if not isinstance(dialogue_turns, list):
+        dialogue_turns = []
+    cleaned_turns = []
+    for row in dialogue_turns:
+        if not isinstance(row, dict):
+            continue
+        sec = row.get("seconds")
+        if not isinstance(sec, (int, float)):
+            continue
+        cleaned_turns.append(
+            {
+                "timestamp": str(row.get("timestamp") or ""),
+                "npc_id": str(row.get("npc_id") or ""),
+                "turn_id": row.get("turn_id"),
+                "seconds": round(float(sec), 3),
+            }
+        )
+    return {
+        "world_generation_seconds": round(float(world_generation_seconds), 3) if world_generation_seconds is not None else None,
+        "dialogue_turns": cleaned_turns,
+    }
+
+
+def _save_ui_metrics(session_id: str, sessions_root: Path, metrics: dict) -> None:
+    path = _metrics_path(session_id, sessions_root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(metrics, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def _record_world_generation_duration(session_id: str, sessions_root: Path, seconds: float) -> None:
+    metrics = _load_ui_metrics(session_id, sessions_root)
+    metrics["world_generation_seconds"] = round(max(0.0, float(seconds)), 3)
+    metrics["world_generation_recorded_at"] = datetime.now(timezone.utc).isoformat()
+    _save_ui_metrics(session_id, sessions_root, metrics)
+
+
+def _record_dialogue_duration(
+    session_id: str,
+    sessions_root: Path,
+    npc_id: str,
+    seconds: float,
+    turn_id: int | None,
+) -> None:
+    metrics = _load_ui_metrics(session_id, sessions_root)
+    rows = list(metrics.get("dialogue_turns", []))
+    rows.append(
+        {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "npc_id": str(npc_id or ""),
+            "turn_id": int(turn_id) if isinstance(turn_id, int) else None,
+            "seconds": round(max(0.0, float(seconds)), 3),
+        }
+    )
+    metrics["dialogue_turns"] = rows[-200:]
+    _save_ui_metrics(session_id, sessions_root, metrics)
+
+
+def _render_evaluation_metrics_panel(session_id: str, sessions_root: Path, prefer_chinese: bool) -> None:
+    metrics = _load_ui_metrics(session_id, sessions_root)
+    st.markdown(_ui_text(prefer_chinese, "**评估耗时**", "**Evaluation Timing**"))
+
+    world_secs = metrics.get("world_generation_seconds")
+    if isinstance(world_secs, (int, float)):
+        st.caption(
+            _ui_text(
+                prefer_chinese,
+                f"世界生成耗时：{world_secs:.2f}s",
+                f"World generation duration: {world_secs:.2f}s",
+            )
+        )
+    else:
+        st.caption(_ui_text(prefer_chinese, "世界生成耗时：暂无记录", "World generation duration: no data"))
+
+    rows = metrics.get("dialogue_turns", [])
+    if not rows:
+        st.caption(_ui_text(prefer_chinese, "对话耗时：暂无记录", "Dialogue duration: no data"))
+        return
+
+    durations = [float(row.get("seconds", 0.0)) for row in rows if isinstance(row.get("seconds"), (int, float))]
+    if not durations:
+        st.caption(_ui_text(prefer_chinese, "对话耗时：暂无记录", "Dialogue duration: no data"))
+        return
+    latest = durations[-1]
+    avg = sum(durations) / len(durations)
+    st.caption(
+        _ui_text(
+            prefer_chinese,
+            f"对话耗时：最近 {latest:.2f}s，平均 {avg:.2f}s（共 {len(durations)} 轮）",
+            f"Dialogue duration: latest {latest:.2f}s, average {avg:.2f}s ({len(durations)} turns)",
+        )
+    )
+
+    with st.expander(_ui_text(prefer_chinese, "查看最近对话耗时", "Show recent dialogue timings"), expanded=False):
+        for row in reversed(rows[-12:]):
+            sec = float(row.get("seconds", 0.0))
+            npc = str(row.get("npc_id") or "-")
+            turn_id = row.get("turn_id")
+            if prefer_chinese:
+                if isinstance(turn_id, int):
+                    st.write(f"- 第{turn_id}轮 | NPC: {npc} | {sec:.2f}s")
+                else:
+                    st.write(f"- NPC: {npc} | {sec:.2f}s")
+            else:
+                if isinstance(turn_id, int):
+                    st.write(f"- Turn {turn_id} | NPC: {npc} | {sec:.2f}s")
+                else:
+                    st.write(f"- NPC: {npc} | {sec:.2f}s")
 
 
 def _map_positions(world: WorldSpec) -> dict[str, tuple[float, float]]:
@@ -1225,6 +1354,7 @@ if not st.session_state.session_id:
                 progress = st.progress(0)
                 status = st.empty()
                 try:
+                    world_gen_started = time.perf_counter()
                     status.info(_ui_text(prefer_chinese, "正在初始化模型连接...", "Initializing model client..."))
                     progress.progress(15)
                     llm = QwenOpenAICompatibleClient(cfg)
@@ -1238,6 +1368,11 @@ if not st.session_state.session_id:
                     state = initialize_game_state(world, session_id=session_id)
                     save_state(session_id, state, sessions_root)
                     _persist_world(cfg, session_id, world)
+                    _record_world_generation_duration(
+                        session_id=session_id,
+                        sessions_root=sessions_root,
+                        seconds=time.perf_counter() - world_gen_started,
+                    )
                     progress.progress(100)
                     status.success(_ui_text(prefer_chinese, "世界生成完成", "World generation completed"))
                     st.session_state.session_id = session_id
@@ -1383,6 +1518,7 @@ else:
                 st.write("retrieved_ids:", last_rag.get("retrieved_ids", []))
         else:
             st.write(_ui_text(prefer_chinese, "暂无日志", "No logs yet"))
+        _render_evaluation_metrics_panel(session_id, sessions_root, prefer_chinese)
 
     with col_mid:
         st.header(_ui_text(prefer_chinese, "对话", "Dialogue"))
@@ -1599,6 +1735,7 @@ else:
                 progress = st.progress(0)
                 status = st.empty()
                 try:
+                    dialogue_started = time.perf_counter()
                     status.info(_ui_text(prefer_chinese, "正在请求模型生成对话...", "Requesting model response..."))
                     progress.progress(20)
                     llm = QwenOpenAICompatibleClient(cfg)
@@ -1615,6 +1752,13 @@ else:
                     if _can_trigger_main_trial(updated_state, selected_npc_id):
                         st.session_state[trial_pending_key] = True
                         quest_lines.append("终局 NPC 已准备好，是否发起最终考验？" if prefer_chinese else "The finale NPC is ready. Start the final trial?")
+                    _record_dialogue_duration(
+                        session_id=session_id,
+                        sessions_root=sessions_root,
+                        npc_id=selected_npc_id or "",
+                        seconds=time.perf_counter() - dialogue_started,
+                        turn_id=int(updated_state.last_turn_id),
+                    )
                     st.session_state.move_notice = moved_lines
                     st.session_state.quest_notice = quest_lines
                     st.session_state.inventory_notice = inv_lines

@@ -1,0 +1,392 @@
+{
+  "world_id": "w_dq001",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "narrative_language": "zh",
+    "magic_rules": "魔法源自古代符文与自然元素，需通过咒语或法器引导。只有经过训练的法师才能安全使用。",
+    "tone": "史诗奇幻，略带古典童话色彩，强调勇气、牺牲与正义。",
+    "anachronism_policy": "严格禁止现代科技词汇和概念。",
+    "taboos": [
+      "背叛盟誓",
+      "亵渎圣物",
+      "无故伤害平民"
+    ],
+    "do_not_mention": [
+      "智能手机",
+      "互联网",
+      "信用卡",
+      "汽车",
+      "电力",
+      "枪械",
+      "塑料",
+      "电脑"
+    ],
+    "anachronism_blocklist": [
+      "手机",
+      "网络",
+      "飞机",
+      "电视",
+      "电池"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "晨露村",
+      "kind": "town",
+      "description": "宁静的小村庄，被晨雾环绕，村民以耕种和采集为生。村中央有一座古老的许愿井。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "和平",
+        "起始点",
+        "农田"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "幽影森林",
+      "kind": "forest",
+      "description": "浓密的古林，阳光难以穿透。传说中栖息着会说话的狐狸与迷失的亡魂。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "神秘",
+        "危险",
+        "魔法"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "铁砧镇",
+      "kind": "town",
+      "description": "以锻造闻名的山脚小镇，铁匠铺日夜不息，产出精良武器与护甲。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "工业",
+        "交易",
+        "工匠"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "遗忘神殿",
+      "kind": "dungeon",
+      "description": "半塌陷的古老神殿，墙上刻满失传的符文，深处藏有封印之物。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "遗迹",
+        "试炼",
+        "封印"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "龙脊山",
+      "kind": "mountain",
+      "description": "高耸入云的险峻山脉，山顶终年积雪，是恶龙巢穴所在之地。",
+      "connected_to": [
+        "loc_003"
+      ],
+      "tags": [
+        "终局",
+        "危险",
+        "巢穴"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "莉娜",
+      "profession": "村长的女儿",
+      "traits": [
+        "善良",
+        "好奇",
+        "勇敢"
+      ],
+      "goals": [
+        "帮助勇者踏上旅程",
+        "保护村民安全"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 3,
+      "refusal_style": "抱歉，我现在不能离开村子，但我会为你准备干粮。"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "老巴顿",
+      "profession": "农夫",
+      "traits": [
+        "固执",
+        "节俭",
+        "多疑"
+      ],
+      "goals": [
+        "收成好年",
+        "远离麻烦"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.3,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.1,
+      "disposition_to_player": 0,
+      "refusal_style": "外乡人？别打我家麦子的主意！"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "银尾",
+      "profession": "灵狐向导",
+      "traits": [
+        "狡黠",
+        "守信",
+        "神秘"
+      ],
+      "goals": [
+        "收集人类故事",
+        "守护森林秘密"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.7,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 2,
+      "refusal_style": "除非你带来三颗月光蘑菇，否则我不会带你去神殿。"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "枯叶婆婆",
+      "profession": "草药师",
+      "traits": [
+        "孤僻",
+        "智慧",
+        "记仇"
+      ],
+      "goals": [
+        "配制永生药",
+        "驱逐入侵者"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.2,
+      "stubbornness": 0.9,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": -1,
+      "refusal_style": "滚开！我的药草不是给莽夫用的。"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "铁锤·格伦",
+      "profession": "铁匠大师",
+      "traits": [
+        "豪爽",
+        "重诺",
+        "爱酒"
+      ],
+      "goals": [
+        "打造传说武器",
+        "教导学徒"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.8,
+      "stubbornness": 0.4,
+      "risk_tolerance": 0.7,
+      "disposition_to_player": 4,
+      "refusal_style": "等我把这壶酒喝完，就帮你修剑！"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "小梅",
+      "profession": "杂货商",
+      "traits": [
+        "精明",
+        "热心",
+        "话多"
+      ],
+      "goals": [
+        "扩大生意",
+        "结交勇者"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.85,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 2,
+      "refusal_style": "哎呀，这东西刚卖完！不过明天会有新货哦。"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "石心守卫",
+      "profession": "神殿守卫",
+      "traits": [
+        "沉默",
+        "忠诚",
+        "无情"
+      ],
+      "goals": [
+        "阻止凡人闯入",
+        "守护封印"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.1,
+      "stubbornness": 1.0,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": -3,
+      "refusal_style": "止步。凡人不得靠近封印。"
+    },
+    {
+      "npc_id": "npc_008",
+      "name": "艾瑞斯",
+      "profession": "古代祭司之魂",
+      "traits": [
+        "悲悯",
+        "虚弱",
+        "睿智"
+      ],
+      "goals": [
+        "解除恶龙诅咒",
+        "指引勇者"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.95,
+      "stubbornness": 0.1,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 5,
+      "refusal_style": "我已等待千年……请快些完成使命。"
+    },
+    {
+      "npc_id": "npc_009",
+      "name": "烈焰巨龙",
+      "profession": "恶龙",
+      "traits": [
+        "傲慢",
+        "贪婪",
+        "强大"
+      ],
+      "goals": [
+        "守护宝藏",
+        "吞噬勇者"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.0,
+      "stubbornness": 1.0,
+      "risk_tolerance": 1.0,
+      "disposition_to_player": -5,
+      "refusal_style": "渺小的虫子，来成为我的晚餐吧！"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "你从昏迷中醒来，发现自己躺在晨露村的许愿井旁。村长的女儿莉娜告诉你，恶龙近日袭击了周边村庄，唯有集齐三件圣物，才能登上龙脊山挑战它。",
+  "initial_quest": "与莉娜交谈，了解如何开始你的勇者之旅。",
+  "main_quest": {
+    "quest_id": "quest_main_001",
+    "title": "屠龙勇士",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+    "objective": "完成支线并收集关键道具：神殿地图碎片 x1，勇者披风 x1，神殿祝福之剑 x1",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_005",
+    "required_items": {
+      "神殿地图碎片": 1,
+      "勇者披风": 1,
+      "神殿祝福之剑": 1
+    },
+    "reward_items": {},
+    "reward_hint": "成为王国的英雄，获得无尽荣耀。"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_001",
+      "title": "森林的试炼",
+      "category": "side",
+      "description": "灵狐向导银尾要求你收集森林中的神秘材料，以换取通往神殿的路径。",
+      "objective": "将三样物品交给银尾。（需求：月光蘑菇 x3，幽影藤蔓 x2，狐语花 x1）",
+      "giver_npc_id": "npc_003",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "月光蘑菇": 3,
+        "幽影藤蔓": 2,
+        "狐语花": 1
+      },
+      "reward_items": {
+        "神殿地图碎片": 1
+      },
+      "reward_hint": "获得进入遗忘神殿的路线图。"
+    },
+    {
+      "quest_id": "quest_side_002",
+      "title": "收集龙脊山矿石",
+      "category": "side",
+      "description": "铁锤·格伦需要稀有材料打造勇者装备，但他无法离开铁砧镇。",
+      "objective": "为铁匠收集锻造材料。（需求：龙脊山矿石 x2，火蜥蜴鳞片 x3，精铁锭 x5）",
+      "giver_npc_id": "npc_005",
+      "suggested_location": "loc_003",
+      "required_items": {
+        "龙脊山矿石": 2,
+        "火蜥蜴鳞片": 3,
+        "精铁锭": 5
+      },
+      "reward_items": {
+        "勇者披风": 1
+      },
+      "reward_hint": "获得可抵御龙焰的魔法披风。"
+    },
+    {
+      "quest_id": "quest_side_003",
+      "title": "祭司的遗愿",
+      "category": "side",
+      "description": "古代祭司之魂希望你完成仪式，唤醒神殿之力，以赐福勇者之剑。",
+      "objective": "在神殿祭坛放置三件圣物。（需求：神殿圣水 x1，古代符文石 x1，纯净水晶 x1）",
+      "giver_npc_id": "npc_008",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "神殿圣水": 1,
+        "古代符文石": 1,
+        "纯净水晶": 1
+      },
+      "reward_items": {
+        "神殿祝福之剑": 1
+      },
+      "reward_hint": "获得能斩破龙鳞的神圣之剑。"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 50.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 30.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 70.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 20.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 80.0,
+      "y": 20.0
+    }
+  ]
+}
