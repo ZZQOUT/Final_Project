@@ -1,0 +1,29 @@
+{
+  "world_generation_seconds": 89.772,
+  "dialogue_turns": [
+    {
+      "timestamp": "2026-03-03T09:30:21.967875+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 1,
+      "seconds": 7.563
+    },
+    {
+      "timestamp": "2026-03-03T09:30:43.462623+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 2,
+      "seconds": 13.153
+    },
+    {
+      "timestamp": "2026-03-03T09:31:03.765610+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 3,
+      "seconds": 8.478
+    },
+    {
+      "timestamp": "2026-03-03T09:34:33.894211+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 16,
+      "seconds": 9.394
+    }
+  ]
+}

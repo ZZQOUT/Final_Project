@@ -1,0 +1,101 @@
+{
+  "world_generation_seconds": 76.507,
+  "dialogue_turns": [
+    {
+      "timestamp": "2026-03-03T09:37:09.932342+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 1,
+      "seconds": 8.519
+    },
+    {
+      "timestamp": "2026-03-03T09:37:33.122627+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 2,
+      "seconds": 9.459
+    },
+    {
+      "timestamp": "2026-03-03T09:37:57.373818+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 3,
+      "seconds": 8.232
+    },
+    {
+      "timestamp": "2026-03-03T09:38:35.748138+00:00",
+      "npc_id": "npc_003",
+      "turn_id": 4,
+      "seconds": 11.091
+    },
+    {
+      "timestamp": "2026-03-03T09:39:35.020225+00:00",
+      "npc_id": "npc_002",
+      "turn_id": 5,
+      "seconds": 12.112
+    },
+    {
+      "timestamp": "2026-03-03T09:40:52.905332+00:00",
+      "npc_id": "npc_002",
+      "turn_id": 10,
+      "seconds": 9.669
+    },
+    {
+      "timestamp": "2026-03-03T09:41:27.088329+00:00",
+      "npc_id": "npc_006",
+      "turn_id": 11,
+      "seconds": 10.058
+    },
+    {
+      "timestamp": "2026-03-03T09:42:11.800110+00:00",
+      "npc_id": "npc_006",
+      "turn_id": 15,
+      "seconds": 10.25
+    },
+    {
+      "timestamp": "2026-03-03T09:43:02.910010+00:00",
+      "npc_id": "npc_008",
+      "turn_id": 16,
+      "seconds": 9.661
+    },
+    {
+      "timestamp": "2026-03-03T09:44:02.328775+00:00",
+      "npc_id": "npc_008",
+      "turn_id": 20,
+      "seconds": 9.99
+    },
+    {
+      "timestamp": "2026-03-03T09:44:40.907468+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 21,
+      "seconds": 8.568
+    },
+    {
+      "timestamp": "2026-03-03T09:45:20.835256+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 22,
+      "seconds": 5.99
+    },
+    {
+      "timestamp": "2026-03-03T09:45:43.369547+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 23,
+      "seconds": 9.906
+    },
+    {
+      "timestamp": "2026-03-03T09:46:09.691068+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 24,
+      "seconds": 9.79
+    },
+    {
+      "timestamp": "2026-03-03T09:47:36.801730+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 26,
+      "seconds": 10.532
+    },
+    {
+      "timestamp": "2026-03-03T09:48:19.279169+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 27,
+      "seconds": 11.579
+    }
+  ]
+}

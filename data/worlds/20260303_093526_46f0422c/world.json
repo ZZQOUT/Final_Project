@@ -1,0 +1,356 @@
+{
+  "world_id": "alien_invasion_001",
+  "title": "外星入侵：地球反击战",
+  "world_bible": {
+    "tech_level": "modern",
+    "narrative_language": "zh",
+    "magic_rules": "本世界不存在魔法，所有现象均可由科学解释。",
+    "tone": "紧张、悬疑、带有希望的科幻动作氛围。",
+    "anachronism_policy": null,
+    "taboos": [
+      "不得出现超自然能力",
+      "不得将外星科技神秘化为魔法"
+    ],
+    "do_not_mention": [],
+    "anachronism_blocklist": []
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "滨海市避难所",
+      "kind": "town",
+      "description": "一座临时改建的地下避难所，收容了大量逃离外星人袭击的市民。墙上贴满了求救信息和军事通告，空气中弥漫着焦虑与希望。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "safe_zone",
+        "civilian",
+        "military_outpost"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "废弃卫星站",
+      "kind": "dungeon",
+      "description": "曾用于深空通信的地面站，如今被外星侦察机部分占领。残破的天线阵列间隐藏着关键数据和外星设备残骸。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "tech_site",
+        "combat_zone",
+        "data_source"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "红岩峡谷",
+      "kind": "forest",
+      "description": "一片荒凉的峡谷地带，因富含铁矿而呈现红色。外星人在此部署了能量采集装置，但地形复杂使其防御薄弱。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "natural_terrain",
+        "resource_rich",
+        "stealth_approach"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "军方秘密实验室",
+      "kind": "castle",
+      "description": "位于山体内部的高保密级研究设施，正在分析外星生物样本并研发反制武器。守卫森严，仅对授权人员开放。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "restricted",
+        "science",
+        "weapon_development"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "废弃小镇“青松镇”",
+      "kind": "town",
+      "description": "曾是宁静的乡村小镇，如今被外星无人机巡逻控制。幸存者躲藏在地下室，等待救援。",
+      "connected_to": [
+        "loc_003"
+      ],
+      "tags": [
+        "occupied",
+        "civilian_hideout",
+        "scavenging"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "林振国",
+      "profession": "避难所指挥官",
+      "traits": [
+        "果断",
+        "责任感强",
+        "略显疲惫"
+      ],
+      "goals": [
+        "保护避难所居民",
+        "组织反击行动"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.8,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.7,
+      "disposition_to_player": 3,
+      "refusal_style": "抱歉，现在不是做这件事的时候。我们得先确保大家的安全。"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "苏婉婷",
+      "profession": "通讯工程师",
+      "traits": [
+        "聪明",
+        "谨慎",
+        "技术宅"
+      ],
+      "goals": [
+        "修复卫星站通信",
+        "获取外星信号数据"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.6,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 2,
+      "refusal_style": "我需要更多证据才能相信这可行。你有相关数据吗？"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "赵大勇",
+      "profession": "物资协调员",
+      "traits": [
+        "热心",
+        "务实",
+        "有点唠叨"
+      ],
+      "goals": [
+        "分发补给",
+        "帮助幸存者"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 4,
+      "refusal_style": "哎呀，这个忙我真帮不上，但我可以给你指条路！"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "李铁柱",
+      "profession": "前卫星站技工",
+      "traits": [
+        "经验丰富",
+        "胆小",
+        "忠诚"
+      ],
+      "goals": [
+        "找回家人",
+        "协助修复设备"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.7,
+      "stubbornness": 0.4,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 2,
+      "refusal_style": "那里太危险了……不过如果你坚持，我可以告诉你怎么避开巡逻。"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "周小梅",
+      "profession": "地质勘探员",
+      "traits": [
+        "勇敢",
+        "独立",
+        "观察力强"
+      ],
+      "goals": [
+        "绘制外星装置地图",
+        "寻找能源核心"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.6,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 3,
+      "refusal_style": "我可以帮你，但你得答应带我一起行动。我可不想一个人待在这儿。"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "陈博士",
+      "profession": "外星生物学专家",
+      "traits": [
+        "冷静",
+        "专注",
+        "不善交际"
+      ],
+      "goals": [
+        "研究外星生物弱点",
+        "开发疫苗"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.5,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 1,
+      "refusal_style": "实验正在进行中，请不要打扰。除非你带来了样本。"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "王建国",
+      "profession": "青松镇民兵队长",
+      "traits": [
+        "坚韧",
+        "多疑",
+        "保护欲强"
+      ],
+      "goals": [
+        "保护镇民",
+        "驱逐外星无人机"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.5,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 0,
+      "refusal_style": "外来者？先证明你不是外星人的探子再说。"
+    },
+    {
+      "npc_id": "npc_008",
+      "name": "张晓雨",
+      "profession": "医疗志愿者",
+      "traits": [
+        "温柔",
+        "细心",
+        "乐观"
+      ],
+      "goals": [
+        "救治伤员",
+        "收集药品"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.85,
+      "stubbornness": 0.25,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 4,
+      "refusal_style": "只要你愿意帮忙照顾病人，我就支持你！"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "你在滨海市避难所醒来，耳边是广播里断断续续的警报声。指挥官林振国正召集志愿者，准备对外星入侵者发起反击。",
+  "initial_quest": "前往废弃卫星站，协助苏婉婷工程师恢复通信并获取外星信号数据。",
+  "main_quest": {
+    "quest_id": "quest_main_001",
+    "title": "终结入侵",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+    "objective": "完成支线并收集关键道具：相位调制器 x1，高能电容组 x1，生物干扰核心 x1",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_004",
+    "required_items": {
+      "相位调制器": 1,
+      "高能电容组": 1,
+      "生物干扰核心": 1
+    },
+    "reward_items": {},
+    "reward_hint": "人类的命运掌握在你手中。胜利后，地球将迎来新的黎明。"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_001",
+      "title": "信号重启",
+      "category": "side",
+      "description": "苏婉婷需要修复卫星站的主控系统，但缺少关键零件。",
+      "objective": "在废弃卫星站内找到‘信号放大器’、‘冷却液罐’和‘备用电源模块’，交给苏婉婷。",
+      "giver_npc_id": "npc_002",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "信号放大器": 1,
+        "冷却液罐": 2,
+        "备用电源模块": 1
+      },
+      "reward_items": {
+        "相位调制器": 1
+      },
+      "reward_hint": "修复后的系统成功截获了外星母舰的通信频率，可用于制造干扰装置。"
+    },
+    {
+      "quest_id": "quest_side_002",
+      "title": "峡谷能源",
+      "category": "side",
+      "description": "周小梅发现外星装置使用一种特殊能源核心，若能回收可用于武器开发。",
+      "objective": "在红岩峡谷中潜入外星装置，取得‘等离子电池’、‘热能转换器’和‘防护外壳碎片’，交给周小梅。",
+      "giver_npc_id": "npc_006",
+      "suggested_location": "loc_003",
+      "required_items": {
+        "等离子电池": 2,
+        "热能转换器": 1,
+        "防护外壳碎片": 3
+      },
+      "reward_items": {
+        "高能电容组": 1
+      },
+      "reward_hint": "这些组件组合后可提供武器所需的瞬时高能输出。"
+    },
+    {
+      "quest_id": "quest_side_003",
+      "title": "镇民救援",
+      "category": "side",
+      "description": "青松镇的医疗物资耗尽，张晓雨急需药品和设备救治伤员。",
+      "objective": "在青松镇废墟中找到‘抗生素药箱’、‘便携净水器’和‘应急绷带包’，交给张晓雨。",
+      "giver_npc_id": "npc_008",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "抗生素药箱": 1,
+        "便携净水器": 1,
+        "应急绷带包": 2
+      },
+      "reward_items": {
+        "生物干扰核心": 1
+      },
+      "reward_hint": "在整理医疗物资时，张晓雨意外发现外星生物对某种药物异常敏感，可用于制造干扰核心。"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 50.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 30.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 70.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 20.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 80.0,
+      "y": 20.0
+    }
+  ]
+}
