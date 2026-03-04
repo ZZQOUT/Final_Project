@@ -871,8 +871,8 @@ def _build_delivery_reply(
     *,
     world: WorldSpec,
     npc_id: str,
-    delivered_delta: Dict[str, int],
-    reward_delta: Dict[str, int],
+    delivered_delta: dict[str, int],
+    reward_delta: dict[str, int],
     notices: list[str],
     prefer_chinese: bool,
 ) -> str:
