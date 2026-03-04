@@ -16,8 +16,10 @@ from rpg_story.models.turn import TurnOutput, NPCDialogueLine, NPCMove
 from rpg_story.engine.state import apply_turn_output
 from rpg_story.engine.validators import validate_npc_move
 from rpg_story.engine.agency import apply_agency_gate
+from rpg_story.rag.embedder import make_embedder
 from rpg_story.rag.index import RAGIndex
 from rpg_story.rag.retriever import RAGRetriever
+from rpg_story.rag.stores.hybrid import PersistentHybridStore
 from rpg_story.rag.stores.memory import InMemoryStore
 from rpg_story.rag.types import Document
 from rpg_story.persistence.store import append_turn_log, save_state, default_sessions_root, read_turn_logs
@@ -293,8 +295,33 @@ class TurnPipeline:
         if not self.cfg.rag.enabled:
             return "", {"enabled": False}
         sessions_root = self.sessions_root or default_sessions_root(self.cfg)
-        store = InMemoryStore()
-        index = RAGIndex(store)
+        retrieval_backend = str(self.cfg.rag.retrieval_backend or "persistent_hybrid").lower()
+        embedder_backend = "none"
+        if retrieval_backend == "in_memory":
+            store = InMemoryStore()
+            store_backend = "in_memory"
+            vectorstore_path = None
+        else:
+            embedder, embedder_backend = make_embedder(self.cfg)
+            vectorstore_base = Path(self.cfg.app.vectorstore_dir)
+            if not vectorstore_base.is_absolute():
+                vectorstore_base = Path(sessions_root).parent / vectorstore_base.name
+            vectorstore_path = vectorstore_base / state.session_id
+            store = PersistentHybridStore(
+                vectorstore_path,
+                embedder=embedder,
+                lexical_weight=self.cfg.rag.lexical_weight,
+                vector_weight=self.cfg.rag.vector_weight,
+                recency_weight=self.cfg.rag.recency_weight,
+                min_score=self.cfg.rag.min_score,
+            )
+            store_backend = store.backend_name
+
+        index = RAGIndex(
+            store,
+            chunk_size_chars=self.cfg.rag.chunk_size_chars,
+            chunk_overlap_chars=self.cfg.rag.chunk_overlap_chars,
+        )
         index.build_default(state.session_id, state.world)
         retriever = RAGRetriever(index)
         query_text = f"{player_text}\nlocation:{state.player_location}\nnpc:{npc_id}"
@@ -313,6 +340,9 @@ class TurnPipeline:
             "enabled": True,
             "always_include_ids": [doc.id for doc in rag_pack["always_include"]],
             "retrieved_ids": [doc.id for doc in rag_pack["retrieved"]],
+            "retrieval_backend": store_backend,
+            "embedding_backend": embedder_backend,
+            "vectorstore_path": str(vectorstore_path) if vectorstore_path else None,
             **rag_pack["debug"],
         }
         return rag_text, debug
@@ -320,13 +350,16 @@ class TurnPipeline:
     def _render_rag_pack(self, rag_pack: dict) -> str:
         always = rag_pack.get("always_include", [])
         retrieved = rag_pack.get("retrieved", [])
+        retrieved_lore = _filter_docs(retrieved, "lore")
+        retrieved_dynamic = [doc for doc in retrieved if doc.metadata.get("doc_type") != "lore"]
         sections = []
         sections.append(self._render_section("WORLD BIBLE", _filter_docs(always, "world_bible")))
         sections.append(self._render_section("LOCATION", _filter_docs(always, "location")))
         sections.append(self._render_section("NPC PROFILE", _filter_docs(always, "npc_profile")))
         sections.append(self._render_section("NPC MEMORY", _filter_docs(always, "memory")))
         sections.append(self._render_section("RECENT SUMMARIES", _filter_docs(always, "summary")))
-        sections.append(self._render_section("RETRIEVED MEMORIES", retrieved))
+        sections.append(self._render_section("RETRIEVED LORE", retrieved_lore))
+        sections.append(self._render_section("RETRIEVED MEMORIES", retrieved_dynamic))
         return "\n\n".join([section for section in sections if section])
 
     def _render_section(self, title: str, docs: list[Document]) -> str:

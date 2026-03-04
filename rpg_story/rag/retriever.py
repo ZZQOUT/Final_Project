@@ -51,7 +51,7 @@ class RAGRetriever:
         summary_docs = build_summary_docs_from_turn_logs(session_id, sessions_root, last_n_summaries)
         always_include.extend(summary_docs)
 
-        memory_docs = build_memory_docs_from_turn_logs(session_id, sessions_root, top_k * 3)
+        memory_docs = build_memory_docs_from_turn_logs(session_id, sessions_root, max(6, top_k * 4))
         self.index.upsert(dedupe_docs(memory_docs))
 
         retrieved, tier_filters = self._retrieve_with_fallbacks(
@@ -63,7 +63,9 @@ class RAGRetriever:
         )
 
         always_include = _dedupe(always_include)
-        retrieved = _dedupe([doc for doc in retrieved if doc.id not in {d.id for d in always_include}])
+        retrieved = _dedupe_on_parent(
+            [doc for doc in retrieved if doc.id not in {d.id for d in always_include}]
+        )
 
         debug = {
             "filters": tier_filters,
@@ -87,7 +89,7 @@ class RAGRetriever:
         query_text: str,
         top_k: int,
     ) -> tuple[List[Document], List[dict]]:
-        doc_type_filter = ["memory", "summary"]
+        doc_type_filter = ["memory", "summary", "lore"]
         tiers = []
         if npc_id:
             tiers.append({"session_id": session_id, "npc_id": npc_id, "doc_type": doc_type_filter})
@@ -102,7 +104,7 @@ class RAGRetriever:
         for filters in tiers:
             if len(results) >= top_k:
                 break
-            batch = self.index.store.query(query_text, top_k, filters)
+            batch = self.index.store.query(query_text, top_k * 2, filters)
             for doc in batch:
                 if doc.id in seen:
                     continue
@@ -120,5 +122,18 @@ def _dedupe(docs: List[Document]) -> List[Document]:
         if doc.id in seen:
             continue
         seen.add(doc.id)
+        result.append(doc)
+    return result
+
+
+def _dedupe_on_parent(docs: List[Document]) -> List[Document]:
+    seen = set()
+    result: List[Document] = []
+    for doc in docs:
+        parent_id = doc.metadata.get("parent_id") or doc.id
+        key = str(parent_id)
+        if key in seen:
+            continue
+        seen.add(key)
         result.append(doc)
     return result

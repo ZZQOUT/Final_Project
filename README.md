@@ -66,6 +66,12 @@ The project focus is **dynamic generation with LLM + engine constraints + RAG me
   - epilogue.
 - Recaps are archived and visible on the start page history panel.
 
+### 1.9 Complete RAG memory stack
+- Hybrid retrieval (`vector + lexical + recency`) with persistent session index.
+- Document chunking with overlap for long world/lore/memory entries.
+- Always-include context (`world/location/NPC/recent summaries`) + retrieved memories/lore.
+- Optional external lore ingestion into the same session vector store.
+
 ---
 
 ## 2. Architecture Overview
@@ -77,7 +83,7 @@ The project focus is **dynamic generation with LLM + engine constraints + RAG me
 ### 2.2 Design principles
 - LLM handles generation and narration.
 - Engine enforces executable rules (movement validity, quest state, item accounting).
-- RAG injects world bible, location, NPC, and recent summaries to reduce context drift.
+- RAG injects world bible, location, NPC, recent summaries, and retrieved memories/lore to reduce context drift.
 - Persistent state/logs support resume and replay.
 
 ### 2.3 Main modules
@@ -145,6 +151,12 @@ Optional flags:
 - `--session <session_id>` to continue a saved run
 - `--world <world_json_path>` to bootstrap from a world file
 
+### 4.3 Lore ingestion (optional)
+```bash
+python scripts/ingest_lore.py --session <session_id> --path <file_or_dir> --tag canon
+```
+Supported files: `.txt`, `.md`, `.markdown` (single file or recursive directory).
+
 ---
 
 ## 5. Configuration
@@ -156,6 +168,9 @@ Important fields:
 - `app.worlds_dir`: generated world files
 - `llm.base_url`, `llm.model`, `llm.api_key_env`
 - `rag.enabled`, `rag.top_k`, `rag.summary_window`
+- `rag.chunk_size_chars`, `rag.chunk_overlap_chars`
+- `rag.retrieval_backend`, `rag.embedding_provider`, `rag.embedding_model`
+- `rag.vector_weight`, `rag.lexical_weight`, `rag.recency_weight`, `rag.min_score`
 - `worldgen.locations_min/max`, `worldgen.npcs_min/max`
 
 ---

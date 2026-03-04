@@ -14,6 +14,13 @@ ALLOWED_METADATA_KEYS = {
     "turn_id",
     "timestamp",
     "tags",
+    "source",
+    "parent_id",
+    "chunk_index",
+    "chunk_count",
+    "score_lexical",
+    "score_vector",
+    "score_hybrid",
 }
 
 KNOWN_DOC_TYPES = {
@@ -22,6 +29,7 @@ KNOWN_DOC_TYPES = {
     "npc_profile",
     "summary",
     "memory",
+    "lore",
 }
 
 REQUIRED_KEYS_BASE = {"doc_type", "session_id"}
@@ -30,6 +38,7 @@ REQUIRED_KEYS_BY_TYPE = {
     "memory": {"turn_id", "timestamp"},
     "location": {"location_id"},
     "npc_profile": {"npc_id"},
+    "lore": set(),
     "world_bible": set(),
 }
 
@@ -81,5 +90,6 @@ def make_doc_id(metadata: Dict[str, Any], text: str) -> str:
     npc_id = metadata.get("npc_id", "-")
     location_id = metadata.get("location_id", "-")
     turn_id = metadata.get("turn_id", "-")
+    chunk_index = metadata.get("chunk_index", "-")
     digest = hashlib.sha1(text.encode("utf-8")).hexdigest()[:8]
-    return f"{session_id}:{doc_type}:{npc_id}:{location_id}:{turn_id}:{digest}"
+    return f"{session_id}:{doc_type}:{npc_id}:{location_id}:{turn_id}:{chunk_index}:{digest}"

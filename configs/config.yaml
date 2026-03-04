@@ -40,6 +40,24 @@ rag:
   top_k: 5
   # Number of recent summaries always included
   summary_window: 3
+  # Chunk size for long documents before indexing
+  chunk_size_chars: 700
+  # Overlap between adjacent chunks
+  chunk_overlap_chars: 120
+  # Retrieval backend: persistent_hybrid or in_memory
+  retrieval_backend: "persistent_hybrid"
+  # Embedding backend: hashing (offline) or openai_compatible
+  embedding_provider: "hashing"
+  # Embedding model when embedding_provider=openai_compatible
+  embedding_model: ""
+  # Embedding dimension for hashing/fallback mode
+  embedding_dim: 384
+  # Hybrid score weights
+  vector_weight: 0.60
+  lexical_weight: 0.35
+  recency_weight: 0.05
+  # Minimum hybrid score threshold for retrieval
+  min_score: 0.03
 
 worldgen:
   # Max retries for invalid world JSON

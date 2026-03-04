@@ -1,0 +1,419 @@
+{
+  "world_id": "world_001",
+  "title": "外星入侵：地球反击战",
+  "world_bible": {
+    "tech_level": "modern",
+    "narrative_language": "zh",
+    "magic_rules": "本世界无魔法，完全依赖现代科技与外星科技对抗。",
+    "tone": "紧张、英雄主义、带有末日危机感但充满希望",
+    "anachronism_policy": null,
+    "taboos": [
+      "封建迷信",
+      "超自然力量",
+      "时间旅行"
+    ],
+    "do_not_mention": [],
+    "anachronism_blocklist": []
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "废弃军事基地",
+      "kind": "military_base",
+      "description": "一座被遗弃的地下军事基地，曾用于冷战时期的秘密武器研发。如今成为人类抵抗组织的临时指挥中心，布满锈迹斑斑的设备和残破的电子屏幕。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "科技",
+        "防御",
+        "隐蔽"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "城市废墟",
+      "kind": "ruins",
+      "description": "曾经繁华的都市，如今被外星人摧毁成一片瓦砾。街道上散落着烧焦的汽车残骸和破碎的玻璃，偶尔能听到远处外星巡逻机的嗡鸣声。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "危险",
+        "资源",
+        "探索"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "科研避难所",
+      "kind": "laboratory",
+      "description": "一群科学家在郊区建立的秘密实验室，致力于研究外星科技弱点。内部干净整洁，但气氛紧张，所有设备都处于高负荷运转状态。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "研究",
+        "安全",
+        "知识"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "地下反抗军营地",
+      "kind": "camp",
+      "description": "位于地铁隧道深处的反抗军据点，墙壁上贴满手绘地图和战术计划。空气中弥漫着汗味和火药味，但士气高昂。",
+      "connected_to": [
+        "loc_002",
+        "loc_006"
+      ],
+      "tags": [
+        "战斗",
+        "团结",
+        "生存"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "外星信号塔",
+      "kind": "tower",
+      "description": "外星人建立的高能信号塔，用于控制地球通讯。塔身闪烁着诡异的蓝光，周围布满自动防御炮台，是极其危险的区域。",
+      "connected_to": [
+        "loc_003",
+        "loc_006"
+      ],
+      "tags": [
+        "敌占",
+        "高科技",
+        "陷阱"
+      ]
+    },
+    {
+      "location_id": "loc_006",
+      "name": "最终母舰坠毁点",
+      "kind": "crash_site",
+      "description": "外星母舰坠毁形成的巨大坑洞，残骸中仍不断释放能量脉冲。这里是决战之地，也是唯一能彻底摧毁外星指挥核心的地方。",
+      "connected_to": [
+        "loc_004",
+        "loc_005"
+      ],
+      "tags": [
+        "终局",
+        "毁灭",
+        "希望"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "李振国",
+      "profession": "抵抗军指挥官",
+      "traits": [
+        "果断",
+        "经验丰富",
+        "略显固执"
+      ],
+      "goals": [
+        "集结人类力量",
+        "摧毁外星母舰"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.7,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 3,
+      "refusal_style": "除非你证明自己有用，否则别指望我给你装备。"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "王小梅",
+      "profession": "通讯专家",
+      "traits": [
+        "细心",
+        "乐于助人",
+        "胆小"
+      ],
+      "goals": [
+        "修复通讯网络",
+        "帮助幸存者联系家人"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 4,
+      "refusal_style": "我……我不敢去危险的地方，但如果你需要通讯支持，我可以帮忙！"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "张大勇",
+      "profession": "拾荒者",
+      "traits": [
+        "狡猾",
+        "实用主义",
+        "中立"
+      ],
+      "goals": [
+        "收集稀有物资",
+        "高价出售给反抗军"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.5,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 1,
+      "refusal_style": "没好处的事我可不干，不过如果你有好货，我们可以谈谈。"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "赵铁柱",
+      "profession": "前消防员",
+      "traits": [
+        "勇敢",
+        "忠诚",
+        "急躁"
+      ],
+      "goals": [
+        "保护平民",
+        "清理废墟中的幸存者"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.85,
+      "stubbornness": 0.4,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": 3,
+      "refusal_style": "救人要紧！快跟我来，别磨蹭！"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "陈博士",
+      "profession": "外星科技研究员",
+      "traits": [
+        "理性",
+        "专注",
+        "社交笨拙"
+      ],
+      "goals": [
+        "破解外星能源核心",
+        "制造反制武器"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.6,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 2,
+      "refusal_style": "我的实验不能被打断！除非你带来关键数据，否则别烦我。"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "林小雨",
+      "profession": "实习生",
+      "traits": [
+        "热情",
+        "聪明",
+        "容易紧张"
+      ],
+      "goals": [
+        "协助陈博士",
+        "证明自己的能力"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.95,
+      "stubbornness": 0.1,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 4,
+      "refusal_style": "啊！我……我马上帮你！只要别告诉博士我搞砸了就行……"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "老马",
+      "profession": "反抗军老兵",
+      "traits": [
+        "坚韧",
+        "沉默寡言",
+        "可靠"
+      ],
+      "goals": [
+        "训练新兵",
+        "守护营地安全"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.8,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.7,
+      "disposition_to_player": 3,
+      "refusal_style": "行动胜于言语。想证明自己？跟我去巡逻。"
+    },
+    {
+      "npc_id": "npc_008",
+      "name": "周小雅",
+      "profession": "医疗兵",
+      "traits": [
+        "温柔",
+        "富有同情心",
+        "坚定"
+      ],
+      "goals": [
+        "救治伤员",
+        "维持营地卫生"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.9,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 4,
+      "refusal_style": "你的伤要紧吗？先坐下，让我看看。"
+    },
+    {
+      "npc_id": "npc_009",
+      "name": "吴天",
+      "profession": "黑客",
+      "traits": [
+        "叛逆",
+        "技术天才",
+        "孤僻"
+      ],
+      "goals": [
+        "瘫痪外星信号塔",
+        "获取外星数据库"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.4,
+      "stubbornness": 0.9,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 0,
+      "refusal_style": "别打扰我，我在黑进他们的系统。除非你有量子解码器，否则滚开。"
+    },
+    {
+      "npc_id": "npc_010",
+      "name": "刘强",
+      "profession": "侦察兵",
+      "traits": [
+        "警觉",
+        "敏捷",
+        "谨慎"
+      ],
+      "goals": [
+        "监视母舰动向",
+        "标记安全路径"
+      ],
+      "starting_location": "loc_006",
+      "obedience_level": 0.75,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.85,
+      "disposition_to_player": 2,
+      "refusal_style": "这里太危险了！没有充分准备就别靠近母舰残骸。"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "你在废弃军事基地的角落醒来，记忆模糊，只记得外星飞船遮蔽天空的恐怖景象。李振国指挥官正站在你面前，严肃地说：“我们没时间解释了，地球的命运就靠你了。”",
+  "initial_quest": "找到王小梅，让她帮你恢复基本通讯权限，以便接收任务指令。",
+  "main_quest": {
+    "quest_id": "quest_main",
+    "title": "摧毁外星母舰核心",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+    "objective": "完成支线并收集关键道具：外星能量电池 x1，量子谐振器 x1，信号干扰芯片 x1",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_006",
+    "required_items": {
+      "外星能量电池": 1,
+      "量子谐振器": 1,
+      "信号干扰芯片": 1
+    },
+    "reward_items": {},
+    "reward_hint": "地球将迎来久违的和平，而你将成为人类的英雄。"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_01",
+      "title": "废墟中的求救信号",
+      "category": "side",
+      "description": "赵铁柱请求你深入城市废墟，寻找失踪的平民并带回关键物资。",
+      "objective": "从废墟中找回医疗包、净水器和无线电零件。（需求：军用医疗包 x2，便携式净水器 x1，老式无线电零件 x3）",
+      "giver_npc_id": "npc_004",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "军用医疗包": 2,
+        "便携式净水器": 1,
+        "老式无线电零件": 3
+      },
+      "reward_items": {
+        "外星能量电池": 1
+      },
+      "reward_hint": "赵铁柱会将找到的外星能量电池交给你，这是从外星巡逻机残骸中拆下的。"
+    },
+    {
+      "quest_id": "quest_side_02",
+      "title": "实验室的紧急需求",
+      "category": "side",
+      "description": "林小雨偷偷告诉你，陈博士急需特殊材料来完成实验，但她不敢直接开口。",
+      "objective": "为实验室收集冷却液、纳米修复胶和备用电路板。",
+      "giver_npc_id": "npc_006",
+      "suggested_location": "loc_003",
+      "required_items": {
+        "液氮冷却罐": 2,
+        "纳米修复胶": 1,
+        "军用级电路板": 3
+      },
+      "reward_items": {
+        "量子谐振器": 1
+      },
+      "reward_hint": "陈博士成功制造出量子谐振器，这是激活终极武器的关键部件。"
+    },
+    {
+      "quest_id": "quest_side_03",
+      "title": "瘫痪信号塔",
+      "category": "side",
+      "description": "吴天需要有人帮他潜入信号塔，获取外星通讯数据并破坏其防御系统。",
+      "objective": "从信号塔控制室带回数据芯片、防护服和能量核心碎片。",
+      "giver_npc_id": "npc_009",
+      "suggested_location": "loc_005",
+      "required_items": {
+        "外星数据芯片": 1,
+        "辐射防护服": 1,
+        "能量核心碎片": 2
+      },
+      "reward_items": {
+        "信号干扰芯片": 1
+      },
+      "reward_hint": "吴天利用数据成功制造出信号干扰芯片，能屏蔽母舰的防御系统。"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 20.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 40.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 40.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 60.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 60.0,
+      "y": 80.0
+    },
+    {
+      "location_id": "loc_006",
+      "x": 80.0,
+      "y": 50.0
+    }
+  ]
+}

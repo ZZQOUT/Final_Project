@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -8,8 +9,11 @@ from rpg_story.engine.orchestrator import TurnPipeline
 from rpg_story.llm.client import MockLLMClient
 from rpg_story.models.world import WorldBibleRules, LocationSpec, NPCProfile, WorldSpec, GameState
 from rpg_story.persistence.store import append_turn_log
+from rpg_story.rag.chunking import ChunkConfig, chunk_document
+from rpg_story.rag.embedder import HashingEmbedder
 from rpg_story.rag.index import RAGIndex
 from rpg_story.rag.retriever import RAGRetriever
+from rpg_story.rag.stores.hybrid import PersistentHybridStore
 from rpg_story.rag.stores.memory import InMemoryStore
 from rpg_story.rag.types import Document, make_doc_id, normalize_metadata
 from rpg_story.rag.sources.summaries import build_summary_docs_from_turn_logs
@@ -245,8 +249,121 @@ def test_forced_pack_includes_npc_memory(tmp_path: Path):
     assert len(npc_memory) == 2
 
 
+def test_chunk_document_adds_parent_chunk_metadata():
+    meta = normalize_metadata(
+        {
+            "doc_type": "memory",
+            "session_id": "sess_chunk",
+            "npc_id": "npc_1",
+            "location_id": "loc_1",
+            "turn_id": 1,
+            "timestamp": "2026-02-10T00:00:00+00:00",
+        }
+    )
+    text = (
+        "The bridge is cracked and unstable. "
+        "Workers report strange lights near the river at midnight. "
+        "Supplies include rope, timber, and iron rivets."
+    )
+    doc = Document(id=make_doc_id(meta, text), text=text, metadata=meta)
+    chunks = chunk_document(
+        doc,
+        ChunkConfig(max_chars=70, overlap_chars=20, min_chunk_chars=20),
+    )
+    assert len(chunks) >= 2
+    assert all(chunk.metadata.get("parent_id") == doc.id for chunk in chunks)
+    assert sorted(int(chunk.metadata.get("chunk_index", -1)) for chunk in chunks) == list(range(len(chunks)))
+    assert all(int(chunk.metadata.get("chunk_count", 0)) == len(chunks) for chunk in chunks)
+
+
+def test_persistent_hybrid_store_roundtrip(tmp_path: Path):
+    store_path = tmp_path / "vectorstore"
+    store = PersistentHybridStore(
+        store_path,
+        embedder=HashingEmbedder(embedding_dim=64),
+        min_score=0.0,
+    )
+    meta1 = normalize_metadata(
+        {
+            "doc_type": "memory",
+            "session_id": "sess_hybrid",
+            "npc_id": "npc_1",
+            "location_id": "loc_1",
+            "turn_id": 1,
+            "timestamp": "2026-02-10T01:00:00+00:00",
+        }
+    )
+    meta2 = normalize_metadata(
+        {
+            "doc_type": "memory",
+            "session_id": "sess_hybrid",
+            "npc_id": "npc_2",
+            "location_id": "loc_2",
+            "turn_id": 2,
+            "timestamp": "2026-02-10T02:00:00+00:00",
+        }
+    )
+    doc1 = Document(id=make_doc_id(meta1, "Ancient bridge needs repair"), text="Ancient bridge needs repair", metadata=meta1)
+    doc2 = Document(id=make_doc_id(meta2, "Market rumors about dragon"), text="Market rumors about dragon", metadata=meta2)
+    store.add([doc1, doc2])
+    assert store.count() == 2
+
+    reloaded = PersistentHybridStore(
+        store_path,
+        embedder=HashingEmbedder(embedding_dim=64),
+        min_score=0.0,
+    )
+    hits = reloaded.query("bridge repair", top_k=1, filters={"session_id": "sess_hybrid", "doc_type": ["memory"]})
+    assert hits
+    assert hits[0].id == doc1.id
+
+
+def test_retriever_can_return_lore_docs(tmp_path: Path):
+    world = make_world()
+    state = make_state(world)
+    store = PersistentHybridStore(
+        tmp_path / "vectorstore",
+        embedder=HashingEmbedder(embedding_dim=64),
+        min_score=0.0,
+    )
+    index = RAGIndex(store)
+    index.build_default(state.session_id, world)
+    lore_meta = normalize_metadata(
+        {
+            "doc_type": "lore",
+            "session_id": state.session_id,
+            "timestamp": "2026-02-10T03:00:00+00:00",
+        }
+    )
+    lore_text = "Moon crystal codex records the hidden ritual under the old bridge."
+    lore_doc = Document(id=make_doc_id(lore_meta, lore_text), text=lore_text, metadata=lore_meta)
+    index.upsert([lore_doc])
+    retriever = RAGRetriever(index)
+
+    pack = retriever.get_forced_context_pack(
+        session_id=state.session_id,
+        world=world,
+        state=state,
+        npc_id="npc_1",
+        sessions_root=tmp_path / "sessions",
+        last_n_summaries=0,
+        top_k=2,
+        query_text="moon crystal ritual",
+    )
+    assert any(doc.metadata.get("doc_type") == "lore" for doc in pack["retrieved"])
+
+
 def test_orchestrator_injects_rag(tmp_path: Path):
-    cfg = load_config("configs/config.yaml")
+    cfg_raw = load_config("configs/config.yaml")
+    cfg = replace(
+        cfg_raw,
+        app=replace(cfg_raw.app, vectorstore_dir=tmp_path / "vectorstore"),
+        rag=replace(
+            cfg_raw.rag,
+            retrieval_backend="persistent_hybrid",
+            embedding_provider="hashing",
+        ),
+    )
     sessions_root = tmp_path / "sessions"
     world = make_world()
     state = make_state(world)

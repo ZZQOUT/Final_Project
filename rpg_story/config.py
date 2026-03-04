@@ -36,6 +36,16 @@ class RAGSection:
     enabled: bool
     top_k: int
     summary_window: int
+    chunk_size_chars: int
+    chunk_overlap_chars: int
+    retrieval_backend: str
+    embedding_provider: str
+    embedding_model: str
+    embedding_dim: int
+    vector_weight: float
+    lexical_weight: float
+    recency_weight: float
+    min_score: float
 
 
 @dataclass(frozen=True)
@@ -152,6 +162,16 @@ def load_config(config_path: str = "configs/config.yaml") -> AppConfig:
         enabled=bool(rag_cfg.get("enabled", True)),
         top_k=int(rag_cfg.get("top_k", 5)),
         summary_window=int(rag_cfg.get("summary_window", 3)),
+        chunk_size_chars=int(rag_cfg.get("chunk_size_chars", 700)),
+        chunk_overlap_chars=int(rag_cfg.get("chunk_overlap_chars", 120)),
+        retrieval_backend=str(rag_cfg.get("retrieval_backend", "persistent_hybrid")),
+        embedding_provider=str(rag_cfg.get("embedding_provider", "hashing")),
+        embedding_model=str(rag_cfg.get("embedding_model", "")),
+        embedding_dim=int(rag_cfg.get("embedding_dim", 384)),
+        vector_weight=float(rag_cfg.get("vector_weight", 0.60)),
+        lexical_weight=float(rag_cfg.get("lexical_weight", 0.35)),
+        recency_weight=float(rag_cfg.get("recency_weight", 0.05)),
+        min_score=float(rag_cfg.get("min_score", 0.03)),
     )
 
     worldgen = WorldGenSection(
