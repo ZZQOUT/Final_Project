@@ -1,0 +1,239 @@
+{
+  "world_generation_seconds": 91.417,
+  "dialogue_turns": [
+    {
+      "timestamp": "2026-03-03T09:03:09.112330+00:00",
+      "npc_id": "npc_002",
+      "turn_id": 1,
+      "seconds": 8.331
+    },
+    {
+      "timestamp": "2026-03-03T09:03:27.801316+00:00",
+      "npc_id": "npc_002",
+      "turn_id": 2,
+      "seconds": 8.86
+    },
+    {
+      "timestamp": "2026-03-03T09:03:48.120293+00:00",
+      "npc_id": "npc_002",
+      "turn_id": 3,
+      "seconds": 7.955
+    },
+    {
+      "timestamp": "2026-03-03T09:04:26.207307+00:00",
+      "npc_id": "npc_002",
+      "turn_id": 4,
+      "seconds": 10.083
+    },
+    {
+      "timestamp": "2026-03-03T09:05:05.643595+00:00",
+      "npc_id": "npc_002",
+      "turn_id": 5,
+      "seconds": 9.923
+    },
+    {
+      "timestamp": "2026-03-03T09:05:53.390376+00:00",
+      "npc_id": "npc_003",
+      "turn_id": 6,
+      "seconds": 9.097
+    },
+    {
+      "timestamp": "2026-03-03T09:07:43.308785+00:00",
+      "npc_id": "npc_003",
+      "turn_id": 10,
+      "seconds": 10.945
+    },
+    {
+      "timestamp": "2026-03-03T09:08:13.850747+00:00",
+      "npc_id": "npc_003",
+      "turn_id": 11,
+      "seconds": 12.243
+    },
+    {
+      "timestamp": "2026-03-03T09:08:41.777915+00:00",
+      "npc_id": "npc_003",
+      "turn_id": 12,
+      "seconds": 11.1
+    },
+    {
+      "timestamp": "2026-03-03T09:09:55.406206+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 13,
+      "seconds": 8.461
+    },
+    {
+      "timestamp": "2026-03-03T09:10:52.712457+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 14,
+      "seconds": 17.02
+    },
+    {
+      "timestamp": "2026-03-03T09:11:24.863551+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 15,
+      "seconds": 9.43
+    },
+    {
+      "timestamp": "2026-03-03T09:12:24.662014+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 16,
+      "seconds": 17.635
+    },
+    {
+      "timestamp": "2026-03-03T09:12:44.863676+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 17,
+      "seconds": 7.746
+    },
+    {
+      "timestamp": "2026-03-03T09:13:09.712206+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 18,
+      "seconds": 9.077
+    },
+    {
+      "timestamp": "2026-03-03T09:13:44.271655+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 19,
+      "seconds": 8.257
+    },
+    {
+      "timestamp": "2026-03-03T09:14:02.521663+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 20,
+      "seconds": 9.587
+    },
+    {
+      "timestamp": "2026-03-03T09:14:29.404558+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 21,
+      "seconds": 9.224
+    },
+    {
+      "timestamp": "2026-03-03T09:15:10.333174+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 22,
+      "seconds": 18.821
+    },
+    {
+      "timestamp": "2026-03-03T09:15:51.627897+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 23,
+      "seconds": 12.332
+    },
+    {
+      "timestamp": "2026-03-03T09:16:22.648164+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 24,
+      "seconds": 8.789
+    },
+    {
+      "timestamp": "2026-03-03T09:17:37.780607+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 28,
+      "seconds": 8.653
+    },
+    {
+      "timestamp": "2026-03-03T09:18:15.221005+00:00",
+      "npc_id": "npc_004",
+      "turn_id": 29,
+      "seconds": 8.369
+    },
+    {
+      "timestamp": "2026-03-03T09:19:00.823438+00:00",
+      "npc_id": "npc_005",
+      "turn_id": 30,
+      "seconds": 12.546
+    },
+    {
+      "timestamp": "2026-03-03T09:19:34.752760+00:00",
+      "npc_id": "npc_005",
+      "turn_id": 31,
+      "seconds": 15.652
+    },
+    {
+      "timestamp": "2026-03-03T09:20:26.378046+00:00",
+      "npc_id": "npc_005",
+      "turn_id": 35,
+      "seconds": 9.172
+    },
+    {
+      "timestamp": "2026-03-03T09:21:18.718864+00:00",
+      "npc_id": "npc_005",
+      "turn_id": 36,
+      "seconds": 8.646
+    },
+    {
+      "timestamp": "2026-03-03T09:21:52.645369+00:00",
+      "npc_id": "npc_005",
+      "turn_id": 37,
+      "seconds": 8.622
+    },
+    {
+      "timestamp": "2026-03-03T09:22:22.053937+00:00",
+      "npc_id": "npc_003",
+      "turn_id": 38,
+      "seconds": 12.723
+    },
+    {
+      "timestamp": "2026-03-03T09:23:02.087362+00:00",
+      "npc_id": "npc_003",
+      "turn_id": 39,
+      "seconds": 9.421
+    },
+    {
+      "timestamp": "2026-03-03T09:23:26.968662+00:00",
+      "npc_id": "npc_003",
+      "turn_id": 40,
+      "seconds": 10.033
+    },
+    {
+      "timestamp": "2026-03-03T09:23:57.640290+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 41,
+      "seconds": 10.039
+    },
+    {
+      "timestamp": "2026-03-03T09:24:20.010812+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 42,
+      "seconds": 10.321
+    },
+    {
+      "timestamp": "2026-03-03T09:24:44.715403+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 43,
+      "seconds": 11.836
+    },
+    {
+      "timestamp": "2026-03-03T09:25:10.551389+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 44,
+      "seconds": 10.549
+    },
+    {
+      "timestamp": "2026-03-03T09:25:45.009277+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 45,
+      "seconds": 10.805
+    },
+    {
+      "timestamp": "2026-03-03T09:26:01.066963+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 46,
+      "seconds": 7.954
+    },
+    {
+      "timestamp": "2026-03-03T09:26:27.384305+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 47,
+      "seconds": 10.108
+    },
+    {
+      "timestamp": "2026-03-03T09:26:50.217463+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 48,
+      "seconds": 8.349
+    }
+  ]
+}

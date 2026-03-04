@@ -1,0 +1,371 @@
+{
+  "world_id": "w_mahoutsukai_no_yoru",
+  "title": "魔法使之夜",
+  "world_bible": {
+    "tech_level": "medieval",
+    "narrative_language": "zh",
+    "magic_rules": "魔法源自星辰与古老契约，仅少数人能感知魔力。施法需借助符文、咒语与特定材料，过度使用会导致精神反噬。",
+    "tone": "神秘而忧郁，带有古典文学气息与宿命感",
+    "anachronism_policy": "严格禁止现代科技元素",
+    "taboos": [
+      "不可亵渎星之契约",
+      "不可在满月夜直视镜湖",
+      "不可向凡人揭示魔法本质"
+    ],
+    "do_not_mention": [
+      "智能手机",
+      "互联网",
+      "电力",
+      "汽车",
+      "枪械",
+      "塑料",
+      "信用卡"
+    ],
+    "anachronism_blocklist": [
+      "电脑",
+      "飞机",
+      "电视",
+      "电池",
+      "钢筋混凝土"
+    ]
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "苍星馆",
+      "kind": "castle",
+      "description": "坐落于山巅的古老魔法塔，外墙爬满银藤，塔顶悬浮着永不熄灭的星焰。这里是魔法使的居所，藏有无数禁书与星象仪。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "魔法",
+        "高处",
+        "禁书"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "雾隐村",
+      "kind": "town",
+      "description": "被终年不散的薄雾笼罩的山村，村民以采集草药与编织星纹布为生。村中有一口据说能映照人心的古井。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "村庄",
+        "草药",
+        "迷雾"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "镜湖森林",
+      "kind": "forest",
+      "description": "环绕镜湖的幽暗密林，树木枝叶交错如织，湖面平静如镜却深不见底。传说湖底沉睡着远古精灵。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "森林",
+        "湖泊",
+        "精灵"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "回音谷",
+      "kind": "dungeon",
+      "description": "两壁陡峭的峡谷，风穿过岩缝会发出如泣如诉的回响。谷底埋藏着古代魔法文明的遗迹与机关。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "遗迹",
+        "机关",
+        "风声"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "星陨丘陵",
+      "kind": "bridge",
+      "description": "横跨两座山丘的天然石桥，夜晚可见流星划过天际。桥下溪流中含有微弱魔力，可淬炼魔法材料。",
+      "connected_to": [
+        "loc_003"
+      ],
+      "tags": [
+        "桥梁",
+        "流星",
+        "溪流"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "青子",
+      "profession": "魔法使",
+      "traits": [
+        "高傲",
+        "聪慧",
+        "责任感强"
+      ],
+      "goals": [
+        "守护苍星馆的秘密",
+        "阻止禁忌魔法复苏"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.3,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 1,
+      "refusal_style": "冷淡地转身离开，只留下一句‘凡人不该涉足此地’"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "久远",
+      "profession": "见习魔法使",
+      "traits": [
+        "温柔",
+        "善解人意",
+        "略带忧郁"
+      ],
+      "goals": [
+        "协助青子完成仪式",
+        "寻找失落的星之契约"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.7,
+      "stubbornness": 0.4,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 3,
+      "refusal_style": "轻声叹息：‘抱歉，现在还不能告诉你……但或许你可以帮我们’"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "千鹤婆婆",
+      "profession": "草药师",
+      "traits": [
+        "慈祥",
+        "健谈",
+        "记忆力差"
+      ],
+      "goals": [
+        "收集七色露珠",
+        "治愈村民的怪病"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.9,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 4,
+      "refusal_style": "颤巍巍地摆手：‘哎呀，老眼昏花了，你刚才说什么？’"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "铁匠源次",
+      "profession": "铁匠",
+      "traits": [
+        "固执",
+        "手艺精湛",
+        "沉默寡言"
+      ],
+      "goals": [
+        "打造星纹匕首",
+        "保护村子免受魔兽侵扰"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.5,
+      "stubbornness": 0.9,
+      "risk_tolerance": 0.7,
+      "disposition_to_player": 0,
+      "refusal_style": "用铁锤敲击铁砧，头也不抬：‘没空，自己想办法去’"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "小夜",
+      "profession": "渔女",
+      "traits": [
+        "活泼",
+        "好奇心强",
+        "胆大"
+      ],
+      "goals": [
+        "探索镜湖秘密",
+        "找到湖底的发光珍珠"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.8,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": 2,
+      "refusal_style": "眨眨眼：‘下次吧！我现在要去湖边了，一起来吗？’"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "守林人藤吉",
+      "profession": "守林人",
+      "traits": [
+        "谨慎",
+        "经验丰富",
+        "多疑"
+      ],
+      "goals": [
+        "防止外人闯入森林禁地",
+        "记录星象变化"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.4,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": -1,
+      "refusal_style": "握紧长矛，低吼：‘此地危险，速速离去！’"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "学者文藏",
+      "profession": "考古学者",
+      "traits": [
+        "博学",
+        "神经质",
+        "执着"
+      ],
+      "goals": [
+        "解读古代铭文",
+        "修复星图罗盘"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.6,
+      "stubbornness": 0.6,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 1,
+      "refusal_style": "推了推眼镜，喃喃自语：‘这些符号……还没破解完呢……’"
+    },
+    {
+      "npc_id": "npc_008",
+      "name": "旅人铃音",
+      "profession": "行商",
+      "traits": [
+        "机灵",
+        "善于交际",
+        "爱占小便宜"
+      ],
+      "goals": [
+        "收购稀有材料",
+        "安全穿越星陨丘陵"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.85,
+      "stubbornness": 0.35,
+      "risk_tolerance": 0.8,
+      "disposition_to_player": 2,
+      "refusal_style": "笑嘻嘻地说：‘这次真帮不了，不过下次见面我请你喝茶！’"
+    }
+  ],
+  "starting_location": "loc_002",
+  "starting_hook": "你在雾隐村醒来，记忆模糊，只记得昨夜看见一道流星坠入镜湖。村中老人说你是被星之力选中的人，而苍星馆的魔法使正在寻找能协助她们的人。",
+  "initial_quest": "前往苍星馆，与魔法使青子对话，了解你的命运。",
+  "main_quest": {
+    "quest_id": "quest_main_01",
+    "title": "星之契约的复苏",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+    "objective": "完成支线并收集关键道具：疗愈香囊 x1，湖心珍珠 x1，星纹匕首 x1",
+    "giver_npc_id": "npc_002",
+    "suggested_location": "loc_001",
+    "required_items": {
+      "疗愈香囊": 1,
+      "湖心珍珠": 1,
+      "星纹匕首": 1
+    },
+    "reward_items": {},
+    "reward_hint": "完成仪式后，你将获得‘星之祝福’，可在夜晚短暂飞行。"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_01",
+      "title": "收集红枫露",
+      "category": "side",
+      "description": "千鹤婆婆需要七种不同颜色的晨露来配制治疗怪病的药剂。这些露珠只能在雾隐村周边特定植物上采集。",
+      "objective": "收集红枫露、蓝莓露、黄菊露、紫藤露、绿苔露、白百合露与黑莓露各一份。",
+      "giver_npc_id": "npc_003",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "红枫露": 1,
+        "蓝莓露": 1,
+        "黄菊露": 1
+      },
+      "reward_items": {
+        "疗愈香囊": 1
+      },
+      "reward_hint": "香囊可暂时提升生命恢复速度，并在回音谷中驱散瘴气。"
+    },
+    {
+      "quest_id": "quest_side_02",
+      "title": "湖底的光辉",
+      "category": "side",
+      "description": "小夜相信镜湖深处藏有能实现愿望的珍珠，但她不敢独自潜入。她请求你协助寻找三样护身物品，以抵御湖中寒气与幻象。",
+      "objective": "为小夜准备暖阳琥珀、静心莲与防水油布。",
+      "giver_npc_id": "npc_005",
+      "suggested_location": "loc_003",
+      "required_items": {
+        "暖阳琥珀": 1,
+        "静心莲": 1,
+        "防水油布": 1
+      },
+      "reward_items": {
+        "湖心珍珠": 1
+      },
+      "reward_hint": "这颗珍珠蕴含湖之精灵的祝福，是封印仪式的关键材料。"
+    },
+    {
+      "quest_id": "quest_side_03",
+      "title": "星纹匕首的锻造",
+      "category": "side",
+      "description": "铁匠源次答应打造一把能斩断魔力的匕首，但需要特殊的材料与工具。他要求你从回音谷带回古代锻炉的余烬，并请学者文藏翻译锻造铭文。",
+      "objective": "取得古代余烬、星砂矿与铭文拓片，交给源次。",
+      "giver_npc_id": "npc_004",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "古代余烬": 1,
+        "星砂矿": 1,
+        "铭文拓片": 1
+      },
+      "reward_items": {
+        "星纹匕首": 1
+      },
+      "reward_hint": "匕首可破除魔法屏障，并在星陨丘陵中吸引流星碎片。"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 50.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 30.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 70.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 20.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 80.0,
+      "y": 70.0
+    }
+  ]
+}
