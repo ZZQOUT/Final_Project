@@ -51,6 +51,7 @@ The project focus is **dynamic generation with LLM + engine constraints + RAG me
 - Scrollable chat panel (page does not infinitely extend).
 - Better continuity constraints for identity, tone, and prior context.
 - NPC movement changes generate UI notices.
+- Dialogue-driven NPC personality drift (model can update trust/obedience-style parameters turn by turn).
 
 ### 1.7 Interactive map
 - Zoom + pan map interaction.

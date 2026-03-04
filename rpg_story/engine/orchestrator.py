@@ -86,14 +86,19 @@ class TurnPipeline:
         allowed_items = self._allowed_world_items_brief(state)
         neighbors_context = self._neighbor_brief(state)
         memory_context = self._recent_memory_brief(state)
+        npc_personality_context = self._npc_personality_brief(state, npc_id)
         schema_hint = (
             "Return JSON with keys: narration, npc_dialogue, world_updates, memory_summary, safety. "
             "npc_dialogue is a list of {npc_id, text}. world_updates may include player_location, npc_moves, "
-            "flags_delta, quest_updates, quest_progress_updates, inventory_delta. "
+            "flags_delta, quest_updates, quest_progress_updates, inventory_delta, npc_personality_updates. "
             "npc_moves MUST be a list (use [] if none). "
             "quest_updates MUST be an object/dict; if none, use {}. "
             "quest_progress_updates MUST be a list (use [] if none). "
             "inventory_delta MUST be an object/dict of item->signed int delta; if none, use {}. "
+            "npc_personality_updates MUST be a list (use [] if none). "
+            "Each personality update is {npc_id, obedience_level, stubbornness, risk_tolerance, "
+            "disposition_to_player, refusal_style, confidence, reason}. "
+            "Personality numeric fields are ABSOLUTE values (not deltas). "
             "safety MUST be an object: {refuse: boolean, reason: string|null}."
         )
         user_prompt = (
@@ -111,6 +116,7 @@ class TurnPipeline:
             f"inventory: {inventory_context}\n"
             f"quest_journal: {quest_context}\n"
             f"npc_assigned_quests: {npc_quest_context}\n"
+            f"npc_personality_current: {npc_personality_context}\n"
             f"allowed_world_items: {allowed_items}\n"
             f"recent_story_memory: {memory_context}\n"
             f"{world_constraints}\n"
@@ -134,6 +140,9 @@ class TurnPipeline:
             "Do NOT increase collected_items_delta for item delivery in chat; item delivery is handled by explicit delivery action. "
             "Do NOT invent ad-hoc new quests unless absolutely necessary for world consistency. "
             "If items are found or consumed in-story, update world_updates.inventory_delta accordingly. "
+            "If this dialogue should change NPC attitude/behavior, output ONE npc_personality_updates item for the speaking npc_id "
+            "with absolute values constrained to: obedience/stubbornness/risk_tolerance in [0,1], disposition in [-5,5]. "
+            "For minor or no change, keep npc_personality_updates=[]. "
             "Keep narration brief and optional.\n"
             f"schema_hint: {schema_hint}"
         )
@@ -184,6 +193,7 @@ class TurnPipeline:
         if warning:
             guard_warnings.append(warning)
         output = self._inject_forced_move_if_missing(state, player_text, npc_id, output)
+        output = self._sanitize_personality_updates(output, npc_id)
         state_non_move = apply_turn_output(state, output, npc_id)
 
         move_rejections = []
@@ -408,11 +418,37 @@ class TurnPipeline:
         updated.narration = ""
         return updated
 
+    def _sanitize_personality_updates(self, output: TurnOutput, npc_id: str) -> TurnOutput:
+        updates = output.world_updates.npc_personality_updates
+        if not updates:
+            return output
+        cleaned = [update for update in updates if update.npc_id == npc_id]
+        if len(cleaned) == len(updates):
+            return output
+        updated = output.model_copy(deep=True)
+        updated.world_updates.npc_personality_updates = cleaned
+        return updated
+
     def _inventory_brief(self, state: GameState) -> str:
         if not state.inventory:
             return "{}"
         pairs = [f"{name}:{count}" for name, count in sorted(state.inventory.items())]
         return "{ " + ", ".join(pairs) + " }"
+
+    def _npc_personality_brief(self, state: GameState, npc_id: str) -> str:
+        npc = next((n for n in state.world.npcs if n.npc_id == npc_id), None)
+        if npc is None:
+            return "{}"
+        payload = {
+            "npc_id": npc.npc_id,
+            "name": npc.name,
+            "obedience_level": npc.obedience_level,
+            "stubbornness": npc.stubbornness,
+            "risk_tolerance": npc.risk_tolerance,
+            "disposition_to_player": npc.disposition_to_player,
+            "refusal_style": npc.refusal_style,
+        }
+        return json.dumps(payload, ensure_ascii=False)
 
     def _allowed_world_items(self, state: GameState) -> List[str]:
         seen: Set[str] = set()

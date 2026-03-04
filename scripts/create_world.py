@@ -4,10 +4,19 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+import re
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
 from rpg_story.config import load_config
 from rpg_story.llm.client import QwenOpenAICompatibleClient, MockLLMClient
 from rpg_story.world.generator import create_new_session
+
+
+def _contains_cjk(text: str) -> bool:
+    return bool(re.search(r"[\u4e00-\u9fff]", text or ""))
 
 
 def main() -> None:
@@ -28,25 +37,48 @@ def main() -> None:
     cfg = load_config(args.config)
 
     if args.mock:
-        mock_world = (
-            '{'
-            '"world_id":"world_mock",'
-            '"title":"Mock World",'
-            '"world_bible":{"tech_level":"medieval","magic_rules":"low","tone":"grounded"},'
-            '"locations":['
-            ' {"location_id":"loc_001","name":"Town","kind":"town","description":"A small town.","connected_to":["loc_002"],"tags":[]},'
-            ' {"location_id":"loc_002","name":"Bridge","kind":"bridge","description":"A broken bridge.","connected_to":["loc_001"],"tags":[]}'
-            '],'
-            '"npcs":['
-            ' {"npc_id":"npc_001","name":"Mara","profession":"Merchant","traits":["practical"],"goals":["trade"],"starting_location":"loc_001",'
-            '  "obedience_level":0.5,"stubbornness":0.5,"risk_tolerance":0.5,"disposition_to_player":0,"refusal_style":"polite"}'
-            '],'
-            '"starting_location":"loc_001",'
-            '"starting_hook":"A rumor spreads.",'
-            '"initial_quest":"Deliver a message."'
-            '}'
-        )
-        llm = MockLLMClient([mock_world])
+        if _contains_cjk(world_prompt):
+            mock_world = (
+                '{'
+                '"world_id":"world_mock",'
+                '"title":"测试世界",'
+                '"world_bible":{"tech_level":"medieval","narrative_language":"zh","magic_rules":"低魔","tone":"务实"},'
+                '"locations":['
+                ' {"location_id":"loc_001","name":"晨光镇","kind":"town","description":"一座宁静的小镇。","connected_to":["loc_002"],"tags":[]},'
+                ' {"location_id":"loc_002","name":"断桥","kind":"bridge","description":"一座年久失修的桥。","connected_to":["loc_001"],"tags":[]}'
+                '],'
+                '"npcs":['
+                ' {"npc_id":"npc_001","name":"玛拉","profession":"商人","traits":["务实"],"goals":["交易"],"starting_location":"loc_001",'
+                '  "obedience_level":0.5,"stubbornness":0.5,"risk_tolerance":0.5,"disposition_to_player":0,"refusal_style":"礼貌"}'
+                '],'
+                '"starting_location":"loc_001",'
+                '"starting_hook":"镇里流传着一条奇怪的传闻。",'
+                '"initial_quest":"把消息送到桥对岸。",'
+                '"side_quests":[]'
+                '}'
+            )
+        else:
+            mock_world = (
+                '{'
+                '"world_id":"world_mock",'
+                '"title":"Mock World",'
+                '"world_bible":{"tech_level":"medieval","narrative_language":"en","magic_rules":"low","tone":"grounded"},'
+                '"locations":['
+                ' {"location_id":"loc_001","name":"Town","kind":"town","description":"A small town.","connected_to":["loc_002"],"tags":[]},'
+                ' {"location_id":"loc_002","name":"Bridge","kind":"bridge","description":"A broken bridge.","connected_to":["loc_001"],"tags":[]}'
+                '],'
+                '"npcs":['
+                ' {"npc_id":"npc_001","name":"Mara","profession":"Merchant","traits":["practical"],"goals":["trade"],"starting_location":"loc_001",'
+                '  "obedience_level":0.5,"stubbornness":0.5,"risk_tolerance":0.5,"disposition_to_player":0,"refusal_style":"polite"}'
+                '],'
+                '"starting_location":"loc_001",'
+                '"starting_hook":"A rumor spreads.",'
+                '"initial_quest":"Deliver a message.",'
+                '"side_quests":[]'
+                '}'
+            )
+        # World generation may trigger one or more repair/localization passes.
+        llm = MockLLMClient([mock_world, mock_world, mock_world, mock_world])
     else:
         llm = QwenOpenAICompatibleClient(cfg)
 

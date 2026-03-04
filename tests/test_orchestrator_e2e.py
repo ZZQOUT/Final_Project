@@ -321,3 +321,95 @@ def test_orchestrator_repairs_npc_item_request_to_assigned_side_quest(tmp_path: 
     assert llm.last_user_prompt is not None
     assert "allowed_world_items" in llm.last_user_prompt
     assert "npc_assigned_quests" in llm.last_user_prompt
+
+
+def test_orchestrator_applies_personality_drift(tmp_path: Path):
+    cfg = load_config("configs/config.yaml")
+    sessions_root = tmp_path / "sessions"
+    world = make_world()
+    state = GameState(
+        session_id="sess_personality",
+        created_at=datetime.now(timezone.utc).isoformat(),
+        world=world,
+        player_location="shop",
+        npc_locations={"npc_1": "shop"},
+    )
+
+    output_json = (
+        "{"
+        '"narration":"Mara seems more trusting now.",'
+        '"npc_dialogue":[{"npc_id":"npc_1","text":"I trust you more than before."}],'
+        '"world_updates":{'
+        '  "player_location":"shop",'
+        '  "npc_moves":[],'
+        '  "flags_delta":{},'
+        '  "quest_updates":{},'
+        '  "npc_personality_updates":[{'
+        '    "npc_id":"npc_1",'
+        '    "obedience_level":0.9,'
+        '    "stubbornness":0.1,'
+        '    "risk_tolerance":0.8,'
+        '    "disposition_to_player":4,'
+        '    "refusal_style":"warm and cooperative",'
+        '    "confidence":1.0,'
+        '    "reason":"player consistently kept promises"'
+        "  }]"
+        "},"
+        '"memory_summary":"Mara became more cooperative after repeated reliable dialogue.",'
+        '"safety":{"refuse":false,"reason":null}'
+        "}"
+    )
+    llm = MockLLMClient([output_json])
+    pipeline = TurnPipeline(cfg=cfg, llm_client=llm, sessions_root=sessions_root)
+    updated_state, output, _log = pipeline.run_turn(state, "I kept every promise.", "npc_1")
+
+    npc = next(n for n in updated_state.world.npcs if n.npc_id == "npc_1")
+    assert npc.obedience_level == 0.9
+    assert npc.stubbornness == 0.1
+    assert npc.risk_tolerance == 0.8
+    assert npc.disposition_to_player == 4
+    assert npc.refusal_style == "warm and cooperative"
+    assert output.world_updates.npc_personality_updates
+
+
+def test_orchestrator_personality_drift_uses_confidence_blending(tmp_path: Path):
+    cfg = load_config("configs/config.yaml")
+    sessions_root = tmp_path / "sessions"
+    world = make_world()
+    state = GameState(
+        session_id="sess_personality_blend",
+        created_at=datetime.now(timezone.utc).isoformat(),
+        world=world,
+        player_location="shop",
+        npc_locations={"npc_1": "shop"},
+    )
+
+    output_json = (
+        "{"
+        '"narration":"Mara softens a little.",'
+        '"npc_dialogue":[{"npc_id":"npc_1","text":"Maybe I can trust you a bit more."}],'
+        '"world_updates":{'
+        '  "player_location":"shop",'
+        '  "npc_moves":[],'
+        '  "flags_delta":{},'
+        '  "quest_updates":{},'
+        '  "npc_personality_updates":[{'
+        '    "npc_id":"npc_1",'
+        '    "obedience_level":1.0,'
+        '    "disposition_to_player":5,'
+        '    "confidence":0.5'
+        "  }]"
+        "},"
+        '"memory_summary":"Mara shows moderate trust growth.",'
+        '"safety":{"refuse":false,"reason":null}'
+        "}"
+    )
+    llm = MockLLMClient([output_json])
+    pipeline = TurnPipeline(cfg=cfg, llm_client=llm, sessions_root=sessions_root)
+    updated_state, _output, _log = pipeline.run_turn(state, "Please trust me.", "npc_1")
+
+    npc = next(n for n in updated_state.world.npcs if n.npc_id == "npc_1")
+    # old obedience=0.8, target=1.0, conf=0.5 -> 0.9
+    assert npc.obedience_level == 0.9
+    # old disposition=1, target=5, conf=0.5 -> 3
+    assert npc.disposition_to_player == 3

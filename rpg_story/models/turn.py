@@ -90,6 +90,19 @@ class QuestProgressUpdate(BaseModel):
         return {}
 
 
+class NPCPersonalityUpdate(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    npc_id: str
+    obedience_level: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    stubbornness: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    risk_tolerance: Optional[float] = Field(default=None, ge=0.0, le=1.0)
+    disposition_to_player: Optional[int] = Field(default=None, ge=-5, le=5)
+    refusal_style: Optional[str] = None
+    confidence: float = Field(default=0.7, ge=0.0, le=1.0)
+    reason: Optional[str] = None
+
+
 class WorldUpdates(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -99,6 +112,7 @@ class WorldUpdates(BaseModel):
     quest_updates: Dict[str, str] = Field(default_factory=dict)
     quest_progress_updates: List[QuestProgressUpdate] = Field(default_factory=list)
     inventory_delta: Dict[str, int] = Field(default_factory=dict)
+    npc_personality_updates: List[NPCPersonalityUpdate] = Field(default_factory=list)
 
     @field_validator("npc_moves", mode="before")
     @classmethod
@@ -179,6 +193,19 @@ class WorldUpdates(BaseModel):
                     raise ValueError("inventory_delta delta must be numeric") from exc
             return result
         raise ValueError("inventory_delta must be an object (dict) or []")
+
+    @field_validator("npc_personality_updates", mode="before")
+    @classmethod
+    def _normalize_personality_updates(cls, v: Any) -> Any:
+        if v is None:
+            return []
+        if isinstance(v, dict):
+            if not v:
+                return []
+            return [v]
+        if isinstance(v, list):
+            return v
+        raise ValueError("npc_personality_updates must be a list (use [] if none)")
 
 
 class SafetyFlag(BaseModel):

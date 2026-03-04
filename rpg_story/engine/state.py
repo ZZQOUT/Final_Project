@@ -5,7 +5,7 @@ from typing import Dict, Any
 import re
 
 from rpg_story.models.world import GameState
-from rpg_story.models.turn import TurnOutput, QuestProgressUpdate
+from rpg_story.models.turn import TurnOutput, QuestProgressUpdate, NPCPersonalityUpdate
 
 _ITEM_ALIAS_TO_CANONICAL = {
     "口粮": "ration",
@@ -63,6 +63,13 @@ def apply_turn_output(state: GameState, output: TurnOutput, npc_id: str) -> Game
     inventory = data.get("inventory", {})
     _merge_inventory(inventory, output.world_updates.inventory_delta)
     data["inventory"] = inventory
+
+    # Dialogue-driven personality drift for current NPC.
+    _apply_npc_personality_updates(
+        data,
+        output.world_updates.npc_personality_updates,
+        active_npc_id=npc_id,
+    )
 
     # Structured quest progress updates
     for update in output.world_updates.quest_progress_updates:
@@ -529,6 +536,96 @@ def _merge_inventory(inventory: Dict[str, Any], delta: Dict[str, int]) -> None:
             inventory.pop(item, None)
         else:
             inventory[item] = new_value
+
+
+def _apply_npc_personality_updates(
+    data: Dict[str, Any],
+    updates: list[NPCPersonalityUpdate],
+    *,
+    active_npc_id: str,
+) -> None:
+    if not updates:
+        return
+    world = data.get("world")
+    if not isinstance(world, dict):
+        return
+    npcs = world.get("npcs")
+    if not isinstance(npcs, list):
+        return
+    npc_by_id: Dict[str, Dict[str, Any]] = {}
+    for raw in npcs:
+        if not isinstance(raw, dict):
+            continue
+        npc_key = str(raw.get("npc_id") or "").strip()
+        if npc_key:
+            npc_by_id[npc_key] = raw
+
+    for update in updates:
+        npc_key = str(update.npc_id or "").strip()
+        if not npc_key or npc_key != active_npc_id:
+            # Keep drift strictly local to the speaking NPC for stability.
+            continue
+        npc = npc_by_id.get(npc_key)
+        if not npc:
+            continue
+        confidence = _clamp(float(update.confidence), 0.0, 1.0)
+        _blend_float(npc, "obedience_level", update.obedience_level, confidence, lo=0.0, hi=1.0)
+        _blend_float(npc, "stubbornness", update.stubbornness, confidence, lo=0.0, hi=1.0)
+        _blend_float(npc, "risk_tolerance", update.risk_tolerance, confidence, lo=0.0, hi=1.0)
+        _blend_int(
+            npc,
+            "disposition_to_player",
+            update.disposition_to_player,
+            confidence,
+            lo=-5,
+            hi=5,
+        )
+        if update.refusal_style:
+            style = str(update.refusal_style).strip()
+            if style and confidence >= 0.55:
+                npc["refusal_style"] = style
+
+
+def _blend_float(
+    npc: Dict[str, Any],
+    key: str,
+    target: float | None,
+    confidence: float,
+    *,
+    lo: float,
+    hi: float,
+) -> None:
+    if target is None:
+        return
+    try:
+        current = float(npc.get(key, target))
+    except Exception:
+        current = float(target)
+    blended = current + (float(target) - current) * _clamp(confidence, 0.0, 1.0)
+    npc[key] = round(_clamp(blended, lo, hi), 3)
+
+
+def _blend_int(
+    npc: Dict[str, Any],
+    key: str,
+    target: int | None,
+    confidence: float,
+    *,
+    lo: int,
+    hi: int,
+) -> None:
+    if target is None:
+        return
+    try:
+        current = int(float(npc.get(key, target)))
+    except Exception:
+        current = int(target)
+    blended = float(current) + (float(target) - float(current)) * _clamp(confidence, 0.0, 1.0)
+    npc[key] = int(round(_clamp(blended, float(lo), float(hi))))
+
+
+def _clamp(value: float, lo: float, hi: float) -> float:
+    return max(lo, min(hi, value))
 
 
 def _fallback_title(quest_id: str) -> str:
