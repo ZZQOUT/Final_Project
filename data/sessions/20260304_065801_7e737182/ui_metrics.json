@@ -1,0 +1,17 @@
+{
+  "world_generation_seconds": 94.85,
+  "dialogue_turns": [
+    {
+      "timestamp": "2026-03-04T07:00:53.722442+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 1,
+      "seconds": 8.848
+    },
+    {
+      "timestamp": "2026-03-04T07:01:46.432043+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 2,
+      "seconds": 8.514
+    }
+  ]
+}
