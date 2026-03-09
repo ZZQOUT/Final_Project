@@ -1,0 +1,460 @@
+{
+  "session_id": "20260309_141823_c48b7e5e",
+  "created_at": "2026-03-09T14:19:44.827903+00:00",
+  "world": {
+    "world_id": "w_santi_001",
+    "title": "三体入侵",
+    "world_bible": {
+      "tech_level": "modern",
+      "narrative_language": "zh",
+      "magic_rules": "无魔法，基于现实物理法则，但存在三体文明的高维科技与智子干扰。",
+      "tone": "紧张、悬疑、硬科幻",
+      "anachronism_policy": null,
+      "taboos": [
+        "不得使用超自然解释",
+        "不得违背已知物理定律（除非由三体科技引起）"
+      ],
+      "do_not_mention": [],
+      "anachronism_blocklist": []
+    },
+    "locations": [
+      {
+        "location_id": "loc_001",
+        "name": "北京地下指挥中心",
+        "kind": "town",
+        "description": "人类抵抗军的秘密总部，位于北京地下深处，布满电子屏幕和通讯设备，空气中弥漫着紧张与咖啡味。",
+        "connected_to": [
+          "loc_002",
+          "loc_003"
+        ],
+        "tags": [
+          "safe",
+          "tech",
+          "military"
+        ]
+      },
+      {
+        "location_id": "loc_002",
+        "name": "上海量子实验室",
+        "kind": "town",
+        "description": "曾是全球顶尖的量子研究基地，如今部分设施被三体人破坏，但仍藏有关键数据和实验样本。",
+        "connected_to": [
+          "loc_001",
+          "loc_004"
+        ],
+        "tags": [
+          "science",
+          "ruined",
+          "dangerous"
+        ]
+      },
+      {
+        "location_id": "loc_003",
+        "name": "内蒙古雷达阵列站",
+        "kind": "town",
+        "description": "广袤草原上的巨型射电望远镜群，用于监听宇宙信号，最近频繁接收到来自三体舰队的异常脉冲。",
+        "connected_to": [
+          "loc_001",
+          "loc_005"
+        ],
+        "tags": [
+          "remote",
+          "surveillance",
+          "exposed"
+        ]
+      },
+      {
+        "location_id": "loc_004",
+        "name": "南海深海探测平台",
+        "kind": "dungeon",
+        "description": "一座半沉没的海上平台，科学家在此发现三体人投放的水下监听器，内部结构复杂且充满未知风险。",
+        "connected_to": [
+          "loc_002"
+        ],
+        "tags": [
+          "underwater",
+          "hostile",
+          "clue-rich"
+        ]
+      },
+      {
+        "location_id": "loc_005",
+        "name": "敦煌数据掩体",
+        "kind": "castle",
+        "description": "利用莫高窟地形改造的数字文明备份库，保存着人类文明的关键数据，防御系统由AI控制。",
+        "connected_to": [
+          "loc_003"
+        ],
+        "tags": [
+          "archive",
+          "secure",
+          "ancient-modern"
+        ]
+      }
+    ],
+    "npcs": [
+      {
+        "npc_id": "npc_001",
+        "name": "林峰",
+        "profession": "抵抗军指挥官",
+        "traits": [
+          "果断",
+          "多疑",
+          "爱国"
+        ],
+        "goals": [
+          "整合全球资源对抗三体",
+          "保护人类文明火种"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.7,
+        "stubbornness": 0.6,
+        "risk_tolerance": 0.8,
+        "disposition_to_player": 3,
+        "refusal_style": "如果你不能证明自己的价值，我不会让你接触核心计划。"
+      },
+      {
+        "npc_id": "npc_006",
+        "name": "李婉如",
+        "profession": "医疗官",
+        "traits": [
+          "温柔",
+          "坚定",
+          "富有同情心"
+        ],
+        "goals": [
+          "救治伤员",
+          "维持士气"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.95,
+        "stubbornness": 0.2,
+        "risk_tolerance": 0.6,
+        "disposition_to_player": 4,
+        "refusal_style": "你的伤还没好，先休息一下吧。"
+      },
+      {
+        "npc_id": "npc_007",
+        "name": "张伟",
+        "profession": "后勤协调员",
+        "traits": [
+          "务实",
+          "幽默",
+          "可靠"
+        ],
+        "goals": [
+          "保障物资供应",
+          "协助人员调度"
+        ],
+        "starting_location": "loc_001",
+        "obedience_level": 0.9,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": 3,
+        "refusal_style": "东西可以给，但得排队登记，规矩不能坏。"
+      },
+      {
+        "npc_id": "npc_002",
+        "name": "陈思源",
+        "profession": "量子物理学家",
+        "traits": [
+          "专注",
+          "内向",
+          "理想主义"
+        ],
+        "goals": [
+          "破解智子封锁",
+          "恢复基础科学研究"
+        ],
+        "starting_location": "loc_002",
+        "obedience_level": 0.9,
+        "stubbornness": 0.3,
+        "risk_tolerance": 0.4,
+        "disposition_to_player": 2,
+        "refusal_style": "我需要安静……除非你带来实验数据，否则别打扰我。"
+      },
+      {
+        "npc_id": "npc_003",
+        "name": "王雅婷",
+        "profession": "雷达工程师",
+        "traits": [
+          "冷静",
+          "细致",
+          "孤独"
+        ],
+        "goals": [
+          "定位三体舰队坐标",
+          "修复受损天线"
+        ],
+        "starting_location": "loc_003",
+        "obedience_level": 0.8,
+        "stubbornness": 0.4,
+        "risk_tolerance": 0.5,
+        "disposition_to_player": 1,
+        "refusal_style": "信号分析不能被打断，等我完成这组数据再说话。"
+      },
+      {
+        "npc_id": "npc_004",
+        "name": "赵大海",
+        "profession": "深海潜水员",
+        "traits": [
+          "勇敢",
+          "粗犷",
+          "忠诚"
+        ],
+        "goals": [
+          "回收三体监听器",
+          "保护海洋科研团队"
+        ],
+        "starting_location": "loc_004",
+        "obedience_level": 0.85,
+        "stubbornness": 0.5,
+        "risk_tolerance": 0.9,
+        "disposition_to_player": 4,
+        "refusal_style": "兄弟，只要你不怕水，我就带你下去！"
+      },
+      {
+        "npc_id": "npc_005",
+        "name": "苏明哲",
+        "profession": "AI安全专家",
+        "traits": [
+          "谨慎",
+          "逻辑性强",
+          "孤僻"
+        ],
+        "goals": [
+          "防止AI叛变",
+          "维护数据掩体完整性"
+        ],
+        "starting_location": "loc_005",
+        "obedience_level": 0.6,
+        "stubbornness": 0.7,
+        "risk_tolerance": 0.3,
+        "disposition_to_player": 0,
+        "refusal_style": "身份未验证，禁止访问核心数据库。"
+      }
+    ],
+    "starting_location": "loc_001",
+    "starting_hook": "你从昏迷中醒来，发现自己身处北京地下指挥中心。林峰指挥官告诉你，三体舰队已进入太阳系边缘，人类最后的希望在于启动“面壁者协议”，但需要三项关键组件才能激活。",
+    "initial_quest": "寻找启动“面壁者协议”所需的三项关键组件。",
+    "main_quest": {
+      "quest_id": "quest_main_001",
+      "title": "启动面壁者协议",
+      "category": "main",
+      "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+      "objective": "完成支线并收集关键道具：量子密钥 x1，舰队坐标图 x1，文明火种芯片 x1",
+      "giver_npc_id": "npc_001",
+      "suggested_location": "loc_001",
+      "required_items": {
+        "量子密钥": 1,
+        "舰队坐标图": 1,
+        "文明火种芯片": 1
+      },
+      "reward_items": {},
+      "reward_hint": "协议启动后，三体舰队将暂时失联，人类获得战略窗口。"
+    },
+    "side_quests": [
+      {
+        "quest_id": "quest_side_001",
+        "title": "修复量子纠缠装置",
+        "category": "side",
+        "description": "陈思源需要特定材料来修复实验室的量子纠缠装置，以生成对抗智子的密钥。",
+        "objective": "为陈思源带回超导铌线圈、液氦冷却罐和校准激光器。",
+        "giver_npc_id": "npc_002",
+        "suggested_location": "loc_002",
+        "required_items": {
+          "超导铌线圈": 1,
+          "液氦冷却罐": 1,
+          "校准激光器": 1
+        },
+        "reward_items": {
+          "量子密钥": 1
+        },
+        "reward_hint": "成功修复后，你将获得可用于主任务的量子密钥。"
+      },
+      {
+        "quest_id": "quest_side_002",
+        "title": "绘制三体舰队轨迹",
+        "category": "side",
+        "description": "王雅婷需要更多数据点来精确计算三体舰队的飞行路径。",
+        "objective": "从南海平台和敦煌掩体获取额外的信号日志和轨道残片。（需求：深海信号日志 x1，轨道金属残片 x1，脉冲校准器 x1）",
+        "giver_npc_id": "npc_003",
+        "suggested_location": "loc_003",
+        "required_items": {
+          "深海信号日志": 1,
+          "轨道金属残片": 1,
+          "脉冲校准器": 1
+        },
+        "reward_items": {
+          "舰队坐标图": 1
+        },
+        "reward_hint": "完整的轨迹图将揭示三体舰队的弱点。"
+      },
+      {
+        "quest_id": "quest_side_003",
+        "title": "解锁文明火种",
+        "category": "side",
+        "description": "苏明哲的AI系统要求验证三项物理凭证才能授权访问文明火种芯片。",
+        "objective": "找到敦煌壁画拓片、碳基存储棒和生物密钥卡。",
+        "giver_npc_id": "npc_005",
+        "suggested_location": "loc_005",
+        "required_items": {
+          "敦煌壁画拓片": 1,
+          "碳基存储棒": 1,
+          "生物密钥卡": 1
+        },
+        "reward_items": {
+          "文明火种芯片": 1
+        },
+        "reward_hint": "芯片包含人类文明精华，是面壁者协议的核心。"
+      }
+    ],
+    "map_layout": [
+      {
+        "location_id": "loc_001",
+        "x": 50.0,
+        "y": 50.0
+      },
+      {
+        "location_id": "loc_002",
+        "x": 70.0,
+        "y": 30.0
+      },
+      {
+        "location_id": "loc_003",
+        "x": 30.0,
+        "y": 30.0
+      },
+      {
+        "location_id": "loc_004",
+        "x": 80.0,
+        "y": 20.0
+      },
+      {
+        "location_id": "loc_005",
+        "x": 20.0,
+        "y": 20.0
+      }
+    ]
+  },
+  "player_location": "loc_001",
+  "npc_locations": {
+    "npc_001": "loc_001",
+    "npc_006": "loc_001",
+    "npc_007": "loc_001",
+    "npc_002": "loc_002",
+    "npc_003": "loc_003",
+    "npc_004": "loc_004",
+    "npc_005": "loc_005"
+  },
+  "flags": {},
+  "quests": {
+    "quest_main_001": "active",
+    "quest_side_001": "active",
+    "quest_side_002": "active",
+    "quest_side_003": "active"
+  },
+  "quest_journal": {
+    "quest_main_001": {
+      "quest_id": "quest_main_001",
+      "title": "启动面壁者协议",
+      "category": "main",
+      "status": "active",
+      "objective": "完成支线并收集关键道具：量子密钥 x1，舰队坐标图 x1，文明火种芯片 x1",
+      "guidance": "主线准备进度：量子密钥 0/1，舰队坐标图 0/1，文明火种芯片 0/1",
+      "giver_npc_id": "npc_001",
+      "required_items": {
+        "量子密钥": 1,
+        "舰队坐标图": 1,
+        "文明火种芯片": 1
+      },
+      "collected_items": {
+        "量子密钥": 0,
+        "舰队坐标图": 0,
+        "文明火种芯片": 0
+      },
+      "reward_items": {},
+      "reward_hint": "协议启动后，三体舰队将暂时失联，人类获得战略窗口。"
+    },
+    "quest_side_001": {
+      "quest_id": "quest_side_001",
+      "title": "修复量子纠缠装置",
+      "category": "side",
+      "status": "active",
+      "objective": "为陈思源带回超导铌线圈、液氦冷却罐和校准激光器。",
+      "guidance": "交付进度：超导铌线圈 已交付0/1（背包0），液氦冷却罐 已交付0/1（背包0），校准激光器 已交付0/1（背包0）",
+      "giver_npc_id": "npc_002",
+      "required_items": {
+        "超导铌线圈": 1,
+        "液氦冷却罐": 1,
+        "校准激光器": 1
+      },
+      "collected_items": {
+        "超导铌线圈": 0,
+        "液氦冷却罐": 0,
+        "校准激光器": 0
+      },
+      "reward_items": {
+        "量子密钥": 1
+      },
+      "reward_hint": "成功修复后，你将获得可用于主任务的量子密钥。"
+    },
+    "quest_side_002": {
+      "quest_id": "quest_side_002",
+      "title": "绘制三体舰队轨迹",
+      "category": "side",
+      "status": "active",
+      "objective": "从南海平台和敦煌掩体获取额外的信号日志和轨道残片。（需求：深海信号日志 x1，轨道金属残片 x1，脉冲校准器 x1）",
+      "guidance": "交付进度：深海信号日志 已交付0/1（背包0），轨道金属残片 已交付0/1（背包0），脉冲校准器 已交付0/1（背包0）",
+      "giver_npc_id": "npc_003",
+      "required_items": {
+        "深海信号日志": 1,
+        "轨道金属残片": 1,
+        "脉冲校准器": 1
+      },
+      "collected_items": {
+        "深海信号日志": 0,
+        "轨道金属残片": 0,
+        "脉冲校准器": 0
+      },
+      "reward_items": {
+        "舰队坐标图": 1
+      },
+      "reward_hint": "完整的轨迹图将揭示三体舰队的弱点。"
+    },
+    "quest_side_003": {
+      "quest_id": "quest_side_003",
+      "title": "解锁文明火种",
+      "category": "side",
+      "status": "active",
+      "objective": "找到敦煌壁画拓片、碳基存储棒和生物密钥卡。",
+      "guidance": "交付进度：敦煌壁画拓片 已交付0/1（背包0），碳基存储棒 已交付0/1（背包0），生物密钥卡 已交付0/1（背包0）",
+      "giver_npc_id": "npc_005",
+      "required_items": {
+        "敦煌壁画拓片": 1,
+        "碳基存储棒": 1,
+        "生物密钥卡": 1
+      },
+      "collected_items": {
+        "敦煌壁画拓片": 0,
+        "碳基存储棒": 0,
+        "生物密钥卡": 0
+      },
+      "reward_items": {
+        "文明火种芯片": 1
+      },
+      "reward_hint": "芯片包含人类文明精华，是面壁者协议的核心。"
+    }
+  },
+  "main_quest_id": "quest_main_001",
+  "inventory": {},
+  "location_resource_stock": {
+    "loc_001": {
+      "深海信号日志": 2,
+      "轨道金属残片": 1,
+      "脉冲校准器": 1
+    }
+  },
+  "recent_summaries": [],
+  "last_turn_id": 0
+}

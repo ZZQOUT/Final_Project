@@ -6,7 +6,6 @@ from collections import deque
 from datetime import datetime, timezone
 import html
 import json
-import os
 import re
 import sys
 import time
@@ -1271,7 +1270,7 @@ def _render_story_summary_page(summary_record: dict, prefer_chinese: bool) -> No
 cfg = load_config("configs/config.yaml")
 sessions_root = default_sessions_root(cfg)
 api_key_env = cfg.llm.api_key_env or "DASHSCOPE_API_KEY"
-has_api_key = bool(os.getenv(api_key_env))
+has_api_key = bool((cfg.llm.api_key or "").strip())
 
 if "session_id" not in st.session_state:
     st.session_state.session_id = None

@@ -105,6 +105,69 @@ def _load_env() -> None:
         load_dotenv(dotenv_path=Path(".env"), override=False)
 
 
+def _read_mapping_value(mapping: Any, key: str) -> Any:
+    try:
+        return mapping.get(key)
+    except Exception:
+        pass
+    try:
+        return mapping[key]
+    except Exception:
+        return None
+
+
+def _as_non_empty_str(value: Any) -> str:
+    if not isinstance(value, str):
+        return ""
+    return value.strip()
+
+
+def _get_streamlit_secrets() -> Any | None:
+    try:
+        import streamlit as st  # type: ignore
+    except Exception:
+        return None
+    try:
+        return st.secrets
+    except Exception:
+        return None
+
+
+def _streamlit_top_level(secrets_obj: Any | None, *keys: str) -> str:
+    if secrets_obj is None:
+        return ""
+    for key in keys:
+        if not key:
+            continue
+        value = _as_non_empty_str(_read_mapping_value(secrets_obj, key))
+        if value:
+            return value
+    return ""
+
+
+def _streamlit_section(secrets_obj: Any | None, section: str, *keys: str) -> str:
+    if secrets_obj is None or not section:
+        return ""
+    section_obj = _read_mapping_value(secrets_obj, section)
+    if section_obj is None:
+        return ""
+    for key in keys:
+        if not key:
+            continue
+        value = _as_non_empty_str(_read_mapping_value(section_obj, key))
+        if value:
+            return value
+    return ""
+
+
+def _first_non_empty(*values: str) -> str:
+    for value in values:
+        text = str(value).strip()
+        if text:
+            return text
+    return ""
+
+
 def _require_section(cfg: Dict[str, Any], key: str) -> Dict[str, Any]:
     if key not in cfg or not isinstance(cfg[key], dict):
         raise ValueError(f"Missing or invalid config section: {key}")
@@ -125,17 +188,40 @@ def load_config(config_path: str = "configs/config.yaml") -> AppConfig:
     rag_cfg = _require_section(data, "rag")
     worldgen_cfg = _require_section(data, "worldgen")
     logging_cfg = _require_section(data, "logging")
+    secrets_obj = _get_streamlit_secrets()
 
     # Environment overrides (base URL / model)
-    env_base_url = os.getenv("LLM_BASE_URL", "")
-    env_model = os.getenv("LLM_MODEL", "")
+    env_base_url = _first_non_empty(
+        os.getenv("LLM_BASE_URL", ""),
+        os.getenv("BASE_URL", ""),
+        _streamlit_top_level(secrets_obj, "LLM_BASE_URL", "BASE_URL"),
+        _streamlit_section(secrets_obj, "llm", "base_url", "BASE_URL"),
+        _streamlit_section(secrets_obj, "openai", "base_url", "BASE_URL"),
+        _streamlit_section(secrets_obj, "dashscope", "base_url", "BASE_URL"),
+    )
+    env_model = _first_non_empty(
+        os.getenv("LLM_MODEL", ""),
+        os.getenv("MODEL_NAME", ""),
+        _streamlit_top_level(secrets_obj, "LLM_MODEL", "MODEL_NAME"),
+        _streamlit_section(secrets_obj, "llm", "model", "MODEL_NAME"),
+        _streamlit_section(secrets_obj, "openai", "model", "MODEL_NAME"),
+        _streamlit_section(secrets_obj, "dashscope", "model", "MODEL_NAME"),
+    )
 
     llm_base_url = env_base_url or str(llm_cfg.get("base_url", ""))
     llm_model = env_model or str(llm_cfg.get("model", ""))
     api_key_env = str(llm_cfg.get("api_key_env", "DASHSCOPE_API_KEY"))
-    api_key = os.getenv(api_key_env, "")
-    if not api_key and api_key_env != "DASHSCOPE_API_KEY":
-        api_key = os.getenv("DASHSCOPE_API_KEY", "")
+    api_key = _first_non_empty(
+        os.getenv(api_key_env, ""),
+        os.getenv("DASHSCOPE_API_KEY", "") if api_key_env != "DASHSCOPE_API_KEY" else "",
+        os.getenv("OPENAI_API_KEY", ""),
+        _streamlit_top_level(secrets_obj, api_key_env),
+        _streamlit_top_level(secrets_obj, "DASHSCOPE_API_KEY") if api_key_env != "DASHSCOPE_API_KEY" else "",
+        _streamlit_top_level(secrets_obj, "OPENAI_API_KEY"),
+        _streamlit_section(secrets_obj, "llm", "api_key", "API_KEY"),
+        _streamlit_section(secrets_obj, "openai", "api_key", "API_KEY"),
+        _streamlit_section(secrets_obj, "dashscope", "api_key", "API_KEY"),
+    )
 
     app = AppSection(
         name=str(app_cfg.get("name", "app")),

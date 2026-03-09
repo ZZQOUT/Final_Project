@@ -124,6 +124,23 @@ DASHSCOPE_API_KEY=your_key_here
 # LLM_MODEL=qwen3-max
 ```
 
+For Streamlit Community Cloud, set secrets in **Advanced settings -> Secrets** (TOML):
+```toml
+DASHSCOPE_API_KEY = "your_key_here"
+LLM_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+LLM_MODEL = "qwen3-max"
+```
+
+The app also accepts these aliases in Streamlit secrets:
+- top-level: `OPENAI_API_KEY`, `BASE_URL`, `MODEL_NAME`
+- section style:
+```toml
+[openai]
+api_key = "your_key_here"
+base_url = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+model = "qwen3-max"
+```
+
 ---
 
 ## 4. Run

@@ -104,6 +104,8 @@ class QwenOpenAICompatibleClient(BaseLLMClient):
 
     @staticmethod
     def _read_api_key(config: AppConfig) -> str:
+        if config.llm.api_key:
+            return config.llm.api_key
         api_key_env = config.llm.api_key_env or "DASHSCOPE_API_KEY"
         api_key = os.getenv(api_key_env, "")
         if not api_key and api_key_env != "DASHSCOPE_API_KEY":
@@ -114,11 +116,15 @@ class QwenOpenAICompatibleClient(BaseLLMClient):
                     RuntimeWarning,
                 )
                 api_key = fallback
+        if not api_key:
+            api_key = os.getenv("OPENAI_API_KEY", "")
         return api_key
 
     def _require_api_key(self) -> None:
         if not self.api_key:
-            raise ValueError("Missing DASHSCOPE_API_KEY (set it in .env or environment)")
+            raise ValueError(
+                "Missing API key (set it in Streamlit secrets, .env, or environment variables)"
+            )
 
     def _should_retry(self, exc: Exception) -> bool:
         if isinstance(exc, (APITimeoutError, APIConnectionError, RateLimitError)):
