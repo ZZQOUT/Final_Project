@@ -1,0 +1,47 @@
+{
+  "world_generation_seconds": 67.673,
+  "dialogue_turns": [
+    {
+      "timestamp": "2026-03-15T13:33:56.820140+00:00",
+      "npc_id": "npc_007",
+      "turn_id": 1,
+      "seconds": 5.148
+    },
+    {
+      "timestamp": "2026-03-15T13:34:23.676134+00:00",
+      "npc_id": "npc_007",
+      "turn_id": 2,
+      "seconds": 6.666
+    },
+    {
+      "timestamp": "2026-03-15T13:34:48.524409+00:00",
+      "npc_id": "npc_002",
+      "turn_id": 3,
+      "seconds": 7.154
+    },
+    {
+      "timestamp": "2026-03-15T13:35:09.168273+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 4,
+      "seconds": 9.328
+    },
+    {
+      "timestamp": "2026-03-15T13:35:43.371543+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 5,
+      "seconds": 11.209
+    },
+    {
+      "timestamp": "2026-03-15T13:36:19.356876+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 6,
+      "seconds": 9.439
+    },
+    {
+      "timestamp": "2026-03-15T13:37:26.467679+00:00",
+      "npc_id": "npc_001",
+      "turn_id": 7,
+      "seconds": 13.793
+    }
+  ]
+}

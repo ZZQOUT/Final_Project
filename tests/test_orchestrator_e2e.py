@@ -323,6 +323,83 @@ def test_orchestrator_repairs_npc_item_request_to_assigned_side_quest(tmp_path: 
     assert "npc_assigned_quests" in llm.last_user_prompt
 
 
+def test_orchestrator_prompt_forbids_nonquest_npc_collection_request(tmp_path: Path):
+    cfg = load_config("configs/config.yaml")
+    sessions_root = tmp_path / "sessions"
+    world = make_world()
+    state = GameState(
+        session_id="sess_nonquest_prompt",
+        created_at=datetime.now(timezone.utc).isoformat(),
+        world=world,
+        player_location="shop",
+        npc_locations={"npc_1": "shop"},
+        location_resource_stock={"bridge": {"healing_herb": 2}},
+    )
+
+    output_json = (
+        "{"
+        '"narration":"",'
+        '"npc_dialogue":[{"npc_id":"npc_1","text":"I can tell you what is happening around town."}],'
+        '"world_updates":{"player_location":"shop","npc_moves":[],"flags_delta":{},"quest_updates":{}},'
+        '"memory_summary":"",'
+        '"safety":{"refuse":false,"reason":null}'
+        "}"
+    )
+    llm = MockLLMClient([output_json])
+    pipeline = TurnPipeline(cfg=cfg, llm_client=llm, sessions_root=sessions_root)
+
+    _updated_state, _output, _log = pipeline.run_turn(state, "Any work for me?", "npc_1")
+
+    assert llm.last_user_prompt is not None
+    assert "If npc_assigned_quests is empty, this NPC must NOT ask the player to collect, bring, deliver, or submit any items." in llm.last_user_prompt
+    assert "If the player asks about collection work anyway, say this NPC has no item-collection commission." in llm.last_user_prompt
+
+
+def test_orchestrator_repairs_nonquest_npc_collection_request(tmp_path: Path):
+    cfg = load_config("configs/config.yaml")
+    sessions_root = tmp_path / "sessions"
+    world = make_world()
+    state = GameState(
+        session_id="sess_nonquest_repair",
+        created_at=datetime.now(timezone.utc).isoformat(),
+        world=world,
+        player_location="shop",
+        npc_locations={"npc_1": "shop"},
+        location_resource_stock={"bridge": {"healing_herb": 2}},
+    )
+
+    first_output = (
+        "{"
+        '"narration":"",'
+        '"npc_dialogue":[{"npc_id":"npc_1","text":"Mara: Bring me three dragon crystals and I will think about it."}],'
+        '"world_updates":{"player_location":"shop","npc_moves":[],"flags_delta":{},"quest_updates":{}},'
+        '"memory_summary":"",'
+        '"safety":{"refuse":false,"reason":null}'
+        "}"
+    )
+    repaired_output = (
+        "{"
+        '"narration":"",'
+        '"npc_dialogue":[{"npc_id":"npc_1","text":"Mara: I do not have any item-collection errand for you. Ask me about the town instead."}],'
+        '"world_updates":{"player_location":"shop","npc_moves":[],"flags_delta":{},"quest_updates":{}},'
+        '"memory_summary":"",'
+        '"safety":{"refuse":false,"reason":null}'
+        "}"
+    )
+    llm = MockLLMClient([first_output, repaired_output])
+    pipeline = TurnPipeline(cfg=cfg, llm_client=llm, sessions_root=sessions_root)
+
+    _updated_state, output, _log = pipeline.run_turn(state, "What do you need?", "npc_1")
+
+    assert llm.calls == 2
+    assert output.npc_dialogue
+    text = output.npc_dialogue[0].text
+    assert "item-collection errand" in text
+    assert "dragon crystals" not in text
+    assert llm.last_user_prompt is not None
+    assert "npc_assigned_quests=[]" in llm.last_user_prompt
+
+
 def test_orchestrator_applies_personality_drift(tmp_path: Path):
     cfg = load_config("configs/config.yaml")
     sessions_root = tmp_path / "sessions"

@@ -1,0 +1,362 @@
+{
+  "world_id": "w_dq001",
+  "title": "勇者斗恶龙",
+  "world_bible": {
+    "tech_level": "medieval",
+    "narrative_language": "zh",
+    "magic_rules": "魔法源自古代符文与自然元素，需通过吟唱或法杖引导。只有经过训练的法师才能安全施法，否则可能引发反噬。",
+    "tone": "史诗奇幻，略带幽默与怀旧感，强调勇气、牺牲与成长。",
+    "anachronism_policy": "严格禁止现代科技与概念混入中世纪奇幻设定。",
+    "taboos": [
+      "不可提及真实世界国家",
+      "不可使用现代俚语",
+      "不可出现非奇幻生物如外星人"
+    ],
+    "do_not_mention": [
+      "智能手机",
+      "互联网",
+      "信用卡",
+      "汽车",
+      "电力",
+      "枪械",
+      "塑料",
+      "电脑"
+    ],
+    "anachronism_blocklist": []
+  },
+  "locations": [
+    {
+      "location_id": "loc_001",
+      "name": "晨露村",
+      "kind": "town",
+      "description": "宁静的小村庄，被晨雾笼罩，村民以耕种和采集为生。村中央有一口古老的许愿井。",
+      "connected_to": [
+        "loc_002",
+        "loc_003"
+      ],
+      "tags": [
+        "和平",
+        "农业",
+        "起点"
+      ]
+    },
+    {
+      "location_id": "loc_002",
+      "name": "幽影森林",
+      "kind": "forest",
+      "description": "浓密的森林，阳光难以穿透，常有哥布林出没。深处据说藏有精灵遗迹。",
+      "connected_to": [
+        "loc_001",
+        "loc_004"
+      ],
+      "tags": [
+        "危险",
+        "神秘",
+        "探索"
+      ]
+    },
+    {
+      "location_id": "loc_003",
+      "name": "铁砧镇",
+      "kind": "town",
+      "description": "热闹的工匠小镇，以锻造武器和盔甲闻名。镇中心有座熔岩喷泉，用于淬火。",
+      "connected_to": [
+        "loc_001",
+        "loc_005"
+      ],
+      "tags": [
+        "工业",
+        "交易",
+        "喧闹"
+      ]
+    },
+    {
+      "location_id": "loc_004",
+      "name": "水晶洞窟",
+      "kind": "dungeon",
+      "description": "地下洞穴系统，墙壁镶嵌着发光水晶，是地底蜥蜴人的巢穴。",
+      "connected_to": [
+        "loc_002"
+      ],
+      "tags": [
+        "地下",
+        "宝藏",
+        "战斗"
+      ]
+    },
+    {
+      "location_id": "loc_005",
+      "name": "龙脊山",
+      "kind": "mountain",
+      "description": "高耸入云的险峻山脉，山顶终年积雪，传说中恶龙盘踞于此。",
+      "connected_to": [
+        "loc_003"
+      ],
+      "tags": [
+        "终局",
+        "挑战",
+        "寒冷"
+      ]
+    }
+  ],
+  "npcs": [
+    {
+      "npc_id": "npc_001",
+      "name": "艾拉",
+      "profession": "村长",
+      "traits": [
+        "慈祥",
+        "智慧",
+        "啰嗦"
+      ],
+      "goals": [
+        "保护村民安全",
+        "寻找失踪的孙女"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.8,
+      "stubbornness": 0.3,
+      "risk_tolerance": 0.2,
+      "disposition_to_player": 3,
+      "refusal_style": "唉，年轻人，这事可不能急，得先准备好才行。"
+    },
+    {
+      "npc_id": "npc_002",
+      "name": "托比",
+      "profession": "信使",
+      "traits": [
+        "健谈",
+        "可靠",
+        "胆小"
+      ],
+      "goals": [
+        "送信到铁砧镇",
+        "攒钱买新靴子"
+      ],
+      "starting_location": "loc_001",
+      "obedience_level": 0.9,
+      "stubbornness": 0.1,
+      "risk_tolerance": 0.4,
+      "disposition_to_player": 2,
+      "refusal_style": "我……我得先看看路是不是安全……"
+    },
+    {
+      "npc_id": "npc_003",
+      "name": "莉娜",
+      "profession": "草药师",
+      "traits": [
+        "孤僻",
+        "知识渊博",
+        "固执"
+      ],
+      "goals": [
+        "收集幽影蘑菇",
+        "研究解毒剂"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.4,
+      "stubbornness": 0.8,
+      "risk_tolerance": 0.6,
+      "disposition_to_player": 0,
+      "refusal_style": "除非你带来三朵幽影蘑菇，否则别打扰我。"
+    },
+    {
+      "npc_id": "npc_004",
+      "name": "格鲁姆",
+      "profession": "猎人",
+      "traits": [
+        "豪爽",
+        "警惕",
+        "实用主义"
+      ],
+      "goals": [
+        "猎杀哥布林首领",
+        "保护森林入口"
+      ],
+      "starting_location": "loc_002",
+      "obedience_level": 0.7,
+      "stubbornness": 0.5,
+      "risk_tolerance": 0.9,
+      "disposition_to_player": 1,
+      "refusal_style": "想进森林？先证明你不是累赘！"
+    },
+    {
+      "npc_id": "npc_005",
+      "name": "巴洛克",
+      "profession": "铁匠",
+      "traits": [
+        "暴躁",
+        "手艺精湛",
+        "重诺"
+      ],
+      "goals": [
+        "打造传奇武器",
+        "偿还债务"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.6,
+      "stubbornness": 0.7,
+      "risk_tolerance": 0.5,
+      "disposition_to_player": 2,
+      "refusal_style": "没材料？那站一边去，别挡我炉火！"
+    },
+    {
+      "npc_id": "npc_006",
+      "name": "米拉",
+      "profession": "旅店老板娘",
+      "traits": [
+        "热情",
+        "八卦",
+        "精明"
+      ],
+      "goals": [
+        "扩大旅店生意",
+        "打听各地消息"
+      ],
+      "starting_location": "loc_003",
+      "obedience_level": 0.85,
+      "stubbornness": 0.2,
+      "risk_tolerance": 0.3,
+      "disposition_to_player": 4,
+      "refusal_style": "哎呀，英雄大人，喝杯热汤再走吧？免费的！"
+    },
+    {
+      "npc_id": "npc_007",
+      "name": "索伦",
+      "profession": "蜥蜴人酋长",
+      "traits": [
+        "狡猾",
+        "贪婪",
+        "迷信"
+      ],
+      "goals": [
+        "守护水晶之心",
+        "驱逐入侵者"
+      ],
+      "starting_location": "loc_004",
+      "obedience_level": 0.2,
+      "stubbornness": 0.9,
+      "risk_tolerance": 0.7,
+      "disposition_to_player": -3,
+      "refusal_style": "嘶……凡人，滚出我的领地！"
+    },
+    {
+      "npc_id": "npc_008",
+      "name": "伊格尼斯",
+      "profession": "老龙",
+      "traits": [
+        "傲慢",
+        "古老",
+        "孤独"
+      ],
+      "goals": [
+        "守护龙蛋",
+        "考验勇者"
+      ],
+      "starting_location": "loc_005",
+      "obedience_level": 0.1,
+      "stubbornness": 1.0,
+      "risk_tolerance": 0.95,
+      "disposition_to_player": -2,
+      "refusal_style": "渺小的虫子，也配与我对话？"
+    }
+  ],
+  "starting_location": "loc_001",
+  "starting_hook": "你从昏迷中醒来，发现自己躺在晨露村的草堆上。村长艾拉告诉你，恶龙掳走了许多村民，包括她的孙女。唯有集齐三件圣物，才能登上龙脊山挑战恶龙。",
+  "initial_quest": "与村长艾拉交谈，了解失踪事件详情。",
+  "main_quest": {
+    "quest_id": "quest_main",
+    "title": "屠龙救民",
+    "category": "main",
+    "description": "主线推进条件：先完成各支线任务，获得关键任务道具，再返回推进终章。",
+    "objective": "完成支线并收集关键道具：精灵护符 x1，熔岩核心 x1，水晶之心 x1",
+    "giver_npc_id": "npc_001",
+    "suggested_location": "loc_005",
+    "required_items": {
+      "精灵护符": 1,
+      "熔岩核心": 1,
+      "水晶之心": 1
+    },
+    "reward_items": {},
+    "reward_hint": "传说中，勇者将获得龙之祝福，成为王国守护者。"
+  },
+  "side_quests": [
+    {
+      "quest_id": "quest_side_01",
+      "title": "幽影蘑菇的解药",
+      "category": "side",
+      "description": "草药师莉娜需要幽影蘑菇制作解毒剂，以治疗被哥布林毒箭所伤的村民。",
+      "objective": "在幽影森林采集3朵幽影蘑菇，交给莉娜。",
+      "giver_npc_id": "npc_003",
+      "suggested_location": "loc_002",
+      "required_items": {
+        "幽影蘑菇": 3
+      },
+      "reward_items": {
+        "精灵护符": 1
+      },
+      "reward_hint": "莉娜会将祖传的精灵护符赠予你，据说能抵御黑暗魔法。"
+    },
+    {
+      "quest_id": "quest_side_02",
+      "title": "铁匠的熔岩核心",
+      "category": "side",
+      "description": "铁匠巴洛克需要熔岩核心来锻造能对抗龙鳞的武器。",
+      "objective": "从铁砧镇的熔岩喷泉底部取出熔岩核心，交给巴洛克。（需求：耐热手套 x1，冷却药水 x2）",
+      "giver_npc_id": "npc_005",
+      "suggested_location": "loc_003",
+      "required_items": {
+        "耐热手套": 1,
+        "冷却药水": 2
+      },
+      "reward_items": {
+        "熔岩核心": 1
+      },
+      "reward_hint": "巴洛克会将刚锻造的熔岩核心交给你，这是他最得意的作品。"
+    },
+    {
+      "quest_id": "quest_side_03",
+      "title": "水晶洞窟的秘密",
+      "category": "side",
+      "description": "旅店老板娘米拉听说水晶洞窟中有宝物，但不敢亲自前往。",
+      "objective": "深入水晶洞窟，从蜥蜴人酋长处夺回水晶之心。（需求：哥布林哨兵徽章 x1，夜光苔藓 x2）",
+      "giver_npc_id": "npc_006",
+      "suggested_location": "loc_004",
+      "required_items": {
+        "哥布林哨兵徽章": 1,
+        "夜光苔藓": 2
+      },
+      "reward_items": {
+        "水晶之心": 1
+      },
+      "reward_hint": "米拉承诺将水晶之心转交给你，作为你冒险的奖励。"
+    }
+  ],
+  "map_layout": [
+    {
+      "location_id": "loc_001",
+      "x": 20.0,
+      "y": 50.0
+    },
+    {
+      "location_id": "loc_002",
+      "x": 40.0,
+      "y": 30.0
+    },
+    {
+      "location_id": "loc_003",
+      "x": 40.0,
+      "y": 70.0
+    },
+    {
+      "location_id": "loc_004",
+      "x": 65.0,
+      "y": 20.0
+    },
+    {
+      "location_id": "loc_005",
+      "x": 80.0,
+      "y": 70.0
+    }
+  ]
+}

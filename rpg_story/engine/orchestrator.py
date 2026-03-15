@@ -130,6 +130,8 @@ class TurnPipeline:
             "If asked about other NPCs or roles, only use names/professions from the NPC roster in WORLD BIBLE; "
             "if a role does not exist, say there is no such person in town. "
             "When discussing quest materials/where to find items, only use item names that appear in allowed_world_items. "
+            "If npc_assigned_quests is empty, this NPC must NOT ask the player to collect, bring, deliver, or submit any items. "
+            "If the player asks about collection work anyway, say this NPC has no item-collection commission. "
             "If npc_assigned_quests is not empty, this NPC can only request the required_items listed in npc_assigned_quests. "
             "Do not claim another NPC's quest requirements as your own. "
             "If asked for unknown items, explicitly say they do not exist in this world yet. "
@@ -777,6 +779,7 @@ class TurnPipeline:
 
         combined = " ".join(npc_lines)
         has_material_cue = _contains_material_or_quest_cue(combined) or _contains_material_or_quest_cue(player_text)
+        has_collection_request = _contains_collection_request_cue(combined)
         mentions = _mentioned_items_in_text(npc_lines, all_items)
         mentions_assigned = {item for item in mentions if item in assigned_items}
         mentions_other = {item for item in mentions if item in other_active_items}
@@ -784,7 +787,13 @@ class TurnPipeline:
 
         needs_rewrite = False
         reason = ""
-        if assigned_items and has_material_cue and not refuses_request:
+        if not assigned_items and has_collection_request and not refuses_request:
+            needs_rewrite = True
+            if mentions:
+                reason = "npc without assigned side quest requested item collection"
+            else:
+                reason = "npc without assigned side quest requested nonexistent or disallowed collection items"
+        elif assigned_items and has_material_cue and not refuses_request:
             if not mentions_assigned:
                 needs_rewrite = True
                 reason = "npc talked about quest/materials without its assigned required items"
@@ -805,11 +814,12 @@ class TurnPipeline:
         rewrite_user = (
             f"Reason to repair: {reason}\n"
             "Rules:\n"
-            "1) If this NPC has assigned side quests, any requested delivery/material items must come ONLY from those quests' required_items.\n"
-            "2) Never claim another NPC's quest requirements.\n"
-            "3) Never invent item names outside allowed_world_items.\n"
-            "4) If player asks for unknown/nonexistent material, explicitly say it does not exist in this world.\n"
-            "5) Keep quest definitions unchanged; only repair dialogue/narration wording.\n\n"
+            "1) If npc_assigned_quests is empty, remove any collection/delivery request and replace it with a line saying this NPC has no item-collection commission.\n"
+            "2) If this NPC has assigned side quests, any requested delivery/material items must come ONLY from those quests' required_items.\n"
+            "3) Never claim another NPC's quest requirements.\n"
+            "4) Never invent item names outside allowed_world_items.\n"
+            "5) If player asks for unknown/nonexistent material, explicitly say it does not exist in this world.\n"
+            "6) Keep quest definitions unchanged; only repair dialogue/narration wording.\n\n"
             f"npc_id={npc_id}\n"
             f"player_text={player_text}\n"
             f"npc_assigned_quests={self._npc_quest_brief(state, npc_id)}\n"
@@ -1019,6 +1029,29 @@ def _contains_material_or_quest_cue(text: str) -> bool:
         "required",
     ]
     return any(cue in lowered for cue in cues)
+
+
+def _contains_collection_request_cue(text: str) -> bool:
+    content = str(text or "")
+    lowered = content.lower()
+    if re.search(r"(帮我|替我|请你|劳烦你).{0,8}(收集|带来|找来|交付|提交)", content):
+        return True
+    if re.search(r"(收集|带来|找来|交付|提交).{0,8}(给我|过来)", content):
+        return True
+    if re.search(r"得带.{0,12}过来", content):
+        return True
+    if re.search(r"需要.{0,12}(收集|带来|找来|交付|提交)", content):
+        return True
+    patterns = [
+        r"\bbring me\b",
+        r"\bcollect\b",
+        r"\bgather\b",
+        r"\bdeliver\b",
+        r"\bsubmit\b",
+        r"\bhand over\b",
+        r"\bneed(?:s)?\b.{0,24}\b(?:collect|gather|bring|deliver|submit)\b",
+    ]
+    return any(re.search(pattern, lowered) for pattern in patterns)
 
 
 def _contains_no_request_phrase(text: str) -> bool:
