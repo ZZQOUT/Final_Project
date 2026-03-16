@@ -353,6 +353,7 @@ def test_orchestrator_prompt_forbids_nonquest_npc_collection_request(tmp_path: P
     assert llm.last_user_prompt is not None
     assert "If npc_assigned_quests is empty, this NPC must NOT ask the player to collect, bring, deliver, or submit any items." in llm.last_user_prompt
     assert "If the player asks about collection work anyway, say this NPC has no item-collection commission." in llm.last_user_prompt
+    assert "During normal conversation, do not keep steering the topic back to quests or tasks." in llm.last_user_prompt
 
 
 def test_orchestrator_repairs_nonquest_npc_collection_request(tmp_path: Path):

@@ -29,9 +29,8 @@ llm:
   # Max retry attempts for failed requests
   max_retries: 2
   # Sampling temperature
-  temperature: 0.7
-  # Top-p nucleus sampling
-  top_p: 0.9
+  temperature: 1.4
+
 
 rag:
   # Enable/disable RAG pipeline

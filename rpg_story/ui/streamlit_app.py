@@ -1107,8 +1107,7 @@ def _build_story_summary(
                 {"role": "system", "content": system},
                 {"role": "user", "content": user},
             ],
-            temperature=0.4,
-            top_p=0.9,
+            temperature=1.4,
         ).strip()
         if text:
             return text
