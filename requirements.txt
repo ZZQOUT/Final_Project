@@ -3,3 +3,4 @@ python-dotenv
 pyyaml
 pytest
 streamlit
+matplotlib

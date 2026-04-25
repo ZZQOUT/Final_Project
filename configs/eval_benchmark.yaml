@@ -1,0 +1,25 @@
+output:
+  base_dir: "data/eval"
+
+experiment:
+  runs_per_prompt: 3
+
+world_prompts:
+  - prompt_id: "medieval_border_town"
+    prompt: "请生成一个中世纪低魔边境小镇世界，包含市场、旧桥和附近森林，适合进行任务与NPC对话实验。"
+    dialogue_texts:
+      - "请你先用一句话介绍这里。"
+      - "最近这里最值得注意的事情是什么？"
+      - "如果我要继续推进剧情，你会给我什么建议？"
+  - prompt_id: "campus_romance"
+    prompt: "请生成一个现代校园恋爱题材世界，包含教学楼、图书馆和广场，适合进行NPC对话与任务推进实验。"
+    dialogue_texts:
+      - "请你简单介绍一下这所学校。"
+      - "最近校园里发生了什么值得注意的事？"
+      - "如果我要推进主线，你建议我先找谁？"
+  - prompt_id: "sci_fi_outpost"
+    prompt: "请生成一个近未来科幻前哨站世界，包含指挥中心、机库和废墟区，适合进行RPG式NPC交互实验。"
+    dialogue_texts:
+      - "请你先介绍一下这个前哨站。"
+      - "这里最近最重要的异常情况是什么？"
+      - "如果我要继续完成任务，你建议我下一步做什么？"
